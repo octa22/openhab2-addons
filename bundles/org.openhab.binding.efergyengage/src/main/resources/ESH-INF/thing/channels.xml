@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="efergyengage"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Instant Channel Type -->
+	<channel-type id="instant">
+		<item-type>Number:Power</item-type>
+		<label>Instant power consumption</label>
+		<description>Efergy Engage instant power consumption</description>
+		<state readOnly="true" pattern="%d %unit%">
+		</state>
+	</channel-type>
+
+	<channel-type id="last_measurement">
+		<item-type>DateTime</item-type>
+		<label>Date and time of last measurement</label>
+		<description>Date and time of last data received from Efergy sensor</description>
+		<state readOnly="true" pattern="%1$ta %1$tR">
+		</state>
+	</channel-type>
+
+	<!-- Estimate Channel Type -->
+	<channel-type id="estimate">
+		<item-type>Number</item-type>
+		<label>Estimate power consumption costs for this month</label>
+		<description>Efergy Engage estimation of costs based on current month power consumption forecast</description>
+		<state readOnly="true" pattern="%.2f">
+		</state>
+	</channel-type>
+
+	<!-- Cost Channel Type -->
+	<channel-type id="cost">
+		<item-type>Number</item-type>
+		<label>Cost of power consumed this month</label>
+		<description>Cost of power consumed so far this this month in local currency</description>
+		<state readOnly="true" pattern="%.2f">
+		</state>
+	</channel-type>
+
+	<!-- Day Total Channel Type -->
+	<channel-type id="daytotal">
+		<item-type>Number:Energy</item-type>
+		<label>Current day total power consumption</label>
+		<description>Efergy Engage current day total power consumption</description>
+		<state readOnly="true" pattern="%.2f %unit%"/>
+	</channel-type>
+
+	<!-- Week Total Channel Type -->
+	<channel-type id="weektotal">
+		<item-type>Number:Energy</item-type>
+		<label>Current week total power consumption</label>
+		<description>Efergy Engage current week total power consumption</description>
+		<state readOnly="true" pattern="%.2f %unit%"/>
+	</channel-type>
+
+	<!-- Month Total Channel Type -->
+	<channel-type id="monthtotal">
+		<item-type>Number:Energy</item-type>
+		<label>Current month total power consumption</label>
+		<description>Efergy Engage current month total power consumption</description>
+		<state readOnly="true" pattern="%.2f %unit%"/>
+	</channel-type>
+
+	<!-- Year Total Channel Type -->
+	<channel-type id="yeartotal">
+		<item-type>Number:Energy</item-type>
+		<label>Current year total power consumption</label>
+		<description>Efergy Engage current year total power consumption</description>
+		<state readOnly="true" pattern="%.2f %unit%"/>
+	</channel-type>
+</thing:thing-descriptions>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="efergyengage"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Hub -->
+	<bridge-type id="hub">
+		<label>Hub</label>
+		<description>Efergy Engage Home Monitoring Hub</description>
+
+		<channels>
+			<channel id="cost" typeId="cost"/>
+			<channel id="estimate" typeId="estimate"/>
+			<channel id="daytotal" typeId="daytotal"/>
+			<channel id="weektotal" typeId="weektotal"/>
+			<channel id="monthtotal" typeId="monthtotal"/>
+			<channel id="yeartotal" typeId="yeartotal"/>
+		</channels>
+		<config-description-ref uri="thing-type:hub:config"/>
+	</bridge-type>
+
+</thing:thing-descriptions>

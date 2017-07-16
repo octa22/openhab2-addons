@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="efergyengage"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Sensor -->
+	<thing-type id="sensor">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="hub"/>
+		</supported-bridge-type-refs>
+		<label>Sensor</label>
+		<description>Efergy Engage Monitoring Sensor</description>
+
+		<channels>
+			<channel id="instant" typeId="instant"/>
+			<channel id="last_measurement" typeId="last_measurement"/>
+		</channels>
+		<config-description-ref uri="thing-type:sensor:config"/>
+	</thing-type>
+
+</thing:thing-descriptions>

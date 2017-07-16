@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="thing-type:hub:config">
+		<parameter name="token" type="text" required="true">
+			<label>Application token</label>
+			<description>The registered application token managed here: https://engage.efergy.com/settings/tokens</description>
+			<required>true</required>
+		</parameter>
+		<parameter name="utcOffset" type="integer" required="false">
+			<label>Offset to UTC</label>
+			<description>Specifies the UTC offset in minutes for total calculations. A value of -120 means current time zone of
+				UTC+2</description>
+			<default>0</default>
+		</parameter>
+		<parameter name="refresh" type="integer" required="false">
+			<label>Summary refresh time</label>
+			<description>Specifies the summary refresh time in seconds</description>
+			<default>300</default>
+		</parameter>
+	</config-description>
+	<config-description uri="thing-type:sensor:config">
+		<parameter name="refresh" type="integer" required="false">
+			<label>Sensor refresh time</label>
+			<description>Specifies the sensor refresh time in seconds</description>
+			<default>30</default>
+		</parameter>
+	</config-description>
+</config-description:config-descriptions>
