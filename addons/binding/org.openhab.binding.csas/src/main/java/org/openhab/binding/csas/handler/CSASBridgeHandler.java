@@ -11,12 +11,11 @@ package org.openhab.binding.csas.handler;
 import static org.openhab.binding.csas.CSASBindingConstants.*;
 
 import com.google.gson.Gson;
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
+import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
+import org.eclipse.smarthome.core.thing.*;
+import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.openhab.binding.csas.config.CSASConfig;
 import org.openhab.binding.csas.internal.model.response.CSASRefreshTokenResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +28,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * The {@link CSASBridgeHandler} is responsible for handling commands, which are
@@ -36,24 +37,28 @@ import java.nio.charset.StandardCharsets;
  *
  * @author Ondrej Pecta - Initial contribution
  */
- @NonNullByDefault
-public class CSASBridgeHandler extends BaseThingHandler {
+public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     private final Logger logger = LoggerFactory.getLogger(CSASBridgeHandler.class);
 
     private long refreshInterval = 1800000;
-    private String clientId = "";
-    private String clientSecret = "";
-    private String refreshToken = "";
     private String accessToken = "";
-    private String webAPIKey = "";
+
+    /**
+     * Our configuration
+     */
+    protected CSASConfig thingConfig;
 
     //Gson parser
     private Gson gson = new Gson();
 
-
-    public CSASBridgeHandler(Thing thing) {
+    public CSASBridgeHandler(Bridge thing) {
         super(thing);
+    }
+
+    @Override
+    public Collection<ConfigStatusMessage> getConfigStatus() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -67,8 +72,7 @@ public class CSASBridgeHandler extends BaseThingHandler {
 
     @Override
     public void initialize() {
-        // TODO: Initialize the thing. If done set status to ONLINE to indicate proper working.
-        // Long running initialization should be done asynchronously in background.
+        thingConfig = getConfigAs(CSASConfig.class);
         refreshToken();
         updateStatus(ThingStatus.ONLINE);
     }
@@ -77,7 +81,7 @@ public class CSASBridgeHandler extends BaseThingHandler {
         String url = null;
 
         try {
-            String urlParameters = "client_id=" + clientId + "&client_secret=" + clientSecret + "&redirect_uri=https://localhost/code&grant_type=refresh_token&refresh_token=" + refreshToken;
+            String urlParameters = "client_id=" + thingConfig.getClientId() + "&client_secret=" + thingConfig.getClientSecret() + "&redirect_uri=https://localhost/code&grant_type=refresh_token&refresh_token=" + thingConfig.getRefreshToken();
             url = "https://www.csas.cz/widp/oauth2/token";
 
             byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
@@ -100,8 +104,10 @@ public class CSASBridgeHandler extends BaseThingHandler {
             logger.info("Access token: {}", accessToken);
         } catch (MalformedURLException e) {
             logger.error("The URL '{}' is malformed", url, e.toString());
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
         } catch (Exception e) {
             logger.error("Cannot get CSAS token", e.toString());
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
         }
     }
 

@@ -4,7 +4,7 @@
 				 xmlns:binding="http://eclipse.org/smarthome/schemas/binding/v1.0.0"
 				 xsi:schemaLocation="http://eclipse.org/smarthome/schemas/binding/v1.0.0 http://eclipse.org/smarthome/schemas/binding-1.0.0.xsd">
 
-	<name>csas Binding</name>
+	<name>Ceska sporitelna Binding</name>
 	<description>This is the binding for accessing API of Ceska sporitelna a.s.</description>
 	<author>Ondrej Pecta</author>
 

@@ -16,9 +16,6 @@
             <parameter name="clientSecret" type="text" required="true">
                 <label>CSAS client secret.</label>
             </parameter>
-            <parameter name="code" type="text" required="true">
-                <label>CSAS code.</label>
-            </parameter>
             <parameter name="refreshToken" type="text" required="true">
                 <label>CSAS refresh token.</label>
             </parameter>

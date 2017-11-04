@@ -8,20 +8,21 @@
  */
 package org.openhab.binding.csas.internal;
 
-import static org.openhab.binding.csas.CSASBindingConstants.*;
-
-import java.util.Collections;
-import java.util.Set;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.csas.handler.CSASBridgeHandler;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
+import org.openhab.binding.csas.handler.CSASBridgeHandler;
 import org.osgi.service.component.annotations.Component;
+
+import java.util.Collections;
+import java.util.Set;
+
+import static org.openhab.binding.csas.CSASBindingConstants.THING_TYPE_BRIDGE;
 
 /**
  * The {@link CSASHandlerFactory} is responsible for creating things and thing
@@ -45,7 +46,7 @@ public class CSASHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(THING_TYPE_BRIDGE)) {
-            return new CSASBridgeHandler(thing);
+            return new CSASBridgeHandler((Bridge) thing);
         }
 
         return null;
