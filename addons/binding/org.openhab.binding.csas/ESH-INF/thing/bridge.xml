@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="csas"
+						  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+						  xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+						  xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Bridge Type -->
+	<bridge-type id="bridge">
+		<label>CSAS Binding Bridge</label>
+		<description>A bridge for accessing CSAS products</description>
+
+        <config-description>
+            <parameter name="clientId" type="text" required="true">
+                <label>CSAS client ID.</label>
+            </parameter>
+            <parameter name="clientSecret" type="text" required="true">
+                <label>CSAS client secret.</label>
+            </parameter>
+            <parameter name="code" type="text" required="true">
+                <label>CSAS code.</label>
+            </parameter>
+            <parameter name="refreshToken" type="text" required="true">
+                <label>CSAS refresh token.</label>
+            </parameter>
+            <parameter name="webAPIKey" type="text" required="false">
+                <label>CSAS webAPI key.</label>
+                <default>0e62d144-311a-4bf6-9868-64a3b52de4c9</default>
+            </parameter>
+        </config-description>
+    </bridge-type>
+</thing:thing-descriptions>
