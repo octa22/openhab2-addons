@@ -111,7 +111,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             url = NETBANKING_V3 + "cz/my/contracts/loyalty";
 
             String line = DoNetbankingRequest(url);
-            logger.info("CSAS getLoyalty: " + line);
+            logger.debug("CSAS getLoyalty: {}", line);
 
             CSASLoyaltyResponse resp = gson.fromJson(line, CSASLoyaltyResponse.class);
             if (resp.getState().equals(REGISTERED)) {
@@ -239,7 +239,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             url = NETBANKING_V3 + "my/cards";
 
             String line = DoNetbankingRequest(url);
-            logger.info("CSAS getCards: {}", line);
+            logger.debug("CSAS getCards: {}", line);
 
             CSASCardsResponse resp = gson.fromJson(line, CSASCardsResponse.class);
             if (resp.getCards() != null) {
