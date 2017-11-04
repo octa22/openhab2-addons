@@ -22,10 +22,38 @@ public class CSASBindingConstants {
 
     private static final String BINDING_ID = "csas";
 
-    // List of all Thing Type UIDs
+    // Bridge
     public static final ThingTypeUID THING_TYPE_BRIDGE = new ThingTypeUID(BINDING_ID, "bridge");
 
+    // Account
+    public static final ThingTypeUID THING_TYPE_ACCOUNT = new ThingTypeUID(BINDING_ID, "account");
+
+    // Card account
+    public static final ThingTypeUID THING_TYPE_CARD_ACCOUNT = new ThingTypeUID(BINDING_ID, "card_account");
+
+    // Building saving account
+    public static final ThingTypeUID THING_TYPE_BS_ACCOUNT = new ThingTypeUID(BINDING_ID, "bs_account");
+
+    // Securities account
+    public static final ThingTypeUID THING_TYPE_SECURITIES_ACCOUNT = new ThingTypeUID(BINDING_ID, "securities_account");
+
+    // Pension contract
+    public static final ThingTypeUID THING_TYPE_PENSION_CONTRACT = new ThingTypeUID(BINDING_ID, "pension_contract");
+
+    // Insurance contract
+    public static final ThingTypeUID THING_TYPE_INSURANCE_CONTRACT = new ThingTypeUID(BINDING_ID, "insurance_contract");
+
+    // Loyalty contract
+    public static final ThingTypeUID THING_TYPE_LOYALTY_CONTRACT = new ThingTypeUID(BINDING_ID, "loyalty_contract");
+
     // List of all Channel ids
-    public static final String CHANNEL_1 = "channel1";
+    //public static final String CHANNEL_1 = "channel1";
+
+    //OTHER
+    public static final String NETBANKING_V3 = "https://www.csas.cz/webapi/api/v3/netbanking/";
+    public static final String CREDIT = "CREDIT";
+    public static final String REGISTERED = "REGISTERED";
+    public static final String IBOD = "IBOD";
+    public static final int DISCOVERY_TIMEOUT_SEC = 10;
 
 }

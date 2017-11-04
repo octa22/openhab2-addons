@@ -20,4 +20,8 @@ public class CSASAccountNumber {
     public String getIban() {
         return iban;
     }
+
+    public String getFullAccount() {
+        return number + "/" + bankCode;
+    }
 }
