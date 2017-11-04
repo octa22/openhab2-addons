@@ -195,9 +195,10 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                     String id = insurance.getId();
                     String policyNumber = insurance.getPolicyNumber();
                     String productI18N = insurance.getProductI18N();
-                    if (!accountList.containsKey(id))
+                    if (!accountList.containsKey(id) && insurance.getStatus().equals(ACTIVE)) {
                         accountList.put(id, "Insurance: " + policyNumber + " (" + productI18N + ")");
-                    discoveryService.insuranceContractDiscovered(id, policyNumber + " (" + productI18N + ")");
+                        discoveryService.insuranceContractDiscovered(id, policyNumber + " (" + productI18N + ")");
+                    }
                 }
             }
         } catch (MalformedURLException e) {
@@ -245,7 +246,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             if (resp.getCards() != null) {
                 for (CSASCard card : resp.getCards()) {
                     CSASAccount cardAccount = card.getMainAccount();
-                    if (cardAccount != null && card.getType().equals(CREDIT)) {
+                    if (cardAccount != null && card.getType().equals(CREDIT) && card.getState().equals(ACTIVE)) {
                         readAccount(cardAccount.getId(), cardAccount.getAccountno());
                         discoveryService.cardAccountDiscovered(cardAccount.getId(), cardAccount.getAccountno());
                     }

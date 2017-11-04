@@ -53,6 +53,7 @@ public class CSASBindingConstants {
     public static final String NETBANKING_V3 = "https://www.csas.cz/webapi/api/v3/netbanking/";
     public static final String CREDIT = "CREDIT";
     public static final String REGISTERED = "REGISTERED";
+    public static final String ACTIVE = "ACTIVE";
     public static final String IBOD = "IBOD";
     public static final int DISCOVERY_TIMEOUT_SEC = 10;
 
