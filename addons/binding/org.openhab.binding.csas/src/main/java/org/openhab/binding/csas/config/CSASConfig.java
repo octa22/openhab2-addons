@@ -5,6 +5,7 @@ public class CSASConfig {
     private String clientSecret;
     private String refreshToken;
     private String webAPIKey;
+    private int refresh;
 
     public String getClientId() {
         return clientId;
@@ -20,5 +21,9 @@ public class CSASConfig {
 
     public String getWebAPIKey() {
         return webAPIKey;
+    }
+
+    public int getRefresh() {
+        return refresh;
     }
 }

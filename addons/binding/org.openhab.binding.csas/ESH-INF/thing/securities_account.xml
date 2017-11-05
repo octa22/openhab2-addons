@@ -11,5 +11,6 @@
 		</supported-bridge-type-refs>
 		<label>CSAS Securities Account</label>
 		<description>A securities account in Ceska sporitelna a.s.</description>
+		<config-description-ref uri="thing-type:csas:item"/>
     </thing-type>
 </thing:thing-descriptions>

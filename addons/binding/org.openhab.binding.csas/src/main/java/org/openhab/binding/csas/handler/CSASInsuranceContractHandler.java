@@ -5,7 +5,7 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 
-public class CSASInsuranceContractHandler extends BaseThingHandler {
+public class CSASInsuranceContractHandler extends CSASBaseThingHandler {
     public CSASInsuranceContractHandler(Thing thing) {
         super(thing);
     }

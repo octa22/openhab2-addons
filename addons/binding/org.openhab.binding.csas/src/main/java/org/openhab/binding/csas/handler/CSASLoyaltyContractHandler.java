@@ -1,9 +1,7 @@
 package org.openhab.binding.csas.handler;
 
-import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.slf4j.Logger;
@@ -11,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.openhab.binding.csas.CSASBindingConstants.CHANNEL_POINTS;
 
-public class CSASLoyaltyContractHandler extends BaseThingHandler {
+public class CSASLoyaltyContractHandler extends CSASBaseThingHandler {
     public CSASLoyaltyContractHandler(Thing thing) {
         super(thing);
     }
@@ -24,9 +22,5 @@ public class CSASLoyaltyContractHandler extends BaseThingHandler {
             CSASBridgeHandler handler = getBridgeHandler();
             handler.updateLoyaltyPoints(channelUID);
         }
-    }
-
-    protected CSASBridgeHandler getBridgeHandler() {
-        return (CSASBridgeHandler) this.getBridge().getHandler();
     }
 }

@@ -5,7 +5,7 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 
-public class CSASPensionContractHandler extends BaseThingHandler {
+public class CSASPensionContractHandler extends CSASBaseThingHandler {
     public CSASPensionContractHandler(Thing thing) {
         super(thing);
     }

@@ -14,5 +14,6 @@
 		<channels>
 			<channel id="points" typeId="points"></channel>
 		</channels>
+		<config-description-ref uri="thing-type:csas:item"/>
 	</thing-type>
 </thing:thing-descriptions>

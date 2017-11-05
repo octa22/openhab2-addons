@@ -48,6 +48,11 @@ public class CSASBindingConstants {
 
     // List of all Channel ids
     public static final String CHANNEL_POINTS = "points";
+    public static final String CHANNEL_CURRENCY = "currency";
+    public static final String CHANNEL_BALANCE = "balance";
+    public static final String CHANNEL_BALANCE_FULL = "balance_full";
+    public static final String CHANNEL_DISPOSABLE = "disposable";
+    public static final String CHANNEL_DISPOSABLE_FULL = "disposable_full";
 
     //OTHER
     public static final String NETBANKING_V3 = "https://www.csas.cz/webapi/api/v3/netbanking/";

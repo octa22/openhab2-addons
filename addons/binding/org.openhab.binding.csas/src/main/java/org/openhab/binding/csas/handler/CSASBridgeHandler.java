@@ -11,6 +11,7 @@ package org.openhab.binding.csas.handler;
 import com.google.gson.Gson;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
 import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -19,6 +20,7 @@ import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.csas.config.CSASConfig;
+import org.openhab.binding.csas.internal.CSASItemType;
 import org.openhab.binding.csas.internal.discovery.CSASDiscoveryService;
 import org.openhab.binding.csas.internal.model.*;
 import org.openhab.binding.csas.internal.model.response.*;
@@ -34,6 +36,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.openhab.binding.csas.CSASBindingConstants.*;
@@ -67,6 +70,12 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     //IbanList
     HashMap<String, String> ibanList = new HashMap<>();
 
+    /**
+     * Future to poll for updated
+     */
+    private ScheduledFuture<?> pollFuture;
+
+
     public CSASBridgeHandler(Bridge thing) {
         super(thing);
     }
@@ -85,6 +94,44 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         thingConfig = getConfigAs(CSASConfig.class);
         refreshToken();
         scheduler.schedule(() -> startDiscovery(), 1, TimeUnit.SECONDS);
+        initPolling(thingConfig.getRefresh());
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        stopPolling();
+    }
+
+    /**
+     * starts this things polling future
+     */
+    private void initPolling(int refresh) {
+        stopPolling();
+        pollFuture = scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    updateCSASStates();
+                } catch (Exception e) {
+                    logger.debug("Exception during poll!", e);
+                }
+            }
+        }, 10, refresh, TimeUnit.SECONDS);
+    }
+
+    private void updateCSASStates() {
+        logger.info("Updating CSAS states...");
+    }
+
+    /**
+     * Stops this thing's polling future
+     */
+    private void stopPolling() {
+        if (pollFuture != null && !pollFuture.isCancelled()) {
+            pollFuture.cancel(true);
+            pollFuture = null;
+        }
     }
 
     public void startDiscovery() {
@@ -141,6 +188,80 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         } catch (Exception e) {
             logger.error("Cannot get CSAS loyalty points", e);
         }
+    }
+
+    private CSASAmount getAccountBalanceInternal(String accountId, CSASItemType balanceType) {
+        String url = null;
+
+        try {
+            url = NETBANKING_V3 + "my/accounts/" + accountId + "/balance";
+
+            String line = DoNetbankingRequest(url);
+            logger.debug("CSAS getBalance: {}", line);
+
+            CSASAccountBalanceResponse resp = gson.fromJson(line, CSASAccountBalanceResponse.class);
+            return balanceType.equals(CSASItemType.BALANCE) ? resp.getBalance() : resp.getDisposable();
+        } catch (MalformedURLException e) {
+            logger.error("The URL '{}' is malformed: ", url, e);
+        } catch (Exception e) {
+            logger.error("Cannot get CSAS balance", e);
+        }
+        return null;
+    }
+
+    private String getAccountBalanceFull(String accountId, CSASItemType balanceType) {
+
+        CSASAmount bal = getAccountBalanceInternal(accountId, balanceType);
+        String balance = readBalanceWithCurrency(bal);
+        return formatMoney(balance);
+    }
+
+    private Double getAccountBalance(String accountId, CSASItemType balanceType) {
+        CSASAmount bal = getAccountBalanceInternal(accountId, balanceType);
+        return readBalanceAsDouble(bal);
+    }
+
+    private String getAccountCurrency(String accountId) {
+        CSASAmount bal = getAccountBalanceInternal(accountId, CSASItemType.BALANCE);
+        return bal.getCurrency();
+    }
+
+    private String formatMoney(String balance) {
+        String newBalance = "";
+        int len = balance.length();
+        int dec = balance.indexOf('.');
+        if (dec >= 0) {
+            len = dec;
+            newBalance = balance.substring(dec);
+        }
+
+        int j = 0;
+        for (int i = len - 1; i >= 0; i--) {
+            char c = balance.charAt(i);
+            newBalance = c + newBalance;
+            if (++j % 3 == 0 && i > 0 && balance.charAt(i - 1) != '-')
+                newBalance = " " + newBalance;
+        }
+        return newBalance;
+    }
+
+    private String readBalanceWithCurrency(CSASAmount balance) {
+        String value = balance.getValue();
+        String currency = balance.getCurrency();
+
+        int precision = balance.getPrecision();
+        int places = value.length();
+
+        return (precision == 0) ? value + ".00 " + currency : value.substring(0, places - precision) + "." + value.substring(places - precision) + " " + currency;
+    }
+
+    private Double readBalanceAsDouble(CSASAmount balance) {
+        String value = balance.getValue();
+
+        int precision = balance.getPrecision();
+        int places = value.length();
+
+        return (precision == 0) ? Double.parseDouble(value) : Double.parseDouble(value.substring(0, places - precision) + "." + value.substring(places - precision));
     }
 
     private void getSecurities() {
@@ -389,5 +510,30 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     public void setDiscoveryService(CSASDiscoveryService csasDiscoveryService) {
         this.discoveryService = csasDiscoveryService;
+    }
+
+    public void updateBalanceFull(ChannelUID channelUID, String id) {
+        String balance = getAccountBalanceFull(id, CSASItemType.BALANCE);
+        updateState(channelUID, new StringType(balance));
+    }
+
+    public void updateBalance(ChannelUID channelUID, String id) {
+        Double balance = getAccountBalance(id, CSASItemType.BALANCE);
+        updateState(channelUID, new DecimalType(balance));
+    }
+
+    public void updateDisposableFull(ChannelUID channelUID, String id) {
+        String balance = getAccountBalanceFull(id, CSASItemType.DISPOSABLE_BALANCE);
+        updateState(channelUID, new StringType(balance));
+    }
+
+    public void updateDisposable(ChannelUID channelUID, String id) {
+        Double balance = getAccountBalance(id, CSASItemType.DISPOSABLE_BALANCE);
+        updateState(channelUID, new DecimalType(balance));
+    }
+
+    public void updateCurrency(ChannelUID channelUID, String id) {
+        String currency = getAccountCurrency(id);
+        updateState(channelUID, new StringType(currency));
     }
 }

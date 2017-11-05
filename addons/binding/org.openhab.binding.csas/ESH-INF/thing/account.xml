@@ -11,5 +11,13 @@
 		</supported-bridge-type-refs>
 		<label>CSAS Base Account</label>
 		<description>A base account in Ceska sporitelna a.s.</description>
-    </thing-type>
+		<channels>
+			<channel id="balance" typeId="balance"></channel>
+			<channel id="disposable" typeId="disposable"></channel>
+			<channel id="balance_full" typeId="balance_full"></channel>
+			<channel id="disposable_full" typeId="disposable_full"></channel>
+			<channel id="currency" typeId="currency"></channel>
+		</channels>
+		<config-description-ref uri="thing-type:csas:item"/>
+	</thing-type>
 </thing:thing-descriptions>

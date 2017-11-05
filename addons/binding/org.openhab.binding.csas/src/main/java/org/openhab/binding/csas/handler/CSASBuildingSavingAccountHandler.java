@@ -5,7 +5,7 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 
-public class CSASBuildingSavingAccountHandler extends BaseThingHandler {
+public class CSASBuildingSavingAccountHandler extends CSASBaseThingHandler {
     public CSASBuildingSavingAccountHandler(Thing thing) {
         super(thing);
     }
