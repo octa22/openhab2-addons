@@ -11,5 +11,8 @@
 		</supported-bridge-type-refs>
 		<label>CSAS Loyalty Contract</label>
 		<description>A loyalty (IBOD) contract in Ceska sporitelna a.s.</description>
-    </thing-type>
+		<channels>
+			<channel id="points" typeId="points"></channel>
+		</channels>
+	</thing-type>
 </thing:thing-descriptions>

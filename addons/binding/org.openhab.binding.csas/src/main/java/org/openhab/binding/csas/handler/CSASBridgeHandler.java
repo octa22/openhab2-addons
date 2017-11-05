@@ -10,12 +10,14 @@ package org.openhab.binding.csas.handler;
 
 import com.google.gson.Gson;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
+import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.csas.config.CSASConfig;
 import org.openhab.binding.csas.internal.discovery.CSASDiscoveryService;
 import org.openhab.binding.csas.internal.model.*;
@@ -76,11 +78,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        /*
-        if (channelUID.getId().equals(CHANNEL_1)) {
-
-        }
-        */
     }
 
     @Override
@@ -118,9 +115,31 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                 discoveryService.loyaltyContractDiscovered();
             }
         } catch (MalformedURLException e) {
-            logger.error("The URL '" + url + "' is malformed: " + e.toString());
+            logger.error("The URL '{}' is malformed: ", url, e);
         } catch (Exception e) {
-            logger.error("Cannot get CSAS loyalty points: " + e.toString());
+            logger.error("Cannot get CSAS loyalty points", e);
+        }
+    }
+
+    public void updateLoyaltyPoints(ChannelUID channelUID) {
+        String url = null;
+
+        try {
+            url = NETBANKING_V3 + "cz/my/contracts/loyalty";
+
+            String line = DoNetbankingRequest(url);
+            logger.debug("CSAS getLoyalty: {}", line);
+
+            CSASLoyaltyResponse resp = gson.fromJson(line, CSASLoyaltyResponse.class);
+            if (resp.getState().equals(REGISTERED)) {
+                logger.info("Found total of {} loyalty points", resp.getPointsCount());
+                State state = new DecimalType(Integer.parseInt(resp.getPointsCount()));
+                updateState(channelUID, state);
+            }
+        } catch (MalformedURLException e) {
+            logger.error("The URL '{}' is malformed: ", url, e);
+        } catch (Exception e) {
+            logger.error("Cannot get CSAS loyalty points", e);
         }
     }
 
@@ -131,7 +150,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             url = NETBANKING_V3 + "my/securities";
 
             String line = DoNetbankingRequest(url);
-            logger.debug("CSAS getSecurities: " + line);
+            logger.debug("CSAS getSecurities: {}", line);
 
             CSASSecuritiesResponse resp = gson.fromJson(line, CSASSecuritiesResponse.class);
             if (resp.getSecuritiesAccounts() != null) {
@@ -159,7 +178,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             url = NETBANKING_V3 + "cz/my/contracts/pensions";
 
             String line = DoNetbankingRequest(url);
-            logger.debug("CSAS getPensions: " + line);
+            logger.debug("CSAS getPensions: {}", line);
 
             CSASPensions resp = gson.fromJson(line, CSASPensions.class);
             if (resp.getPensions() != null) {
@@ -180,14 +199,13 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private void getInsurances() {
-
         String url = null;
 
         try {
             url = NETBANKING_V3 + "my/contracts/insurances";
 
             String line = DoNetbankingRequest(url);
-            logger.debug("CSAS getInsurances: " + line);
+            logger.debug("CSAS getInsurances: {}", line);
 
             CSASInsurancesResponse resp = gson.fromJson(line, CSASInsurancesResponse.class);
             if (resp.getInsurances() != null) {
@@ -216,7 +234,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             url = NETBANKING_V3 + "my/contracts/buildings";
 
             String line = DoNetbankingRequest(url);
-            logger.debug("CSAS getBuildingSavings: " + line);
+            logger.debug("CSAS getBuildingSavings: {}", line);
 
             CSASBuildingsResponse resp = gson.fromJson(line, CSASBuildingsResponse.class);
             if (resp.getBuildings() != null) {

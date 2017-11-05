@@ -19,7 +19,7 @@
             <parameter name="refreshToken" type="text" required="true">
                 <label>CSAS refresh token.</label>
             </parameter>
-            <parameter name="webAPIKey" type="text" required="false">
+            <parameter name="webAPIKey" type="text" required="true">
                 <label>CSAS webAPI key.</label>
                 <default>0e62d144-311a-4bf6-9868-64a3b52de4c9</default>
             </parameter>

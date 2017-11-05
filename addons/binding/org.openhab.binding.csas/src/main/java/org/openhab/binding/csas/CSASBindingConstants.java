@@ -47,7 +47,7 @@ public class CSASBindingConstants {
     public static final ThingTypeUID THING_TYPE_LOYALTY_CONTRACT = new ThingTypeUID(BINDING_ID, "loyalty_contract");
 
     // List of all Channel ids
-    //public static final String CHANNEL_1 = "channel1";
+    public static final String CHANNEL_POINTS = "points";
 
     //OTHER
     public static final String NETBANKING_V3 = "https://www.csas.cz/webapi/api/v3/netbanking/";
