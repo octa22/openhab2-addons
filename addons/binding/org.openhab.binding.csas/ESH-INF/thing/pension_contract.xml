@@ -11,6 +11,11 @@
 		</supported-bridge-type-refs>
 		<label>CSAS Pension Contract</label>
 		<description>A pension contract in Ceska sporitelna a.s.</description>
+		<channels>
+			<channel id="balance" typeId="balance"></channel>
+			<channel id="balance_full" typeId="balance_full"></channel>
+			<channel id="currency" typeId="currency"></channel>
+		</channels>
 		<config-description-ref uri="thing-type:csas:item"/>
     </thing-type>
 </thing:thing-descriptions>

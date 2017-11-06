@@ -61,22 +61,22 @@ public class CSASHandlerFactory extends BaseThingHandlerFactory {
             return handler;
         }
         if (thingTypeUID.equals(THING_TYPE_ACCOUNT)) {
-            return new CSASAccountHandler(thing);
+            return new CSASDisposableAccountHandler(thing);
         }
         if (thingTypeUID.equals(THING_TYPE_CARD_ACCOUNT)) {
-            return new CSASCardAccountHandler(thing);
+            return new CSASDisposableAccountHandler(thing);
         }
         if (thingTypeUID.equals(THING_TYPE_BS_ACCOUNT)) {
-            return new CSASBuildingSavingAccountHandler(thing);
+            return new CSASAccountHandler(thing);
         }
         if (thingTypeUID.equals(THING_TYPE_SECURITIES_ACCOUNT)) {
-            return new CSASSecuritiesAccountHandler(thing);
+            return new CSASAccountHandler(thing);
         }
         if (thingTypeUID.equals(THING_TYPE_PENSION_CONTRACT)) {
-            return new CSASPensionContractHandler(thing);
+            return new CSASAccountHandler(thing);
         }
         if (thingTypeUID.equals(THING_TYPE_INSURANCE_CONTRACT)) {
-            return new CSASInsuranceContractHandler(thing);
+            return new CSASAccountHandler(thing);
         }
         if (thingTypeUID.equals(THING_TYPE_LOYALTY_CONTRACT)) {
             return new CSASLoyaltyContractHandler(thing);

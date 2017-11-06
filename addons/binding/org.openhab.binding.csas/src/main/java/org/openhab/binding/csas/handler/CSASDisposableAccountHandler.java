@@ -2,6 +2,8 @@ package org.openhab.binding.csas.handler;
 
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
+import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.slf4j.Logger;
@@ -9,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import static org.openhab.binding.csas.CSASBindingConstants.*;
 
-public class CSASAccountHandler extends CSASBaseThingHandler {
-    public CSASAccountHandler(Thing thing) {
+public class CSASDisposableAccountHandler extends CSASBaseThingHandler {
+    public CSASDisposableAccountHandler(Thing thing) {
         super(thing);
     }
 
@@ -29,6 +31,12 @@ public class CSASAccountHandler extends CSASBaseThingHandler {
                 break;
             case CHANNEL_BALANCE:
                 handler.updateBalance(channelUID, getId());
+                break;
+            case CHANNEL_DISPOSABLE_FULL:
+                handler.updateDisposableFull(channelUID, getId());
+                break;
+            case CHANNEL_DISPOSABLE:
+                handler.updateDisposable(channelUID, getId());
                 break;
             case CHANNEL_CURRENCY:
                 handler.updateCurrency(channelUID, getId());
