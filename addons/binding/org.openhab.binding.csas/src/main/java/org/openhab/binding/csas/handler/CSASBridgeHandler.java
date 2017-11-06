@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2017 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,13 @@ package org.openhab.binding.csas.handler;
 
 import com.google.gson.Gson;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
+import org.eclipse.smarthome.core.cache.ExpiringCacheMap;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Bridge;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
+import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
 import org.eclipse.smarthome.core.types.Command;
+import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.csas.config.CSASConfig;
 import org.openhab.binding.csas.internal.CSASItemType;
@@ -75,6 +74,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
      */
     private ScheduledFuture<?> pollFuture;
 
+    ExpiringCacheMap<String, CSASAccountBalanceResponse> accountBalance;
 
     public CSASBridgeHandler(Bridge thing) {
         super(thing);
@@ -94,6 +94,8 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         thingConfig = getConfigAs(CSASConfig.class);
         refreshToken();
         scheduler.schedule(() -> startDiscovery(), 1, TimeUnit.SECONDS);
+
+        accountBalance = new ExpiringCacheMap<String, CSASAccountBalanceResponse>(CACHE_EXPIRY);
         initPolling(thingConfig.getRefresh());
     }
 
@@ -122,6 +124,11 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     private void updateCSASStates() {
         logger.info("Updating CSAS states...");
+        for (Thing t : getBridge().getThings()) {
+            for (Channel channel : t.getChannels()) {
+                t.getHandler().handleCommand(channel.getUID(), RefreshType.REFRESH);
+            }
+        }
     }
 
     /**
@@ -190,17 +197,26 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         }
     }
 
-    private CSASAmount getAccountBalanceInternal(String accountId, CSASItemType balanceType) {
+    private CSASAmount getCachedAccountBalance(String accountId, CSASItemType balanceType) {
+
+        if(!accountBalance.containsKey(accountId)) {
+            accountBalance.put(accountId, () -> invokeGetAccountBalance(accountId));
+        }
+
+        CSASAccountBalanceResponse resp = accountBalance.get(accountId);
+        return balanceType.equals(CSASItemType.BALANCE) ? resp.getBalance() : resp.getDisposable();
+    }
+
+    private CSASAccountBalanceResponse invokeGetAccountBalance(String accountId) {
         String url = null;
 
         try {
             url = NETBANKING_V3 + "my/accounts/" + accountId + "/balance";
 
             String line = DoNetbankingRequest(url);
-            logger.debug("CSAS getBalance: {}", line);
+            logger.info("CSAS getBalance of account: {} returned: {}", accountId, line);
 
-            CSASAccountBalanceResponse resp = gson.fromJson(line, CSASAccountBalanceResponse.class);
-            return balanceType.equals(CSASItemType.BALANCE) ? resp.getBalance() : resp.getDisposable();
+            return gson.fromJson(line, CSASAccountBalanceResponse.class);
         } catch (MalformedURLException e) {
             logger.error("The URL '{}' is malformed: ", url, e);
         } catch (Exception e) {
@@ -210,19 +226,18 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private String getAccountBalanceFull(String accountId, CSASItemType balanceType) {
-
-        CSASAmount bal = getAccountBalanceInternal(accountId, balanceType);
+        CSASAmount bal = getCachedAccountBalance(accountId, balanceType);
         String balance = readBalanceWithCurrency(bal);
         return formatMoney(balance);
     }
 
     private Double getAccountBalance(String accountId, CSASItemType balanceType) {
-        CSASAmount bal = getAccountBalanceInternal(accountId, balanceType);
+        CSASAmount bal = getCachedAccountBalance(accountId, balanceType);
         return readBalanceAsDouble(bal);
     }
 
     private String getAccountCurrency(String accountId) {
-        CSASAmount bal = getAccountBalanceInternal(accountId, CSASItemType.BALANCE);
+        CSASAmount bal = getCachedAccountBalance(accountId, CSASItemType.BALANCE);
         return bal.getCurrency();
     }
 
@@ -292,7 +307,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private void getPensions() {
-
         String url = null;
 
         try {

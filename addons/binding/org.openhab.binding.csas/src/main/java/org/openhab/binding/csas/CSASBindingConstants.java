@@ -61,5 +61,6 @@ public class CSASBindingConstants {
     public static final String ACTIVE = "ACTIVE";
     public static final String IBOD = "IBOD";
     public static final int DISCOVERY_TIMEOUT_SEC = 10;
+    public static final int CACHE_EXPIRY = 10 * 1000;
 
 }
