@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2017 by the respective copyright holders.
- * <p>
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,11 +92,13 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     @Override
     public void initialize() {
         thingConfig = getConfigAs(CSASConfig.class);
-        refreshToken();
-        scheduler.schedule(() -> startDiscovery(), 1, TimeUnit.SECONDS);
-
         accountBalance = new ExpiringCacheMap<String, CSASAccountBalanceResponse>(CACHE_EXPIRY);
         initPolling(thingConfig.getRefresh());
+        refreshToken();
+
+        if(thing.getStatus().equals(ThingStatus.ONLINE)) {
+            scheduler.schedule(() -> startDiscovery(), 1, TimeUnit.SECONDS);
+        }
     }
 
     @Override
@@ -116,17 +118,20 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                 try {
                     updateCSASStates();
                 } catch (Exception e) {
-                    logger.debug("Exception during poll!", e);
+                    logger.error("Exception during poll!", e);
                 }
             }
-        }, 10, refresh, TimeUnit.SECONDS);
+        }, refresh, refresh, TimeUnit.SECONDS);
     }
 
     private void updateCSASStates() {
         logger.info("Updating CSAS states...");
-        for (Thing t : getBridge().getThings()) {
-            for (Channel channel : t.getChannels()) {
-                t.getHandler().handleCommand(channel.getUID(), RefreshType.REFRESH);
+        refreshToken();
+        if(thing.getStatus().equals(ThingStatus.ONLINE)) {
+            for (Thing t : getBridge().getThings()) {
+                for (Channel channel : t.getChannels()) {
+                    t.getHandler().handleCommand(channel.getUID(), RefreshType.REFRESH);
+                }
             }
         }
     }
@@ -198,8 +203,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private CSASAmount getCachedAccountBalance(String accountId, CSASItemType balanceType) {
-
-        if(!accountBalance.containsKey(accountId)) {
+        if (accountBalance.get(accountId) == null) {
             accountBalance.put(accountId, () -> invokeGetAccountBalance(accountId));
         }
 
@@ -495,7 +499,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
             InputStream response = connection.getInputStream();
             String line = readResponse(response);
-            logger.debug("CSAS response: " + line);
+            logger.debug("CSAS response: {}", line);
 
             CSASRefreshTokenResponse resp = gson.fromJson(line, CSASRefreshTokenResponse.class);
             accessToken = resp.getAccessToken();
