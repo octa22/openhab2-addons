@@ -16,6 +16,5 @@
 			<channel id="balance_full" typeId="balance_full"></channel>
 			<channel id="currency" typeId="currency"></channel>
 		</channels>
-		<config-description-ref uri="thing-type:csas:item"/>
     </thing-type>
 </thing:thing-descriptions>

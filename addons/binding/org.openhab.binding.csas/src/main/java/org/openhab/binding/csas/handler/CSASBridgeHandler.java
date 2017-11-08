@@ -156,7 +156,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             getInsurances();
             getSecurities();
             getLoyalty();
-            listUnboundAccounts();
+            listAccounts();
         }
     }
 
@@ -202,11 +202,13 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         }
     }
 
-    private CSASAmount getCachedAccountBalance(String accountId, CSASItemType balanceType) {
+    private synchronized CSASAmount getCachedAccountBalance(String accountId, CSASItemType balanceType) {
         if (accountBalance.get(accountId) == null) {
+            logger.info("Putting method into cached map...");
             accountBalance.put(accountId, () -> invokeGetAccountBalance(accountId));
         }
 
+        logger.info("Getting cached balance for account id: {}", accountId);
         CSASAccountBalanceResponse resp = accountBalance.get(accountId);
         return balanceType.equals(CSASItemType.BALANCE) ? resp.getBalance() : resp.getDisposable();
     }
@@ -417,7 +419,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         }
     }
 
-    private void listUnboundAccounts() {
+    private void listAccounts() {
         StringBuilder sb = new StringBuilder();
         Iterator it = accountList.entrySet().iterator();
         while (it.hasNext()) {
@@ -428,7 +430,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             sb.append("\t").append(acc).append(" Id: ").append(id).append("\n");
         }
         if (sb.length() > 0) {
-            logger.info("Found unbound CSAS account(s): {}\n", sb.toString());
+            logger.debug("Found CSAS product(s): {}\n", sb.toString());
         }
     }
 

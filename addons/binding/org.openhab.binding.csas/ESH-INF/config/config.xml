@@ -3,15 +3,6 @@
                                         xmlns:config-description="http://eclipse.org/smarthome/schemas/config-description/v1.0.0"
                                         xsi:schemaLocation="http://eclipse.org/smarthome/schemas/config-description/v1.0.0 http://eclipse.org/smarthome/schemas/config-description-1.0.0.xsd">
 
-    <config-description uri="thing-type:csas:item">
-        <parameter name="id" type="text">
-            <label>CSAS Item Id</label>
-            <description>The identifier of the CSAS item</description>
-            <required>true</required>
-            <advanced>true</advanced>
-        </parameter>
-    </config-description>
-
     <config-description uri="bridge-type:csas:bridge">
         <parameter name="clientId" type="text" required="true">
             <label>CSAS client ID.</label>
