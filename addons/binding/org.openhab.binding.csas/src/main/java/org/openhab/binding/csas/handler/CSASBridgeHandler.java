@@ -128,7 +128,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         logger.info("Updating CSAS states...");
         refreshToken();
         if(thing.getStatus().equals(ThingStatus.ONLINE)) {
-            for (Thing t : getBridge().getThings()) {
+            for (Thing t : getThing().getThings()) {
                 for (Channel channel : t.getChannels()) {
                     t.getHandler().handleCommand(channel.getUID(), RefreshType.REFRESH);
                 }
