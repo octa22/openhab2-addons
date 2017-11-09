@@ -96,7 +96,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         initPolling(thingConfig.getRefresh());
         refreshToken();
 
-        if(thing.getStatus().equals(ThingStatus.ONLINE)) {
+        if (thing.getStatus().equals(ThingStatus.ONLINE)) {
             scheduler.schedule(() -> startDiscovery(), 1, TimeUnit.SECONDS);
         }
     }
@@ -127,9 +127,13 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     private void updateCSASStates() {
         logger.info("Updating CSAS states...");
         refreshToken();
-        if(thing.getStatus().equals(ThingStatus.ONLINE)) {
-            for (Thing t : getThing().getThings()) {
-                for (Channel channel : t.getChannels()) {
+        if (!thing.getStatus().equals(ThingStatus.ONLINE)) {
+            return;
+        }
+
+        for (Thing t : getThing().getThings()) {
+            for (Channel channel : t.getChannels()) {
+                if (isLinked(channel.getUID().getId())) {
                     t.getHandler().handleCommand(channel.getUID(), RefreshType.REFRESH);
                 }
             }
@@ -148,7 +152,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     public void startDiscovery() {
         if (discoveryService != null) {
-            //discover accounts
+            //discover products
             getAccounts();
             getCards();
             getBuildingSavings();
@@ -191,7 +195,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
             CSASLoyaltyResponse resp = gson.fromJson(line, CSASLoyaltyResponse.class);
             if (resp.getState().equals(REGISTERED)) {
-                logger.info("Found total of {} loyalty points", resp.getPointsCount());
                 State state = new DecimalType(Integer.parseInt(resp.getPointsCount()));
                 updateState(channelUID, state);
             }
@@ -220,7 +223,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             url = NETBANKING_V3 + "my/accounts/" + accountId + "/balance";
 
             String line = DoNetbankingRequest(url);
-            logger.info("CSAS getBalance of account: {} returned: {}", accountId, line);
+            logger.debug("CSAS getBalance of account: {} returned: {}", accountId, line);
 
             return gson.fromJson(line, CSASAccountBalanceResponse.class);
         } catch (MalformedURLException e) {
