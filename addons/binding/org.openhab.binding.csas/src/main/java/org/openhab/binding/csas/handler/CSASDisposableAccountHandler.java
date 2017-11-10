@@ -34,7 +34,7 @@ public class CSASDisposableAccountHandler extends CSASBaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (!command.equals(RefreshType.REFRESH)) {
+        if (!command.equals(RefreshType.REFRESH) || !isLinked(channelUID.getId())) {
             return;
         }
 

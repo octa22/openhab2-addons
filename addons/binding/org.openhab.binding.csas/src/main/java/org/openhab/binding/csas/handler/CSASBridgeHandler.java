@@ -133,9 +133,8 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
         for (Thing t : getThing().getThings()) {
             for (Channel channel : t.getChannels()) {
-                if (isLinked(channel.getUID().getId())) {
-                    t.getHandler().handleCommand(channel.getUID(), RefreshType.REFRESH);
-                }
+                t.getHandler().handleCommand(channel.getUID(), RefreshType.REFRESH);
+
             }
         }
     }

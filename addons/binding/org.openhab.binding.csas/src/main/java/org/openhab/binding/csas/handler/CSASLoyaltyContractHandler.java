@@ -32,7 +32,7 @@ public class CSASLoyaltyContractHandler extends CSASBaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (command.equals(RefreshType.REFRESH) && channelUID.getId().equals(CHANNEL_POINTS)) {
+        if (isLinked(channelUID.getId()) && command.equals(RefreshType.REFRESH) && channelUID.getId().equals(CHANNEL_POINTS)) {
             CSASBridgeHandler handler = getBridgeHandler();
             handler.updateLoyaltyPoints(channelUID);
         }

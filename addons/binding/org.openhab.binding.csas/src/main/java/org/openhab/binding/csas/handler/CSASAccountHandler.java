@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2017 by the respective copyright holders.
- *
+ * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,12 +32,12 @@ public class CSASAccountHandler extends CSASBaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (!command.equals(RefreshType.REFRESH)) {
+        if (!command.equals(RefreshType.REFRESH) || !isLinked(channelUID.getId())) {
             return;
         }
 
         CSASBridgeHandler handler = getBridgeHandler();
-        switch(channelUID.getId()) {
+        switch (channelUID.getId()) {
             case CHANNEL_BALANCE_FULL:
                 handler.updateBalanceFull(channelUID, getId());
                 break;
