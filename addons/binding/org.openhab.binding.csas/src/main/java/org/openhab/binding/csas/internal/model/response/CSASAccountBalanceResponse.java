@@ -10,6 +10,12 @@ package org.openhab.binding.csas.internal.model.response;
 
 import org.openhab.binding.csas.internal.model.CSASAmount;
 
+/**
+ * The {@link CSASAccountBalanceResponse} is represents the response model of the
+ * account balance operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASAccountBalanceResponse {
     private CSASAmount balance;
     private CSASAmount disposable;

@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.csas.internal.model;
 
+/**
+ * The {@link CSASCard} is represents the model of the
+ * CSAS card.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASCard {
     private CSASAccount mainAccount;
     private String type;

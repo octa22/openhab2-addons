@@ -12,6 +12,12 @@ import org.openhab.binding.csas.internal.model.CSASInsurance;
 
 import java.util.ArrayList;
 
+/**
+ * The {@link CSASInsurancesResponse} is represents the response model of the
+ * insurances information operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASInsurancesResponse {
     private ArrayList<CSASInsurance> insurances;
 

@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.csas.internal.model;
 
+/**
+ * The {@link CSASTransaction} is represents the model of the
+ * CSAS account transaction.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASTransaction {
     private String bookingDate;
     private CSASAmount amount;

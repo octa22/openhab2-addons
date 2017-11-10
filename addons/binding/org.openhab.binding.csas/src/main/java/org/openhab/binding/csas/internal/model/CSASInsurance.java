@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.csas.internal.model;
 
+/**
+ * The {@link CSASInsurance} is represents the model of the
+ * CSAS insurance.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASInsurance {
     private String id;
     private String policyNumber;

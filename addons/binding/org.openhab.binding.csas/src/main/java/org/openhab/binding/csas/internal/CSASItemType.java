@@ -8,6 +8,11 @@
  */
 package org.openhab.binding.csas.internal;
 
+/**
+ * The {@link CSASItemType} represents the enumeration for CSAS item types.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public enum CSASItemType {
     BALANCE,
     DISPOSABLE_BALANCE,

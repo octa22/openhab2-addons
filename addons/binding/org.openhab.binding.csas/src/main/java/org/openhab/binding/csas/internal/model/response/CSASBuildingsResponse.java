@@ -12,6 +12,12 @@ import org.openhab.binding.csas.internal.model.CSASAccount;
 
 import java.util.ArrayList;
 
+/**
+ * The {@link CSASBuildingsResponse} is represents the response model of the
+ * building savings information operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASBuildingsResponse {
     private ArrayList<CSASAccount> buildings;
 

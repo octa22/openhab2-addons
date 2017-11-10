@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.csas.internal.model;
 
+/**
+ * The {@link CSASAgreement} is represents the model of the
+ * CSAS agreement.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASAgreement {
     private String id;
     private String agreementNumber;

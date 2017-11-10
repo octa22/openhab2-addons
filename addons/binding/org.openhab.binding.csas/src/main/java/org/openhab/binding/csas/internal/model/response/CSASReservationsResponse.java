@@ -12,6 +12,12 @@ import org.openhab.binding.csas.internal.model.CSASReservation;
 
 import java.util.ArrayList;
 
+/**
+ * The {@link CSASReservationsResponse} is represents the response model of the
+ * account reservations operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASReservationsResponse {
     private ArrayList<CSASReservation> reservations;
 

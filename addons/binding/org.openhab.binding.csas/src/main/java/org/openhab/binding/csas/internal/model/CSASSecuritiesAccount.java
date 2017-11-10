@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.csas.internal.model;
 
+/**
+ * The {@link CSASSecuritiesAccount} is represents the model of the
+ * CSAS securities account.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASSecuritiesAccount {
     String id;
     String accountno;

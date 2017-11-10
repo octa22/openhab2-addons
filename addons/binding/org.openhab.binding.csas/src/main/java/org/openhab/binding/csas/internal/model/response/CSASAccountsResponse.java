@@ -12,6 +12,12 @@ import org.openhab.binding.csas.internal.model.CSASAccount;
 
 import java.util.ArrayList;
 
+/**
+ * The {@link CSASAccountsResponse} is represents the response model of the
+ * accounts information operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASAccountsResponse {
     private ArrayList<CSASAccount> accounts;
 

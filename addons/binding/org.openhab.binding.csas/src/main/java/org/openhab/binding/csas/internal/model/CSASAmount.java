@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.csas.internal.model;
 
+/**
+ * The {@link CSASAmount} is represents the model of the
+ * CSAS payment amount.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASAmount {
     private String value;
     private String currency;

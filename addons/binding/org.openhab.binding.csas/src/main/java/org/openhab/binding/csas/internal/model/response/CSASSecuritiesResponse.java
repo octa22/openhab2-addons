@@ -12,6 +12,12 @@ import org.openhab.binding.csas.internal.model.CSASSecuritiesAccount;
 
 import java.util.ArrayList;
 
+/**
+ * The {@link CSASSecuritiesResponse} is represents the response model of the
+ * securities operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASSecuritiesResponse {
     private ArrayList<CSASSecuritiesAccount> securitiesAccounts;
 

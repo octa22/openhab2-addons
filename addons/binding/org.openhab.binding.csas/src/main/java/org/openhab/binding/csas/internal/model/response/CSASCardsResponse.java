@@ -12,6 +12,12 @@ import org.openhab.binding.csas.internal.model.CSASCard;
 
 import java.util.ArrayList;
 
+/**
+ * The {@link CSASCardsResponse} is represents the response model of the
+ * cards information operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASCardsResponse {
     private ArrayList<CSASCard> cards;
 

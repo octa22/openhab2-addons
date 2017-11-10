@@ -10,6 +10,12 @@ package org.openhab.binding.csas.internal.model.response;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * The {@link CSASRefreshTokenResponse} is represents the response model of the
+ * token refreshing operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASRefreshTokenResponse {
     @SerializedName("access_token")
     private String accessToken;

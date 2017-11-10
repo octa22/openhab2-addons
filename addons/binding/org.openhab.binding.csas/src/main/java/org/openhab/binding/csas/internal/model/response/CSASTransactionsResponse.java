@@ -12,6 +12,12 @@ import org.openhab.binding.csas.internal.model.CSASTransaction;
 
 import java.util.ArrayList;
 
+/**
+ * The {@link CSASTransactionsResponse} is represents the response model of the
+ * account transactions operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASTransactionsResponse {
     private ArrayList<CSASTransaction> transactions;
 

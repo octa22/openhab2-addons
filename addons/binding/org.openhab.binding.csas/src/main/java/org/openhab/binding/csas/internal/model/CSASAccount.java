@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.csas.internal.model;
 
+/**
+ * The {@link CSASAccount} is represents the model of the
+ * CSAS account.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASAccount {
     private String id;
     private CSASAccountNumber accountno;

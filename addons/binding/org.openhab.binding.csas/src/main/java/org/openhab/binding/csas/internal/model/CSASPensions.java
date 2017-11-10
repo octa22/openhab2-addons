@@ -10,6 +10,12 @@ package org.openhab.binding.csas.internal.model;
 
 import java.util.ArrayList;
 
+/**
+ * The {@link CSASPensions} is represents the model of the
+ * CSAS pensions.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASPensions {
     private ArrayList<CSASAgreement> pensions;
 

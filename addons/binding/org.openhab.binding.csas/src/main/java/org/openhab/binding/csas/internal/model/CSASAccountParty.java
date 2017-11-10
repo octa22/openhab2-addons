@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.csas.internal.model;
 
+/**
+ * The {@link CSASAccountParty} is represents the model of the
+ * CSAS account party.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASAccountParty {
     private String accountPartyDescription;
     private String accountPartyInfo;

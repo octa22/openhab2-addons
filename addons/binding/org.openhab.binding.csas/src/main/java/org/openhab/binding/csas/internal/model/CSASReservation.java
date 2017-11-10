@@ -10,6 +10,12 @@ package org.openhab.binding.csas.internal.model;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * The {@link CSASReservation} is represents the model of the
+ * CSAS account reservations.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASReservation {
     private String creationDate;
     private CSASAmount amount;

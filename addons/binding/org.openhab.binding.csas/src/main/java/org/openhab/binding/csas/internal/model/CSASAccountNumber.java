@@ -10,6 +10,12 @@ package org.openhab.binding.csas.internal.model;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * The {@link CSASAccountNumber} is represents the model of the
+ * CSAS account number.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASAccountNumber {
     private String number;
     private String bankCode;

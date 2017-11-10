@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.csas.internal.model.response;
 
+/**
+ * The {@link CSASLoyaltyResponse} is represents the response model of the
+ * loyalty information operation.
+ *
+ * @author Ondrej Pecta - Initial contribution
+ */
 public class CSASLoyaltyResponse {
     private String pointsCount;
     private String state;
