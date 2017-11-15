@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2017 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
 package org.openhab.binding.csas.handler;
 
 import com.google.gson.Gson;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
 import org.eclipse.smarthome.core.cache.ExpiringCacheMap;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -34,7 +35,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -52,31 +56,30 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     private CSASDiscoveryService discoveryService = null;
 
-    private long refreshInterval = 1800000;
     private String accessToken = "";
 
     /**
      * Our configuration
      */
-    protected CSASConfig thingConfig;
+    private CSASConfig thingConfig;
 
     //Gson parser
     private Gson gson = new Gson();
 
     //Account list
-    HashMap<String, String> accountList = new HashMap<>();
+    private HashMap<String, String> accountList = new HashMap<>();
 
     //IbanList
-    HashMap<String, String> ibanList = new HashMap<>();
+    private HashMap<String, String> ibanList = new HashMap<>();
 
     /**
      * Future to poll for updated
      */
     private ScheduledFuture<?> pollFuture;
 
-    ExpiringCacheMap<String, CSASAccountBalanceResponse> accountBalance;
+    private ExpiringCacheMap<String, CSASAccountBalanceResponse> accountBalance;
 
-    public CSASBridgeHandler(Bridge thing) {
+    public CSASBridgeHandler(@NonNull Bridge thing) {
         super(thing);
     }
 
@@ -92,12 +95,12 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     @Override
     public void initialize() {
         thingConfig = getConfigAs(CSASConfig.class);
-        accountBalance = new ExpiringCacheMap<String, CSASAccountBalanceResponse>(CACHE_EXPIRY);
+        accountBalance = new ExpiringCacheMap<>(CACHE_EXPIRY);
         initPolling(thingConfig.getRefresh());
         refreshToken();
 
         if (thing.getStatus().equals(ThingStatus.ONLINE)) {
-            scheduler.schedule(() -> startDiscovery(), 1, TimeUnit.SECONDS);
+            scheduler.schedule(this::startDiscovery, 1, TimeUnit.SECONDS);
         }
     }
 
@@ -112,14 +115,11 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
      */
     private void initPolling(int refresh) {
         stopPolling();
-        pollFuture = scheduler.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    updateCSASStates();
-                } catch (Exception e) {
-                    logger.error("Exception during poll!", e);
-                }
+        pollFuture = scheduler.scheduleAtFixedRate(() -> {
+            try {
+                updateCSASStates();
+            } catch (Exception e) {
+                logger.error("Exception during poll!", e);
             }
         }, refresh, refresh, TimeUnit.SECONDS);
     }
@@ -132,9 +132,15 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         }
 
         for (Thing t : getThing().getThings()) {
+            CSASBaseThingHandler handler = (CSASBaseThingHandler) t.getHandler();
+            if (handler == null) {
+                continue;
+            }
             for (Channel channel : t.getChannels()) {
-                t.getHandler().handleCommand(channel.getUID(), RefreshType.REFRESH);
-
+                ChannelUID uid = channel.getUID();
+                if (uid != null) {
+                    handler.handleCommand(uid, RefreshType.REFRESH);
+                }
             }
         }
     }
@@ -183,30 +189,9 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         }
     }
 
-    public void updateLoyaltyPoints(ChannelUID channelUID) {
-        String url = null;
-
-        try {
-            url = NETBANKING_V3 + "cz/my/contracts/loyalty";
-
-            String line = DoNetbankingRequest(url);
-            logger.debug("CSAS getLoyalty: {}", line);
-
-            CSASLoyaltyResponse resp = gson.fromJson(line, CSASLoyaltyResponse.class);
-            if (resp.getState().equals(REGISTERED)) {
-                State state = new DecimalType(Integer.parseInt(resp.getPointsCount()));
-                updateState(channelUID, state);
-            }
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed: ", url, e);
-        } catch (Exception e) {
-            logger.error("Cannot get CSAS loyalty points", e);
-        }
-    }
-
     private synchronized CSASAmount getCachedAccountBalance(String accountId, CSASItemType balanceType) {
         if (accountBalance.get(accountId) == null) {
-            logger.info("Putting method into cached map...");
+            logger.debug("Putting method into cached map...");
             accountBalance.put(accountId, () -> invokeGetAccountBalance(accountId));
         }
 
@@ -250,22 +235,22 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private String formatMoney(String balance) {
-        String newBalance = "";
+        StringBuilder newBalance = new StringBuilder();
         int len = balance.length();
         int dec = balance.indexOf('.');
         if (dec >= 0) {
             len = dec;
-            newBalance = balance.substring(dec);
+            newBalance.append(balance.substring(dec));
         }
 
         int j = 0;
         for (int i = len - 1; i >= 0; i--) {
             char c = balance.charAt(i);
-            newBalance = c + newBalance;
+            newBalance.insert(0, c);
             if (++j % 3 == 0 && i > 0 && balance.charAt(i - 1) != '-')
-                newBalance = " " + newBalance;
+                newBalance.insert(0, " ");
         }
-        return newBalance;
+        return newBalance.toString();
     }
 
     private String readBalanceWithCurrency(CSASAmount balance) {
@@ -422,18 +407,18 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private void listAccounts() {
+        logger.debug("Found CSAS product(s): {}\n", getAccountList());
+    }
+
+    private String getAccountList() {
         StringBuilder sb = new StringBuilder();
-        Iterator it = accountList.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
+        for (Object o : accountList.entrySet()) {
+            Map.Entry pair = (Map.Entry) o;
             String id = (String) pair.getKey();
             String acc = (String) pair.getValue();
-            //if (!isBound(id))
             sb.append("\t").append(acc).append(" Id: ").append(id).append("\n");
         }
-        if (sb.length() > 0) {
-            logger.debug("Found CSAS product(s): {}\n", sb.toString());
-        }
+        return sb.toString();
     }
 
     private void getAccounts() {
@@ -557,5 +542,26 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     public void updateCurrency(ChannelUID channelUID, String id) {
         String currency = getAccountCurrency(id);
         updateState(channelUID, new StringType(currency));
+    }
+
+    public void updateLoyaltyPoints(ChannelUID channelUID) {
+        String url = null;
+
+        try {
+            url = NETBANKING_V3 + "cz/my/contracts/loyalty";
+
+            String line = DoNetbankingRequest(url);
+            logger.debug("CSAS getLoyalty: {}", line);
+
+            CSASLoyaltyResponse resp = gson.fromJson(line, CSASLoyaltyResponse.class);
+            if (resp.getState().equals(REGISTERED)) {
+                State state = new DecimalType(Integer.parseInt(resp.getPointsCount()));
+                updateState(channelUID, state);
+            }
+        } catch (MalformedURLException e) {
+            logger.error("The URL '{}' is malformed: ", url, e);
+        } catch (Exception e) {
+            logger.error("Cannot get CSAS loyalty points", e);
+        }
     }
 }

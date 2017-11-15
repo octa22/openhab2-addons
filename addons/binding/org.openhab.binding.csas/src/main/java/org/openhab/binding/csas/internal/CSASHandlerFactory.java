@@ -90,8 +90,6 @@ public class CSASHandlerFactory extends BaseThingHandlerFactory {
             ServiceRegistration<?> serviceReg = this.discoveryServiceRegs.get(thingHandler.getThing().getUID());
             if (serviceReg != null) {
                 // remove discovery service, if bridge handler is removed
-                CSASDiscoveryService service = (CSASDiscoveryService) bundleContext
-                        .getService(serviceReg.getReference());
                 serviceReg.unregister();
                 discoveryServiceRegs.remove(thingHandler.getThing().getUID());
             }
@@ -101,7 +99,7 @@ public class CSASHandlerFactory extends BaseThingHandlerFactory {
     private synchronized void registerItemDiscoveryService(CSASBridgeHandler bridgeHandler) {
         CSASDiscoveryService discoveryService = new CSASDiscoveryService(bridgeHandler);
         this.discoveryServiceRegs.put(bridgeHandler.getThing().getUID(), bundleContext
-                .registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<String, Object>()));
+                .registerService(DiscoveryService.class.getName(), discoveryService, new Hashtable<>()));
 
     }
 
