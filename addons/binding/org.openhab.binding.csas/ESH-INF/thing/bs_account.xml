@@ -12,9 +12,10 @@
 		<label>CSAS Building Savings Account</label>
 		<description>A building savings account in Ceska sporitelna a.s.</description>
 		<channels>
-			<channel id="balance" typeId="balance"></channel>
-			<channel id="balance_full" typeId="balance_full"></channel>
-			<channel id="currency" typeId="currency"></channel>
+			<channel id="balance" typeId="balance"/>
+			<channel id="balance_full" typeId="balance_full"/>
+			<channel id="currency" typeId="currency"/>
 		</channels>
+		<config-description-ref uri="thing-type:csas:account"/>
     </thing-type>
 </thing:thing-descriptions>

@@ -54,8 +54,17 @@ public class CSASDisposableAccountHandler extends CSASBaseThingHandler {
                 handler.updateCurrency(channelUID, getId());
                 break;
             default:
-                logger.error("Unknown channel: {}", channelUID.getId());
+                if(channelUID.getId().startsWith(TRAN)) {
+                    logger.info("Updating transaction: {}", channelUID.getId());
+                    handler.updateTransaction(channelUID, getId(), getIBAN());
+                }
+                else {
+                    logger.error("Unknown channel: {}", channelUID.getId());
+                }
         }
     }
 
+    public String getIBAN() {
+        return getThing().getConfiguration().get("iban").toString();
+    }
 }

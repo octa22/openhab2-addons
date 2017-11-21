@@ -12,9 +12,9 @@
 		<label>CSAS Pension Contract</label>
 		<description>A pension contract in Ceska sporitelna a.s.</description>
 		<channels>
-			<channel id="balance" typeId="balance"></channel>
-			<channel id="balance_full" typeId="balance_full"></channel>
-			<channel id="currency" typeId="currency"></channel>
+			<channel id="balance" typeId="balance"/>
+			<channel id="balance_full" typeId="balance_full"/>
+			<channel id="currency" typeId="currency"/>
 		</channels>
     </thing-type>
 </thing:thing-descriptions>

@@ -54,13 +54,16 @@ public class CSASBindingConstants {
     public static final String CHANNEL_DISPOSABLE = "disposable";
     public static final String CHANNEL_DISPOSABLE_FULL = "disposable_full";
 
+    //public static final String CHANNEL_TRAN2 = "tran2";
+
     //OTHER
     public static final String NETBANKING_V3 = "https://www.csas.cz/webapi/api/v3/netbanking/";
     public static final String CREDIT = "CREDIT";
     public static final String REGISTERED = "REGISTERED";
     public static final String ACTIVE = "ACTIVE";
     public static final String IBOD = "IBOD";
+    public static final String TRAN = "tran";
     public static final int DISCOVERY_TIMEOUT_SEC = 10;
     public static final int CACHE_EXPIRY = 10 * 1000;
-
+    public static final int HISTORY_INTERVAL = 14;
 }

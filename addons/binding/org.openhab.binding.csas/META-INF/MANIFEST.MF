@@ -12,6 +12,7 @@ Export-Package:
  org.openhab.binding.csas.handler
 Import-Package: com.google.gson,
  com.google.gson.annotations,
+ org.apache.commons.lang.time,
  org.openhab.binding.csas,
  org.openhab.binding.csas.handler,
  org.eclipse.jdt.annotation;resolution:=optional,

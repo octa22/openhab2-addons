@@ -23,4 +23,10 @@
             <default>1800</default>
         </parameter>
     </config-description>
+
+    <config-description uri="thing-type:csas:account">
+        <parameter name="iban" type="text" required="true">
+            <label>CSAS account IBAN</label>
+        </parameter>
+    </config-description>
 </config-description:config-descriptions>

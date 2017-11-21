@@ -48,8 +48,15 @@ public class CSASAccountHandler extends CSASBaseThingHandler {
                 handler.updateCurrency(channelUID, getId());
                 break;
             default:
-                logger.error("Unknown channel: {}", channelUID.getId());
+                if (channelUID.getId().startsWith(TRAN)) {
+                    handler.updateTransaction(channelUID, getId(), getIBAN());
+                } else {
+                    logger.error("Unknown channel: {}", channelUID.getId());
+                }
         }
     }
 
+    public String getIBAN() {
+        return getThing().getConfiguration().get("iban").toString();
+    }
 }

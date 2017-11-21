@@ -12,11 +12,27 @@
 		<label>CSAS Current Account</label>
 		<description>A current account in Ceska sporitelna a.s.</description>
 		<channels>
-			<channel id="balance" typeId="balance"></channel>
-			<channel id="disposable" typeId="disposable"></channel>
-			<channel id="balance_full" typeId="balance_full"></channel>
-			<channel id="disposable_full" typeId="disposable_full"></channel>
-			<channel id="currency" typeId="currency"></channel>
+			<channel id="balance" typeId="balance"/>
+			<channel id="disposable" typeId="disposable"/>
+			<channel id="balance_full" typeId="balance_full"/>
+			<channel id="disposable_full" typeId="disposable_full"/>
+			<channel id="currency" typeId="currency"/>
+			<channel id="tran1" typeId="transaction"/>
+			<channel id="tran2" typeId="transaction"/>
+			<channel id="tran3" typeId="transaction"/>
+			<channel id="tran4" typeId="transaction"/>
+			<channel id="tran5" typeId="transaction"/>
+			<channel id="tran6" typeId="transaction"/>
+			<channel id="tran7" typeId="transaction"/>
+			<channel id="tran8" typeId="transaction"/>
+			<channel id="tran9" typeId="transaction"/>
+			<channel id="tran10" typeId="transaction"/>
+			<channel id="tran11" typeId="transaction"/>
+			<channel id="tran12" typeId="transaction"/>
+			<channel id="tran13" typeId="transaction"/>
+			<channel id="tran14" typeId="transaction"/>
+			<channel id="tran15" typeId="transaction"/>
 		</channels>
+		<config-description-ref uri="thing-type:csas:account"/>
 	</thing-type>
 </thing:thing-descriptions>

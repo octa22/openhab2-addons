@@ -15,6 +15,7 @@ import org.eclipse.smarthome.config.discovery.ExtendedDiscoveryService;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.csas.handler.CSASBridgeHandler;
+import org.openhab.binding.csas.internal.model.CSASAccount;
 import org.openhab.binding.csas.internal.model.CSASAccountNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,16 +84,38 @@ public class CSASDiscoveryService extends AbstractDiscoveryService
         }
     }
 
-    public void accountDiscovered(String id, CSASAccountNumber accountNr) {
-        deviceDiscovered(id, accountNr.getFullAccount(), THING_TYPE_ACCOUNT);
+    private void deviceDiscovered(String id, String label, String iban, ThingTypeUID thingTypeUID) {
+        Map<String, Object> properties = new HashMap<>(1);
+        properties.put("id", id);
+        properties.put("iban", iban);
+
+        ThingUID thingUID = new ThingUID(thingTypeUID, bridge.getThing().getUID(), id);
+
+        if (discoveryServiceCallback.getExistingThing(thingUID) == null) {
+            logger.debug("Detected a/an {} - label: {} id: {}", thingTypeUID.getId(), label, id);
+            thingDiscovered(
+                    DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID).withProperties(properties)
+                            .withRepresentationProperty("id").withLabel(label)
+                            .withBridge(bridge.getThing().getUID()).build());
+        }
     }
 
-    public void cardAccountDiscovered(String id, CSASAccountNumber accountNr) {
-        deviceDiscovered(id, accountNr.getFullAccount(), THING_TYPE_CARD_ACCOUNT);
+    public void accountDiscovered(CSASAccount account) {
+        String id = account.getId();
+        CSASAccountNumber accountNr = account.getAccountno();
+        deviceDiscovered(id, accountNr.getFullAccount(), accountNr.getIban(), THING_TYPE_ACCOUNT);
     }
 
-    public void buildingSavingsAccountDiscovered(String id, CSASAccountNumber accountNr) {
-        deviceDiscovered(id, accountNr.getFullAccount(), THING_TYPE_BS_ACCOUNT);
+    public void cardAccountDiscovered(CSASAccount account) {
+        String id = account.getId();
+        CSASAccountNumber accountNr = account.getAccountno();
+        deviceDiscovered(id, accountNr.getFullAccount(), accountNr.getIban(), THING_TYPE_CARD_ACCOUNT);
+    }
+
+    public void buildingSavingsAccountDiscovered(CSASAccount account) {
+        String id = account.getId();
+        CSASAccountNumber accountNr = account.getAccountno();
+        deviceDiscovered(id, accountNr.getFullAccount(), accountNr.getIban(), THING_TYPE_BS_ACCOUNT);
     }
 
     public void pensionContractDiscovered(String id, String agreement) {

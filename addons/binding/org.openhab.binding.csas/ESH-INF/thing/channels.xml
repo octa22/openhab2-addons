@@ -44,4 +44,11 @@
 		<description>A formatted disposable balance of an account in CSAS including currency</description>
 		<state readOnly="true" pattern="%s"></state>
 	</channel-type>
+
+	<channel-type id="transaction">
+		<item-type>String</item-type>
+		<label>CSAS Transaction With Date And Currency</label>
+		<description>A formatted transaction value of an account in CSAS including date and currency</description>
+		<state readOnly="true" pattern="%s"></state>
+	</channel-type>
 </thing:thing-descriptions>

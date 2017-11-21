@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2017 by the respective copyright holders.
- * <p>
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.csas.config.CSASConfig;
 import org.openhab.binding.csas.internal.CSASItemType;
+import org.openhab.binding.csas.internal.CSASSimpleTransaction;
 import org.openhab.binding.csas.internal.discovery.CSASDiscoveryService;
 import org.openhab.binding.csas.internal.model.*;
 import org.openhab.binding.csas.internal.model.response.*;
@@ -35,13 +36,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang.time.DateUtils.addDays;
 import static org.openhab.binding.csas.CSASBindingConstants.*;
 
 /**
@@ -69,15 +69,14 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     //Account list
     private HashMap<String, String> accountList = new HashMap<>();
 
-    //IbanList
-    private HashMap<String, String> ibanList = new HashMap<>();
-
     /**
      * Future to poll for updated
      */
     private ScheduledFuture<?> pollFuture;
 
+    //Cache
     private ExpiringCacheMap<String, CSASAccountBalanceResponse> accountBalance;
+    private ExpiringCacheMap<String, ArrayList<CSASSimpleTransaction>> accountTransactions;
 
     public CSASBridgeHandler(@NonNull Bridge thing) {
         super(thing);
@@ -96,18 +95,22 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     public void initialize() {
         thingConfig = getConfigAs(CSASConfig.class);
         accountBalance = new ExpiringCacheMap<>(CACHE_EXPIRY);
-        initPolling(thingConfig.getRefresh());
+        accountTransactions = new ExpiringCacheMap<String, ArrayList<CSASSimpleTransaction>>(CACHE_EXPIRY);
         refreshToken();
+
+        initPolling(thingConfig.getRefresh());
 
         if (thing.getStatus().equals(ThingStatus.ONLINE)) {
             scheduler.schedule(this::startDiscovery, 1, TimeUnit.SECONDS);
         }
+        logger.info("CSAS binding initialized...");
     }
 
     @Override
     public void dispose() {
         super.dispose();
         stopPolling();
+        logger.info("CSAS binding disposed...");
     }
 
     /**
@@ -368,7 +371,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             if (resp.getBuildings() != null) {
                 for (CSASAccount account : resp.getBuildings()) {
                     readAccount(account.getId(), account.getAccountno());
-                    discoveryService.buildingSavingsAccountDiscovered(account.getId(), account.getAccountno());
+                    discoveryService.buildingSavingsAccountDiscovered(account);
                 }
             }
         } catch (MalformedURLException e) {
@@ -394,7 +397,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                     CSASAccount cardAccount = card.getMainAccount();
                     if (cardAccount != null && card.getType().equals(CREDIT) && card.getState().equals(ACTIVE)) {
                         readAccount(cardAccount.getId(), cardAccount.getAccountno());
-                        discoveryService.cardAccountDiscovered(cardAccount.getId(), cardAccount.getAccountno());
+                        discoveryService.cardAccountDiscovered(cardAccount);
                     }
                 }
             }
@@ -434,7 +437,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             if (resp.getAccounts() != null) {
                 for (CSASAccount account : resp.getAccounts()) {
                     readAccount(account.getId(), account.getAccountno());
-                    discoveryService.accountDiscovered(account.getId(), account.getAccountno());
+                    discoveryService.accountDiscovered(account);
                 }
             }
         } catch (MalformedURLException e) {
@@ -461,10 +464,8 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
         String number = account.getNumber();
         String bankCode = account.getBankCode();
-        String iban = account.getIban();
         if (!accountList.containsKey(id)) {
             accountList.put(id, "Account: " + number + "/" + bankCode);
-            ibanList.put(id, iban);
         }
     }
 
@@ -562,6 +563,128 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             logger.error("The URL '{}' is malformed: ", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS loyalty points", e);
+        }
+    }
+
+    /*
+    private String getIbanFromAccountId(String accountId) {
+        if (ibanList.containsKey(accountId)) {
+            return ibanList.get(accountId);
+        }
+
+        logger.debug("Cannot get IBAN for account: {}", accountId);
+        return "";
+    }*/
+
+    private CSASSimpleTransaction createTransaction(CSASTransaction csasTran) {
+
+        SimpleDateFormat myUTCFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        SimpleDateFormat requiredFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+        CSASSimpleTransaction tran = new CSASSimpleTransaction();
+
+        try {
+            CSASAmount amount = csasTran.getAmount();
+
+            Date date = myUTCFormat.parse(csasTran.getBookingDate());
+            String shortDate = requiredFormat.format(date);
+
+            String balance = formatMoney(readBalanceWithCurrency(amount)) + " " + shortDate;
+            String description = csasTran.getDescription();
+            tran.setBalance(balance);
+
+            if (description != null) {
+                tran.setDescription(description);
+            }
+
+            String variableSymbol = csasTran.getVariableSymbol();
+            if (variableSymbol != null) {
+                tran.setVariableSymbol(variableSymbol);
+            }
+
+            CSASAccountParty party = csasTran.getAccountParty();
+            if (party == null) {
+                return tran;
+            }
+            if (party.getAccountPartyInfo() != null) {
+                String accountPartyInfo = party.getAccountPartyInfo();
+                tran.setAccountPartyInfo(accountPartyInfo);
+            }
+            if (party.getAccountPartyDescription() != null) {
+                String accountPartyDescription = party.getAccountPartyDescription();
+                tran.setAccountPartyDescription(accountPartyDescription);
+            }
+        } catch (Exception ex) {
+            logger.error("Error during parsing transaction!", ex);
+        }
+        return tran;
+    }
+
+    private ArrayList<CSASSimpleTransaction> invokeGetTransactions(String iban) {
+
+        String url = null;
+        ArrayList<CSASSimpleTransaction> transactionsList = new ArrayList<>();
+
+        SimpleDateFormat requestFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        try {
+            //url = NETBANKING_V3 + "cz/my/accounts/" + getIbanFromAccountId(accountId) + "/transactions?dateStart=" + requestFormat.format(addDays(new Date(), -HISTORY_INTERVAL)) + "T00:00:00+01:00&dateEnd=" + requestFormat.format(new Date()) + "T00:00:00+01:00";
+            url = NETBANKING_V3 + "cz/my/accounts/" + iban + "/transactions?dateStart=" + requestFormat.format(addDays(new Date(), -HISTORY_INTERVAL)) + "T00:00:00+01:00&dateEnd=" + requestFormat.format(new Date()) + "T00:00:00+01:00";
+
+            String line = DoNetbankingRequest(url);
+            logger.debug("CSAS getTransactions: {}", line);
+
+            CSASTransactionsResponse resp = gson.fromJson(line, CSASTransactionsResponse.class);
+            if (resp.getTransactions() != null) {
+                for (CSASTransaction tran : resp.getTransactions()) {
+                    transactionsList.add(createTransaction(tran));
+                }
+            }
+
+            logger.trace("Transactions: {}", transactionsList.toString());
+            return transactionsList;
+
+        } catch (MalformedURLException e) {
+            logger.error("The URL '{}' is malformed: ", url, e);
+        } catch (Exception e) {
+            logger.error("Cannot get CSAS transactions: ", e);
+        }
+        return transactionsList;
+    }
+
+    private synchronized ArrayList<CSASSimpleTransaction> getCachedTransactions(String accountId, String iban) {
+        if (accountTransactions.get(accountId) == null) {
+            logger.info("Putting getTransactions method into cached map...");
+            accountTransactions.put(accountId, () -> invokeGetTransactions(iban));
+        }
+        return accountTransactions.get(accountId);
+    }
+
+    private void updateTransaction(ChannelUID channelUID, String id, String iban, int position) {
+        ArrayList<CSASSimpleTransaction> transactions = getCachedTransactions(id, iban);
+        updateState(channelUID, new StringType(transactions.get(position).getBalance()));
+    }
+
+    public void updateTransaction(ChannelUID channelUID, String id, String iban) {
+        /*
+        if (getIbanFromAccountId(id).isEmpty()) {
+            logger.info("IBAN list not ready yet");
+            return;
+        }*/
+
+        String tran = channelUID.getId().replace(TRAN, "");
+        if (tryParseInt(tran)) {
+            int position = Integer.parseInt(tran);
+            updateTransaction(channelUID, id, iban, position);
+        }
+    }
+
+    private boolean tryParseInt(String value) {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }
