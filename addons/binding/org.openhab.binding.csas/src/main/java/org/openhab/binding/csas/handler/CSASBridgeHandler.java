@@ -128,7 +128,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private void updateCSASStates() {
-        logger.info("Updating CSAS states...");
+        logger.debug("Updating CSAS states...");
         refreshToken();
         if (!thing.getStatus().equals(ThingStatus.ONLINE)) {
             return;
@@ -198,7 +198,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             accountBalance.put(accountId, () -> invokeGetAccountBalance(accountId));
         }
 
-        logger.info("Getting cached balance for account id: {}", accountId);
+        logger.debug("Getting cached balance for account id: {}", accountId);
         CSASAccountBalanceResponse resp = accountBalance.get(accountId);
         return balanceType.equals(CSASItemType.BALANCE) ? resp.getBalance() : resp.getDisposable();
     }

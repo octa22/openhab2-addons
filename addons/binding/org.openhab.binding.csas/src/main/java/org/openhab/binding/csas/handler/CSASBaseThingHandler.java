@@ -25,5 +25,5 @@ public abstract class CSASBaseThingHandler extends BaseThingHandler {
         return (CSASBridgeHandler) this.getBridge().getHandler();
     }
 
-    protected String getId() { return thing.getUID().getId(); }
+    protected String getThingId() { return thing.getUID().getId(); }
 }

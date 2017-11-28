@@ -8,6 +8,7 @@
  */
 package org.openhab.binding.csas.handler;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.types.Command;
@@ -39,24 +40,23 @@ public class CSASDisposableAccountHandler extends CSASBaseThingHandler {
         CSASBridgeHandler handler = getBridgeHandler();
         switch(channelUID.getId()) {
             case CHANNEL_BALANCE_FULL:
-                handler.updateBalanceFull(channelUID, getId());
+                handler.updateBalanceFull(channelUID, getThingId());
                 break;
             case CHANNEL_BALANCE:
-                handler.updateBalance(channelUID, getId());
+                handler.updateBalance(channelUID, getThingId());
                 break;
             case CHANNEL_DISPOSABLE_FULL:
-                handler.updateDisposableFull(channelUID, getId());
+                handler.updateDisposableFull(channelUID, getThingId());
                 break;
             case CHANNEL_DISPOSABLE:
-                handler.updateDisposable(channelUID, getId());
+                handler.updateDisposable(channelUID, getThingId());
                 break;
             case CHANNEL_CURRENCY:
-                handler.updateCurrency(channelUID, getId());
+                handler.updateCurrency(channelUID, getThingId());
                 break;
             default:
                 if(channelUID.getId().startsWith(TRAN)) {
-                    logger.info("Updating transaction: {}", channelUID.getId());
-                    handler.updateTransaction(channelUID, getId(), getIBAN());
+                    handler.updateTransaction(channelUID, getThingId(), getIBAN());
                 }
                 else {
                     logger.error("Unknown channel: {}", channelUID.getId());
