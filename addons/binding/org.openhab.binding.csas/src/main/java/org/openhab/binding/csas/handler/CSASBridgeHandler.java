@@ -662,7 +662,11 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     private void updateTransaction(ChannelUID channelUID, String id, String iban, int position) {
         ArrayList<CSASSimpleTransaction> transactions = getCachedTransactions(id, iban);
-        updateState(channelUID, new StringType(transactions.get(position).getBalance()));
+        if(transactions.size() > position) {
+            updateState(channelUID, new StringType(transactions.get(position).getBalance()));
+        } else {
+            updateState(channelUID, new StringType("-"));
+        }
     }
 
     public void updateTransaction(ChannelUID channelUID, String id, String iban) {
