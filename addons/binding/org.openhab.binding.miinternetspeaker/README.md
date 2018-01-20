@@ -1,50 +1,74 @@
 # Mi Internet Speaker Binding
 
+This is the binding for the Xiaomi Mi Internet Speaker
 https://xiaomi-mi.com/portable-speakers/xiaomi-mi-internet-speaker-white/
 
 ## Supported Things
-
-_Please describe the different supported things / devices within this section._
-_Which different types are supported, which models were tested etc.?_
-_Note that it is planned to generate some part of this based on the XML files within ```ESH-INF/thing``` of your binding._
+Xiaomi Mi Internet Speaker
 
 ## Discovery
 
-_Describe the available auto-discovery features here. Mention for what it works and what needs to be kept in mind when using it._
+Once binding active, your Internet Speaker is auto discovered and appears in Inbox of PaperUI.
 
 ## Binding Configuration
 
-_If your binding requires or supports general configuration settings, please create a folder ```cfg``` and place the configuration file ```<bindingId>.cfg``` inside it. In this section, you should link to this file and provide some information about the options. The file could e.g. look like:_
-
-```
-# Configuration for the Philips Hue Binding
-#
-# Default secret key for the pairing of the Philips Hue Bridge.
-# It has to be between 10-40 (alphanumeric) characters 
-# This may be changed by the user for security reasons.
-secret=EclipseSmartHome
-```
-
-_Note that it is planned to generate some part of this based on the information that is available within ```ESH-INF/binding``` of your binding._
-
-_If your binding does not offer any generic configurations, you can remove this section completely._
+No configuration needed.
 
 ## Thing Configuration
 
-_Describe what is needed to manually configure a thing, either through the (Paper) UI or via a thing-file. This should be mainly about its mandatory and optional configuration parameters. A short example entry for a thing file can help!_
-
-_Note that it is planned to generate some part of this based on the XML files within ```ESH-INF/thing``` of your binding._
+The Internet speaker needs a device URL string. Since it is not easy to find the device URL, it is better to have it
+auto discovered.
 
 ## Channels
 
-_Here you should provide information about available channel types, what their meaning is and how they can be used._
+* control - control the speaker, e.g. start/pause/next/previous
+* bluetooth - control bluetooth capability of the speaker device
+* command - sending commands to the speaker device (play, pause, next, prev, off) 
+* volume - control volume of the speaker device by dimmer/slider
+* sound - control sound mode of the speaker device
+* sleep - control sleep feature of the speaker device
+* playmode - control play mode of the speaker device (repeat all, one, shuffle)
+* artist - display current song's artist name of the speaker device
+* title - display current song's title of the speaker device
+* status - display status of the speaker device (playing/pause/...)
 
-_Note that it is planned to generate some part of this based on the XML files within ```ESH-INF/thing``` of your binding._
+## Example
+items file:
+```
+Player XiaomiSpeakerControl "Xiaomi speaker control" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:control" } 
+String XiaomiSpeakerStatus "Xiaomi speaker status [%s]" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:status" }
+Dimmer XiaomiSpeakerVolume "Xiaomi speaker volume" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:volume" }
+String XiaomiSpeakerSound "Xiaomi speaker sound" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:sound" }
+String XiaomiSpeakerSleep "Xiaomi speaker sleep" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:sleep" }
+String XiaomiSpeakerCommand "Xiaomi speaker command" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:command", autoupdate="false" }
+String XiaomiSpeakerMode "Xiaomi speaker play mode" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:playmode" }
+String XiaomiSpeakerArtist "Xiaomi speaker artist [%s]" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:artist" }
+String XiaomiSpeakerTitle "Xiaomi speaker title [%s]" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:title" }
+Switch XiaomiSpeakerBT "Xiaomi speaker bluetooth" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:bluetooth" }
+```
 
-## Full Example
+sitemap:
+```
+Group item=FF_MiSpeaker {
+        Default item=XiaomiSpeakerControl label="Control" icon="speaker"
+        //Switch item=XiaomiSpeakerCommand label="Control" icon="speaker" mappings=["PAUSE"="PAUSE","PLAY"="PLAY"]
+        //Switch item=XiaomiSpeakerCommand label="Song" icon="arrows" mappings=["PREV"="PREV","NEXT"="NEXT"]
+        Switch item=XiaomiSpeakerCommand label="Power" icon="shutdown" mappings=[OFF="OFF"]
+        Slider item=XiaomiSpeakerVolume label="Volume" icon="music"
+        Setpoint item=XiaomiSpeakerVolume label="Volume" icon="music" minValue=0 maxValue=100 step=1
+        Selection label="Sound" item=XiaomiSpeakerSound icon="music" mappings=["NORMAL"="Normal", "VOICE"="Voice", "BASS"="Bass", "TREBLE"="Treble"]
+        Selection label="Sleep" item=XiaomiSpeakerSleep icon="sleep" mappings=["0"="OFF", "300"="5 min", "600"="10 min", "1200"="20 min", "1800"="30 min", "2400"="40 min", "3000"="50 min", "3600"="60 min", "4200"="70 min","4800"="80 min","5400"="90 min","6000"="100 min", "6600"="110 min","7200"="120 min"]                
+        Selection label="Mode" item=XiaomiSpeakerMode icon="music" mappings=["REPEAT_ALL"="Repeat all", "REPEAT_ONE"="Repeat one", "REPEAT_SHUFFLE"="Repeat shuffle"]
+        Text item=XiaomiSpeakerStatus label="Status [%s]"
+        Text item=XiaomiSpeakerArtist label="Artist [%s]"
+        Text item=XiaomiSpeakerTitle label="Title [%s]"
+        Switch item=XiaomiSpeakerBT icon="bluetooth"
+    }
+```
+things:
+```
+Thing miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15 [ deviceUrl="http://192.168.2.216:9999/0b28241c-de33-6013-6dab-f1aad3d87e15-MR/" ]
+```
 
-_Provide a full usage example based on textual configuration files (*.things, *.items, *.sitemap)._
+## Note
 
-## Any custom content here!
-
-_Feel free to add additional sections for whatever you think should also be mentioned about your binding!_

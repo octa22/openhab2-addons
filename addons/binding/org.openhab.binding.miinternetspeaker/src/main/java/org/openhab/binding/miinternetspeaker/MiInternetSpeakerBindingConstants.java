@@ -24,6 +24,7 @@ public class MiInternetSpeakerBindingConstants {
     public static final ThingTypeUID THING_TYPE_SPEAKER = new ThingTypeUID(BINDING_ID, "speaker");
 
     // List of all Channel ids
+    public static final String CHANNEL_CONTROL = "control";
     public static final String CHANNEL_STATUS = "status";
     public static final String CHANNEL_BLUETOOTH = "bluetooth";
     public static final String CHANNEL_VOLUME = "volume";

@@ -10,9 +10,7 @@ package org.openhab.binding.miinternetspeaker.handler;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.PercentType;
-import org.eclipse.smarthome.core.library.types.StringType;
+import org.eclipse.smarthome.core.library.types.*;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
@@ -82,10 +80,17 @@ public class MiInternetSpeakerHandler extends BaseThingHandler {
         }
 
         switch (channelUID.getId()) {
-            case CHANNEL_VOLUME: {
+            case CHANNEL_CONTROL:
+                if( command instanceof PlayPauseType) {
+                    sendCommandToSpeaker(command.equals(PlayPauseType.PAUSE) ? "pause" : "play");
+                }
+                if( command instanceof NextPreviousType) {
+                    sendCommandToSpeaker(command.equals(NextPreviousType.NEXT) ? "next" : "prev");
+                }
+                break;
+            case CHANNEL_VOLUME:
                 setVolume(((PercentType) command).intValue());
                 break;
-            }
             case CHANNEL_BLUETOOTH:
                 if (command instanceof OnOffType) {
                     enableBluetooth(command.equals(OnOffType.ON));
