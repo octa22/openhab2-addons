@@ -1,7 +1,18 @@
+/**
+ * Copyright (c) 2010-2018 by the respective copyright holders.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.binding.miinternetspeaker.internal;
 
 /**
- * Created by Ondrej Pecta on 02.05.2017.
+ * The {@link MiInternetSpeakerDevice} represents the discovered Mi Speaker device
+ * thing.
+ *
+ * @author Ondrej Pecta - Initial contribution
  */
 public class MiInternetSpeakerDevice {
     private String friendlyName;

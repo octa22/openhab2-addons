@@ -3,10 +3,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: MiInternetSpeaker Binding
 Bundle-SymbolicName: org.openhab.binding.miinternetspeaker;singleton:=true
 Bundle-Vendor: openHAB
-Bundle-Version: 2.2.0.qualifier
+Bundle-Version: 2.3.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Import-Package: com.google.gson,
+ org.apache.commons.lang,
+ org.eclipse.jdt.annotation;resolution:=optional,
  org.openhab.binding.miinternetspeaker,
  org.openhab.binding.miinternetspeaker.handler,
  org.eclipse.smarthome.config.core,

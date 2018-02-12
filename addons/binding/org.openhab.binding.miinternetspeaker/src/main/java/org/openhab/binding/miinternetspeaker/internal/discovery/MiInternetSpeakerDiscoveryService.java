@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2010-2018 by the respective copyright holders.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.openhab.binding.miinternetspeaker.internal.discovery;
 
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
@@ -29,7 +37,10 @@ import static org.openhab.binding.miinternetspeaker.internal.Utils.isOKPacket;
 import static org.openhab.binding.miinternetspeaker.internal.Utils.readResponse;
 
 /**
- * Created by Ondrej Pecta on 17.07.2017.
+ * The {@link MiInternetSpeakerDiscoveryService} is responsible for discovering compatible
+ * things.
+ *
+ * @author Ondrej Pecta - Initial contribution
  */
 public class MiInternetSpeakerDiscoveryService extends AbstractDiscoveryService implements ExtendedDiscoveryService {
 
@@ -213,10 +224,8 @@ public class MiInternetSpeakerDiscoveryService extends AbstractDiscoveryService 
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, addr, MCAST_PORT);
             logger.debug("Sending discover packet");
             socket.send(sendPacket);
-        } catch (MalformedURLException e) {
-            logger.error("The URL is malformed: {}", e.toString());
         } catch (Exception e) {
-            logger.error("Cannot discover Xiaomi internet speaker devices: ", e.toString());
+            logger.error("Cannot discover Xiaomi internet speaker devices", e);
         }
     }
 }

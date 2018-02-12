@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2010-2017 by the respective copyright holders.
- * <p>
+ * Copyright (c) 2010-2018 by the respective copyright holders.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@ package org.openhab.binding.miinternetspeaker.handler;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.eclipse.smarthome.core.library.types.*;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
@@ -175,7 +176,7 @@ public class MiInternetSpeakerHandler extends BaseThingHandler {
             sb.append(variable);
             sb.append("</VariableName>");
             sb.append("<StringValue>");
-            sb.append(value);
+            sb.append(StringEscapeUtils.escapeHtml(value));
             sb.append("</StringValue>");
             sb.append("</u:SetString>");
             sb.append(SOAP_BODY_END);
@@ -244,7 +245,7 @@ public class MiInternetSpeakerHandler extends BaseThingHandler {
                 try {
                     Thread.sleep(delay);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.error("Exception during delay", e);
                 }
                 updatePlayingInfo();
             }
@@ -447,13 +448,13 @@ public class MiInternetSpeakerHandler extends BaseThingHandler {
     private String sendSoundToSpeaker(String sound) {
         switch (sound) {
             case "NORMAL":
-                return sendSetStringToSpeaker("eq_param", "{&quot;value&quot;:&quot;0,0,0,0,0&quot;,&quot;type&quot;:&quot;Normal&quot;,&quot;version&quot;:1}");
+                return sendSetStringToSpeaker("eq_param", "{\"value\":\"0,0,0,0,0\",\"type\":\"Normal\",\"version\":1}");
             case "VOICE":
-                return sendSetStringToSpeaker("eq_param", "{&quot;value&quot;:&quot;-4,-1,2,2,-3&quot;,&quot;type&quot;:&quot;Voice&quot;,&quot;version&quot;:1}");
+                return sendSetStringToSpeaker("eq_param", "{\"value\":\"-4,-1,2,2,-3\",\"type\":\"Voice\",\"version\":1}");
             case "BASS":
-                return sendSetStringToSpeaker("eq_param", "{&quot;value&quot;:&quot;3,2,0,0,0&quot;,&quot;type&quot;:&quot;Bass&quot;,&quot;version&quot;:1}");
+                return sendSetStringToSpeaker("eq_param", "{\"value\":\"3,2,0,0,0\",\"type\":\"Bass\",\"version\":1}");
             case "TREBLE":
-                return sendSetStringToSpeaker("eq_param", "{&quot;value&quot;:&quot;0,0,0,2,3&quot;,&quot;type&quot;:&quot;Treble&quot;,&quot;version&quot;:1}");
+                return sendSetStringToSpeaker("eq_param", "{\"value\":\"0,0,0,2,3\",\"type\":\"Treble\",\"version\":1}");
             default:
                 logger.error("Cannot set sound mode: {}", sound);
         }

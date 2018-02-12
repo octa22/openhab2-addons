@@ -4,6 +4,7 @@ This is the binding for the Xiaomi Mi Internet Speaker
 https://xiaomi-mi.com/portable-speakers/xiaomi-mi-internet-speaker-white/
 
 ## Supported Things
+
 Xiaomi Mi Internet Speaker
 
 ## Discovery
@@ -33,7 +34,9 @@ auto discovered.
 * status - display status of the speaker device (playing/pause/...)
 
 ## Example
+
 items file:
+
 ```
 Player XiaomiSpeakerControl "Xiaomi speaker control" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:control" } 
 String XiaomiSpeakerStatus "Xiaomi speaker status [%s]" { channel="miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15:status" }
@@ -48,6 +51,7 @@ Switch XiaomiSpeakerBT "Xiaomi speaker bluetooth" { channel="miinternetspeaker:s
 ```
 
 sitemap:
+
 ```
 Group item=FF_MiSpeaker {
         Default item=XiaomiSpeakerControl label="Control" icon="speaker"
@@ -65,7 +69,9 @@ Group item=FF_MiSpeaker {
         Switch item=XiaomiSpeakerBT icon="bluetooth"
     }
 ```
+
 things:
+
 ```
 Thing miinternetspeaker:speaker:0b28241c-de33-6013-6dab-f1aad3d87e15 [ deviceUrl="http://192.168.2.216:9999/0b28241c-de33-6013-6dab-f1aad3d87e15-MR/" ]
 ```
