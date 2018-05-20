@@ -9,7 +9,11 @@
 package org.openhab.binding.csas.handler;
 
 import com.google.gson.Gson;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.util.StringContentProvider;
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
 import org.eclipse.smarthome.core.cache.ExpiringCacheMap;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -28,14 +32,6 @@ import org.openhab.binding.csas.internal.model.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
@@ -55,6 +51,9 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     private final Logger logger = LoggerFactory.getLogger(CSASBridgeHandler.class);
 
     private CSASDiscoveryService discoveryService = null;
+
+    private SslContextFactory sslContextFactory = new SslContextFactory();
+    private HttpClient httpClient = new HttpClient(sslContextFactory);
 
     private String accessToken = "";
 
@@ -78,7 +77,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     private ExpiringCacheMap<String, CSASAccountBalanceResponse> accountBalance;
     private ExpiringCacheMap<String, ArrayList<CSASSimpleTransaction>> accountTransactions;
 
-    public CSASBridgeHandler(@NonNull Bridge thing) {
+    public CSASBridgeHandler(Bridge thing) {
         super(thing);
     }
 
@@ -95,9 +94,17 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     public void initialize() {
         thingConfig = getConfigAs(CSASConfig.class);
         accountBalance = new ExpiringCacheMap<>(CACHE_EXPIRY);
-        accountTransactions = new ExpiringCacheMap<String, ArrayList<CSASSimpleTransaction>>(CACHE_EXPIRY);
-        refreshToken();
+        accountTransactions = new ExpiringCacheMap<>(CACHE_EXPIRY);
 
+        httpClient.setFollowRedirects(false);
+        try {
+            httpClient.start();
+        } catch (Exception e) {
+            logger.error("Cannot start HttpClient!", e);
+            return;
+        }
+
+        refreshToken();
         initPolling(thingConfig.getRefresh());
 
         if (thing.getStatus().equals(ThingStatus.ONLINE)) {
@@ -110,6 +117,14 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     public void dispose() {
         super.dispose();
         stopPolling();
+        if (httpClient != null && httpClient.isStarted()) {
+            try {
+                httpClient.stop();
+            } catch (Exception e) {
+                //silence
+            }
+
+        }
         logger.info("CSAS binding disposed...");
     }
 
@@ -141,9 +156,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             }
             for (Channel channel : t.getChannels()) {
                 ChannelUID uid = channel.getUID();
-                if (uid != null) {
-                    handler.handleCommand(uid, RefreshType.REFRESH);
-                }
+                handler.handleCommand(uid, RefreshType.REFRESH);
             }
         }
     }
@@ -173,7 +186,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private void getLoyalty() {
-        String url = null;
+        String url;
 
         try {
             url = NETBANKING_V3 + "cz/my/contracts/loyalty";
@@ -185,8 +198,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             if (resp.getState().equals(REGISTERED)) {
                 discoveryService.loyaltyContractDiscovered();
             }
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed: ", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS loyalty points", e);
         }
@@ -204,7 +215,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private CSASAccountBalanceResponse invokeGetAccountBalance(String accountId) {
-        String url = null;
+        String url;
 
         try {
             url = NETBANKING_V3 + "my/accounts/" + accountId + "/balance";
@@ -213,8 +224,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             logger.debug("CSAS getBalance of account: {} returned: {}", accountId, line);
 
             return gson.fromJson(line, CSASAccountBalanceResponse.class);
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed: ", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS balance", e);
         }
@@ -276,7 +285,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private void getSecurities() {
-        String url = null;
+        String url;
 
         try {
             url = NETBANKING_V3 + "my/securities";
@@ -295,15 +304,13 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                     }
                 }
             }
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS securities", e);
         }
     }
 
     private void getPensions() {
-        String url = null;
+        String url;
 
         try {
             url = NETBANKING_V3 + "cz/my/contracts/pensions";
@@ -322,15 +329,13 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                     }
                 }
             }
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS pensions", e);
         }
     }
 
     private void getInsurances() {
-        String url = null;
+        String url;
 
         try {
             url = NETBANKING_V3 + "my/contracts/insurances";
@@ -350,8 +355,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                     }
                 }
             }
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS insurances", e);
         }
@@ -359,7 +362,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     private void getBuildingSavings() {
 
-        String url = null;
+        String url;
 
         try {
             url = NETBANKING_V3 + "my/contracts/buildings";
@@ -374,8 +377,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                     discoveryService.buildingSavingsAccountDiscovered(account);
                 }
             }
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS building savings", e);
         }
@@ -383,7 +384,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     private void getCards() {
 
-        String url = null;
+        String url;
 
         try {
             url = NETBANKING_V3 + "my/cards";
@@ -401,9 +402,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                     }
                 }
             }
-
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS cards", e);
         }
@@ -425,7 +423,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private void getAccounts() {
-        String url = null;
+        String url;
 
         try {
             url = NETBANKING_V3 + "my/accounts";
@@ -440,22 +438,14 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                     discoveryService.accountDiscovered(account);
                 }
             }
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS accounts", e);
         }
     }
 
     private String DoNetbankingRequest(String url) throws Exception {
-        URL cookieUrl = new URL(url);
-        HttpURLConnection connection = (HttpURLConnection) cookieUrl.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("WEB-API-key", thingConfig.getWebAPIKey());
-        connection.setRequestProperty("Authorization", "Bearer " + accessToken);
-
-        InputStream response = connection.getInputStream();
-        return readResponse(response);
+        ContentResponse response = httpClient.newRequest(url).header("WEB-API-key", thingConfig.getWebAPIKey()).header("Authorization", "Bearer " + accessToken).method(HttpMethod.GET).send();
+        return response.getContentAsString();
     }
 
     private void readAccount(String id, CSASAccountNumber account) {
@@ -470,50 +460,27 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private void refreshToken() {
-        String url = null;
+        String url;
 
         try {
             String urlParameters = "client_id=" + thingConfig.getClientId() + "&client_secret=" + thingConfig.getClientSecret() + "&redirect_uri=https://localhost/code&grant_type=refresh_token&refresh_token=" + thingConfig.getRefreshToken();
             url = "https://www.csas.cz/widp/oauth2/token";
 
-            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+            ContentResponse response = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .send();
+            String line = response.getContentAsString();
 
-            URL cookieUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) cookieUrl.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
-            try (DataOutputStream wr = new DataOutputStream(connection.getOutputStream())) {
-                wr.write(postData);
-            }
-
-            InputStream response = connection.getInputStream();
-            String line = readResponse(response);
             logger.debug("CSAS response: {}", line);
 
             CSASRefreshTokenResponse resp = gson.fromJson(line, CSASRefreshTokenResponse.class);
             accessToken = resp.getAccessToken();
             updateStatus(ThingStatus.ONLINE);
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed", url, e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
         } catch (Exception e) {
             logger.error("Cannot get CSAS token", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
         }
-    }
-
-    private String readResponse(InputStream response) throws Exception {
-        String line;
-        StringBuilder body = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(response));
-
-        while ((line = reader.readLine()) != null) {
-            body.append(line).append("\n");
-        }
-        line = body.toString();
-        logger.debug(line);
-        return line;
     }
 
     public void setDiscoveryService(CSASDiscoveryService csasDiscoveryService) {
@@ -546,7 +513,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     public void updateLoyaltyPoints(ChannelUID channelUID) {
-        String url = null;
+        String url;
 
         try {
             url = NETBANKING_V3 + "cz/my/contracts/loyalty";
@@ -559,8 +526,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
                 State state = new DecimalType(Integer.parseInt(resp.getPointsCount()));
                 updateState(channelUID, state);
             }
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed: ", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS loyalty points", e);
         }
@@ -622,7 +587,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     private ArrayList<CSASSimpleTransaction> invokeGetTransactions(String iban) {
 
-        String url = null;
+        String url;
         ArrayList<CSASSimpleTransaction> transactionsList = new ArrayList<>();
 
         SimpleDateFormat requestFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -643,9 +608,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
             logger.trace("Transactions: {}", transactionsList.toString());
             return transactionsList;
-
-        } catch (MalformedURLException e) {
-            logger.error("The URL '{}' is malformed: ", url, e);
         } catch (Exception e) {
             logger.error("Cannot get CSAS transactions: ", e);
         }
@@ -662,7 +624,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     private void updateTransaction(ChannelUID channelUID, String id, String iban, int position) {
         ArrayList<CSASSimpleTransaction> transactions = getCachedTransactions(id, iban);
-        if(transactions.size() > position) {
+        if (transactions.size() > position) {
             updateState(channelUID, new StringType(transactions.get(position).getBalance()));
         } else {
             updateState(channelUID, new StringType("-"));
