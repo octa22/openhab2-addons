@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="mintos"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Account Thing Type -->
+	<thing-type id="account">
+		<label>Mintos Binding Thing</label>
+		<description>Account thing for Mintos Binding</description>
+
+		<channels>
+			<channel id="account_balance" typeId="account_balance" />
+			<channel id="available_funds" typeId="available_funds" />
+            <channel id="invested_funds" typeId="invested_funds" />
+            <channel id="net_annual_return" typeId="net_annual_return" />
+			<channel id="interest" typeId="interest" />
+			<channel id="late_payment_fees" typeId="late_payment_fees" />
+			<channel id="bad_debt" typeId="bad_debt" />
+			<channel id="sec_market_transactions" typeId="sec_market_transactions" />
+			<channel id="campaign_rewards" typeId="campaign_rewards" />
+			<channel id="service_fees" typeId="service_fees" />
+			<channel id="total_profit" typeId="total_profit" />
+		</channels>
+
+		<config-description>
+			<parameter name="login" type="text" required="true">
+				<label>Mintos account login</label>
+				<description>The login (email) to a Mintos account.</description>
+			</parameter>
+            <parameter name="password" type="text" required="true">
+                <label>Mintos account password</label>
+                <description>The password to a Mintos account.</description>
+                <context>password</context>
+            </parameter>
+			<parameter name="currency" type="text" required="false">
+				<label>Mintos sub account currency</label>
+				<description>The sub account currency of a Mintos account.</description>
+			</parameter>
+			<parameter name="refreshInterval" type="integer" required="false">
+				<label>Refresh interval</label>
+				<description>The refresh interval of channels in minutes.</description>
+				<default>240</default>
+			</parameter>
+
+
+        </config-description>
+
+	</thing-type>
+
+	<!-- Total Balance Channel Type -->
+	<channel-type id="account_balance">
+		<item-type>Number</item-type>
+		<label>Total account balance</label>
+		<description>Total account balance in a specific currency</description>
+        <state readOnly="true"/>
+	</channel-type>
+
+	<!-- Available Funds Channel Type -->
+	<channel-type id="available_funds">
+		<item-type>Number</item-type>
+		<label>Available funds</label>
+		<description>Available account funds in a specific currency</description>
+        <state readOnly="true"/>
+	</channel-type>
+
+    <!-- Invested Funds Channel Type -->
+    <channel-type id="invested_funds">
+        <item-type>Number</item-type>
+        <label>Invested funds</label>
+        <description>Invested account funds in a specific currency</description>
+        <state readOnly="true"/>
+    </channel-type>
+
+    <!-- Net Annual Return Channel Type -->
+    <channel-type id="net_annual_return">
+        <item-type>Number</item-type>
+        <label>Net Annual Return</label>
+        <description>Net annual return of invested funds</description>
+        <state pattern="%f.2 %%" readOnly="true"/>
+    </channel-type>
+
+	<!-- Interest Channel Type -->
+	<channel-type id="interest">
+		<item-type>Number</item-type>
+		<label>Earned Interest</label>
+		<description>Earned interest in a specific currency</description>
+		<state pattern="%f.2 %%" readOnly="true"/>
+	</channel-type>
+
+	<!-- Late Payment Fees Channel Type -->
+	<channel-type id="late_payment_fees">
+		<item-type>Number</item-type>
+		<label>Late Payment Fees</label>
+		<description>Late payment fees obtained in a specific currency</description>
+		<state pattern="%f.2 %%" readOnly="true"/>
+	</channel-type>
+
+	<!-- Bad Debt Fees Channel Type -->
+	<channel-type id="bad_debt">
+		<item-type>Number</item-type>
+		<label>Bad Debt</label>
+		<description>Amount of bad depts in a specific currency</description>
+		<state pattern="%f.2 %%" readOnly="true"/>
+	</channel-type>
+
+	<!-- Secondary Market Transactions Channel Type -->
+	<channel-type id="sec_market_transactions">
+		<item-type>Number</item-type>
+		<label>Secondary Market Transactions</label>
+		<description>Secondary market transactions made in a specific currency</description>
+		<state pattern="%f.2 %%" readOnly="true"/>
+	</channel-type>
+
+	<!-- Campaign Rewards Channel Type -->
+	<channel-type id="campaign_rewards">
+		<item-type>Number</item-type>
+		<label>Campaign Rewards</label>
+		<description>Campaign rewards obtained in a specific currency</description>
+		<state pattern="%f.2 %%" readOnly="true"/>
+	</channel-type>
+
+	<!-- Service Fees Channel Type -->
+	<channel-type id="service_fees">
+		<item-type>Number</item-type>
+		<label>Service Fees</label>
+		<description>Service fees paid in a specific currency</description>
+		<state pattern="%f.2 %%" readOnly="true"/>
+	</channel-type>
+
+	<!-- Total Profit Channel Type -->
+	<channel-type id="total_profit">
+		<item-type>Number</item-type>
+		<label>Total Profit</label>
+		<description>Total profit earned in a specific currency</description>
+		<state pattern="%f.2 %%" readOnly="true"/>
+	</channel-type>
+</thing:thing-descriptions>
