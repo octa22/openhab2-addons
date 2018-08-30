@@ -8,9 +8,10 @@
  */
 package org.openhab.binding.csas.handler;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.slf4j.Logger;
@@ -38,29 +39,34 @@ public class CSASDisposableAccountHandler extends CSASBaseThingHandler {
         }
 
         CSASBridgeHandler handler = getBridgeHandler();
-        switch(channelUID.getId()) {
-            case CHANNEL_BALANCE_FULL:
-                handler.updateBalanceFull(channelUID, getThingId());
-                break;
-            case CHANNEL_BALANCE:
-                handler.updateBalance(channelUID, getThingId());
-                break;
-            case CHANNEL_DISPOSABLE_FULL:
-                handler.updateDisposableFull(channelUID, getThingId());
-                break;
-            case CHANNEL_DISPOSABLE:
-                handler.updateDisposable(channelUID, getThingId());
-                break;
-            case CHANNEL_CURRENCY:
-                handler.updateCurrency(channelUID, getThingId());
-                break;
-            default:
-                if(channelUID.getId().startsWith(TRAN)) {
-                    handler.updateTransaction(channelUID, getThingId(), getIBAN());
-                }
-                else {
-                    logger.error("Unknown channel: {}", channelUID.getId());
-                }
+
+        try {
+            switch (channelUID.getId()) {
+                case CHANNEL_BALANCE_FULL:
+                    handler.updateBalanceFull(channelUID, getThingId());
+                    break;
+                case CHANNEL_BALANCE:
+                    handler.updateBalance(channelUID, getThingId());
+                    break;
+                case CHANNEL_DISPOSABLE_FULL:
+                    handler.updateDisposableFull(channelUID, getThingId());
+                    break;
+                case CHANNEL_DISPOSABLE:
+                    handler.updateDisposable(channelUID, getThingId());
+                    break;
+                case CHANNEL_CURRENCY:
+                    handler.updateCurrency(channelUID, getThingId());
+                    break;
+                default:
+                    if (channelUID.getId().startsWith(TRAN)) {
+                        handler.updateTransaction(channelUID, getThingId(), getIBAN());
+                    } else {
+                        logger.error("Unknown channel: {}", channelUID.getId());
+                    }
+            }
+        } catch (NumberFormatException ex) {
+            logger.error("Account {} doesn't exist!", getIBAN(), ex);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Account doesn't exist");
         }
     }
 

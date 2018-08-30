@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2010-2017 by the respective copyright holders.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -266,6 +266,9 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private String readBalanceWithCurrency(CSASAmount balance) {
+        if (balance == null) {
+            throw new NumberFormatException("Null balance, most probably account doesn't exist");
+        }
         String value = balance.getValue();
         String currency = balance.getCurrency();
 
@@ -276,6 +279,9 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     private Double readBalanceAsDouble(CSASAmount balance) {
+        if (balance == null) {
+            throw new NumberFormatException("Null balance, most probably account doesn't exist");
+        }
         String value = balance.getValue();
 
         int precision = balance.getPrecision();
@@ -528,6 +534,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             }
         } catch (Exception e) {
             logger.error("Cannot get CSAS loyalty points", e);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot get loyalty points");
         }
     }
 
