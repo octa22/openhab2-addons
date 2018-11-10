@@ -534,19 +534,8 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             }
         } catch (Exception e) {
             logger.error("Cannot get CSAS loyalty points", e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot get loyalty points");
         }
     }
-
-    /*
-    private String getIbanFromAccountId(String accountId) {
-        if (ibanList.containsKey(accountId)) {
-            return ibanList.get(accountId);
-        }
-
-        logger.debug("Cannot get IBAN for account: {}", accountId);
-        return "";
-    }*/
 
     private CSASSimpleTransaction createTransaction(CSASTransaction csasTran) {
 
@@ -600,7 +589,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
         SimpleDateFormat requestFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         try {
-            //url = NETBANKING_V3 + "cz/my/accounts/" + getIbanFromAccountId(accountId) + "/transactions?dateStart=" + requestFormat.format(addDays(new Date(), -HISTORY_INTERVAL)) + "T00:00:00+01:00&dateEnd=" + requestFormat.format(new Date()) + "T00:00:00+01:00";
             url = NETBANKING_V3 + "cz/my/accounts/" + iban + "/transactions?dateStart=" + requestFormat.format(addDays(new Date(), -HISTORY_INTERVAL)) + "T00:00:00+01:00&dateEnd=" + requestFormat.format(new Date()) + "T00:00:00+01:00";
 
             String line = DoNetbankingRequest(url);
@@ -639,12 +627,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     }
 
     public void updateTransaction(ChannelUID channelUID, String id, String iban) {
-        /*
-        if (getIbanFromAccountId(id).isEmpty()) {
-            logger.info("IBAN list not ready yet");
-            return;
-        }*/
-
         String tran = channelUID.getId().replace(TRAN, "");
         if (tryParseInt(tran)) {
             int position = Integer.parseInt(tran);

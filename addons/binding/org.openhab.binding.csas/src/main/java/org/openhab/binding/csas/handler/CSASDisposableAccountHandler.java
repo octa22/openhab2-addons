@@ -64,6 +64,9 @@ public class CSASDisposableAccountHandler extends CSASBaseThingHandler {
                         logger.error("Unknown channel: {}", channelUID.getId());
                     }
             }
+            if (ThingStatus.ONLINE != thing.getStatus()) {
+                updateStatus(ThingStatus.ONLINE);
+            }
         } catch (NumberFormatException ex) {
             logger.error("Account {} doesn't exist!", getIBAN(), ex);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Account doesn't exist");
