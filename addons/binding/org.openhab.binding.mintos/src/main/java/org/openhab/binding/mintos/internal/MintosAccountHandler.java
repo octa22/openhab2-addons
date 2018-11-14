@@ -29,6 +29,8 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
+import org.openhab.binding.mintos.internal.config.MintosAccountConfiguration;
+import org.openhab.binding.mintos.internal.config.MintosBridgeConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,18 +42,19 @@ import java.util.concurrent.TimeoutException;
 import static org.openhab.binding.mintos.internal.MintosBindingConstants.*;
 
 /**
- * The {@link MintosHandler} is responsible for handling commands, which are
+ * The {@link MintosAccountHandler} is responsible for handling commands, which are
  * sent to one of the channels.
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class MintosHandler extends BaseThingHandler {
+public class MintosAccountHandler extends BaseThingHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(MintosHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(MintosAccountHandler.class);
 
     @Nullable
-    private MintosConfiguration config;
+    private MintosAccountConfiguration config;
+    private MintosBridgeConfiguration bridgeConfig;
 
     private ExpiringCache<MintosAccountOverview> accountOverview;
 
@@ -66,7 +69,7 @@ public class MintosHandler extends BaseThingHandler {
     @Nullable
     ScheduledFuture<?> future;
 
-    public MintosHandler(Thing thing) {
+    public MintosAccountHandler(Thing thing) {
         super(thing);
     }
 
@@ -79,13 +82,18 @@ public class MintosHandler extends BaseThingHandler {
 
     @Override
     public void initialize() {
-        config = getConfigAs(MintosConfiguration.class);
+        config = getConfigAs(MintosAccountConfiguration.class);
 
-        if (config != null && !config.login.isEmpty() && !config.password.isEmpty() ) {
-            accountOverview = new ExpiringCache<>(10000, this::getOverview);
-            startPolling();
-        } else {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
+        if(getBridge() != null) {
+            MintosBridgeHandler handler = (MintosBridgeHandler) getBridge().getHandler();
+            bridgeConfig = handler.getBridgeConfiguration();
+
+            if (config != null && !bridgeConfig.getLogin().isEmpty() && !bridgeConfig.getPassword().isEmpty()) {
+                accountOverview = new ExpiringCache<>(10000, this::getOverview);
+                startPolling();
+            } else {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
+            }
         }
     }
 
@@ -220,7 +228,7 @@ public class MintosHandler extends BaseThingHandler {
             return new MintosAccountOverview();
         }
 
-        StringContentProvider content = new StringContentProvider("_csrf_token=" + csrf + "&_username=" + config.login + "&_password=" + config.password);
+        StringContentProvider content = new StringContentProvider("_csrf_token=" + csrf + "&_username=" + bridgeConfig.getLogin() + "&_password=" + bridgeConfig.getPassword());
         try {
             response = httpClient.newRequest("https://www.mintos.com/en/login/check")
                     .method(HttpMethod.POST)

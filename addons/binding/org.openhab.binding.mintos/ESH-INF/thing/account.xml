@@ -6,6 +6,9 @@
 
 	<!-- Account Thing Type -->
 	<thing-type id="account">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
 		<label>Mintos Binding Thing</label>
 		<description>Account thing for Mintos Binding</description>
 
@@ -24,27 +27,16 @@
 		</channels>
 
 		<config-description>
-			<parameter name="login" type="text" required="true">
-				<label>Mintos account login</label>
-				<description>The login (email) to a Mintos account.</description>
-			</parameter>
-            <parameter name="password" type="text" required="true">
-                <label>Mintos account password</label>
-                <description>The password to a Mintos account.</description>
-                <context>password</context>
-            </parameter>
 			<parameter name="currency" type="text" required="false">
-				<label>Mintos sub account currency</label>
-				<description>The sub account currency of a Mintos account.</description>
+							<label>Mintos sub account currency</label>
+							<description>The sub account currency of a Mintos account.</description>
 			</parameter>
 			<parameter name="refreshInterval" type="integer" required="false">
-				<label>Refresh interval</label>
-				<description>The refresh interval of channels in minutes.</description>
-				<default>240</default>
+						<label>Refresh interval</label>
+						<description>The refresh interval of channels in minutes.</description>
+						<default>240</default>
 			</parameter>
-
-
-        </config-description>
+		</config-description>
 
 	</thing-type>
 

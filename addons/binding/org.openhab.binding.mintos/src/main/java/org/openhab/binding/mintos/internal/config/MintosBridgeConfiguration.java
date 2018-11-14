@@ -10,17 +10,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.mintos.internal;
+package org.openhab.binding.mintos.internal.config;
 
 /**
- * The {@link MintosConfiguration} class contains fields mapping thing configuration parameters.
+ * The {@link MintosBridgeConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Ondrej Pecta - Initial contribution
  */
-public class MintosConfiguration {
+public class MintosBridgeConfiguration {
 
-    public String login;
-    public String password;
-    public String currency;
-    public long refreshInterval;
+    private String login;
+    private String password;
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }

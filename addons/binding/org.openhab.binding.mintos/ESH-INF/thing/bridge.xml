@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="mintos"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Bridge Type -->
+	<bridge-type id="bridge">
+		<label>Mintos Binding Bridge</label>
+		<description>Mintos bridge enabling communication with Mintos bindings</description>
+
+		<config-description>
+					<parameter name="login" type="text" required="true">
+						<label>Mintos account login</label>
+						<description>The login (email) to a Mintos account.</description>
+					</parameter>
+		            <parameter name="password" type="text" required="true">
+		                <label>Mintos account password</label>
+		                <description>The password to a Mintos account.</description>
+		                <context>password</context>
+		            </parameter>
+		</config-description>
+	</bridge-type>
+
+</thing:thing-descriptions>
