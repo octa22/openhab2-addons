@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.mintos.internal;
+package org.openhab.binding.mintos.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -21,22 +21,19 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
 import org.eclipse.smarthome.core.cache.ExpiringCache;
-import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.*;
-import org.eclipse.smarthome.core.thing.binding.BaseBridgeHandler;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
 import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
+import org.openhab.binding.mintos.internal.MintosAccountOverview;
 import org.openhab.binding.mintos.internal.config.MintosBridgeConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.mintos.internal.MintosBindingConstants.*;
@@ -62,6 +59,7 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
     private HttpClient httpClient;
 
     private String csrf = "";
+    private String logoutURL = "";
 
     public MintosBridgeHandler(Bridge thing) {
         super(thing);
@@ -93,6 +91,28 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
         } else {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
         }
+        logout();
+    }
+
+    private void logout() {
+        try {
+            if (!logoutURL.isEmpty()) {
+                httpClient.newRequest(logoutURL).method(HttpMethod.GET)
+                        .header("referer", "https://www.mintos.com/en/overview")
+                        .header(":authority", "www.mintos.com")
+                        .header(":method", "POST")
+                        .header(":path", logoutURL.replace("https://www.mintos.com", ""))
+                        .header(":scheme", "https")
+                        .agent(AGENT)
+                        .send();
+            }
+            if (httpClient.isRunning()) {
+                httpClient.stop();
+            }
+            logoutURL = "";
+        } catch (Exception e) {
+            logger.error("Error during logout", e);
+        }
     }
 
     @Override
@@ -111,7 +131,7 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
         return config;
     }
 
-    private void getOverview() {
+    private synchronized String getOverview() {
         ContentResponse response;
 
         try {
@@ -128,7 +148,7 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("Cannot send GET command to mintos.com!", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot open www.mintos.com");
-            return;
+            return null;
         }
 
         StringContentProvider content = new StringContentProvider("_csrf_token=" + csrf + "&_username=" + config.getLogin() + "&_password=" + config.getPassword());
@@ -147,22 +167,58 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("Cannot login to mintos.com!", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to www.mintos.com");
-            return;
+            return null;
         }
 
         if (response.getStatus() == 200) {
             logger.debug("Got login response with length: {}", response.getContentAsString().length());
             updateStatus(ThingStatus.ONLINE);
+            String txt = response.getContentAsString();
+            logoutURL = getLogoutUrl(txt);
+            return txt;
         } else {
             logger.error("Got response code: {} and message: {}", response.getStatus(), response.getContentAsString());
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Got response code: " + response.getStatus());
         }
-        return;
+        return null;
+    }
+
+    public List<String> getAccounts() {
+        try {
+            httpClient = new HttpClient(sslContext);
+            httpClient.start();
+        } catch (Exception e) {
+            logger.error("Cannot start http client!", e);
+            return new ArrayList<>();
+        }
+        String response = getOverview();
+        logout();
+        return parseAccounts(response);
+    }
+
+    private List<String> parseAccounts(String page) {
+        final String SPAN = "<span title=\"";
+        List<String> accounts = new ArrayList<>();
+        int pos = page.indexOf(SPAN);
+        while( pos >= 0 ) {
+            page = page.substring(pos + SPAN.length());
+            String currency = page.substring(0,3);
+            logger.debug("Found currency: {}", currency);
+            accounts.add(currency);
+            pos = page.indexOf(SPAN);
+        }
+        return accounts;
     }
 
     private String getCsrfToken(String content) {
         final String field = "_csrf_token";
         int pos = content.indexOf(field);
         return content.substring(pos + field.length() + 9, pos + field.length() + 9 + 43);
+    }
+
+    private String getLogoutUrl(String text) {
+        int pos = text.indexOf(LOGOUT_URL);
+        int posEnd = text.indexOf("\" class=\"logout main-nav-logout");
+        return text.substring(pos + 9, posEnd);
     }
 }

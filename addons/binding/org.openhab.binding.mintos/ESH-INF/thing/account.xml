@@ -9,7 +9,7 @@
 		<supported-bridge-type-refs>
 			<bridge-type-ref id="bridge"/>
 		</supported-bridge-type-refs>
-		<label>Mintos Binding Thing</label>
+		<label>Mintos Binding Account Thing</label>
 		<description>Account thing for Mintos Binding</description>
 
 		<channels>
@@ -27,10 +27,6 @@
 		</channels>
 
 		<config-description>
-			<parameter name="currency" type="text" required="false">
-							<label>Mintos sub account currency</label>
-							<description>The sub account currency of a Mintos account.</description>
-			</parameter>
 			<parameter name="refreshInterval" type="integer" required="false">
 						<label>Refresh interval</label>
 						<description>The refresh interval of channels in minutes.</description>

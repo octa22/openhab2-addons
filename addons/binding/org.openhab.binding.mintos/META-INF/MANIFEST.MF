@@ -19,6 +19,7 @@ Import-Package:
  org.eclipse.jetty.util.ssl,
  org.eclipse.smarthome.config.core,
  org.eclipse.smarthome.config.core.status,
+ org.eclipse.smarthome.config.discovery,
  org.eclipse.smarthome.core.cache,
  org.eclipse.smarthome.core.library.types,
  org.eclipse.smarthome.core.thing,
@@ -27,5 +28,6 @@ Import-Package:
  org.eclipse.smarthome.core.thing.type,
  org.eclipse.smarthome.core.types,
  org.eclipse.smarthome.core.util,
+ org.osgi.framework,
  org.slf4j
 Service-Component: OSGI-INF/*.xml

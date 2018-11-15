@@ -19,6 +19,9 @@ package org.openhab.binding.mintos.internal.config;
  */
 public class MintosAccountConfiguration {
 
-    public String currency;
-    public long refreshInterval;
+    private long refreshInterval;
+
+    public long getRefreshInterval() {
+        return refreshInterval;
+    }
 }

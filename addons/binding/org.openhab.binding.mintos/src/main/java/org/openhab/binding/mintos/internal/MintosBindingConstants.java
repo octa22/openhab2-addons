@@ -48,9 +48,9 @@ public class MintosBindingConstants {
     public static final String LOGOUT_URL = "<a href=\"https://www.mintos.com/en/logout?";
 
     //indexes
-    final static String TOOLTIP_INDEX = "</i></td><td>";
-    final static String OVERVIEW_INDEX = "<div class=\"value\">";
-    final static String OVERVIEW_TAB_INDEX = "</td><td>";
-    final static String END_INDEX = "</td>";
-    final static String END_DIV_INDEX = "</div>";
+    public static final String TOOLTIP_INDEX = "</i></td><td>";
+    public static final String OVERVIEW_INDEX = "<div class=\"value\">";
+    public static final String OVERVIEW_TAB_INDEX = "</td><td>";
+    public static final String END_INDEX = "</td>";
+    public static final String END_DIV_INDEX = "</div>";
 }

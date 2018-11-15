@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.mintos.internal;
+package org.openhab.binding.mintos.internal.handler;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -29,6 +29,8 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
+import org.openhab.binding.mintos.internal.MintosAccountOverview;
+import org.openhab.binding.mintos.internal.MintosCurrencies;
 import org.openhab.binding.mintos.internal.config.MintosAccountConfiguration;
 import org.openhab.binding.mintos.internal.config.MintosBridgeConfiguration;
 import org.slf4j.Logger;
@@ -106,7 +108,7 @@ public class MintosAccountHandler extends BaseThingHandler {
     }
 
     private void startPolling() {
-        future = scheduler.scheduleWithFixedDelay(this::updateState, 0, config.refreshInterval, TimeUnit.MINUTES);
+        future = scheduler.scheduleWithFixedDelay(this::updateState, 0, config.getRefreshInterval(), TimeUnit.MINUTES);
     }
 
     private void updateState() {
@@ -203,7 +205,7 @@ public class MintosAccountHandler extends BaseThingHandler {
             }
             logoutURL = "";
         } catch (Exception e) {
-            logger.error("Erorr during logout", e);
+            logger.error("Error during logout", e);
         }
     }
 
@@ -257,8 +259,8 @@ public class MintosAccountHandler extends BaseThingHandler {
             int pos = txt.indexOf("bindTabs('");
             while( pos > 0) {
                 String currency = MintosCurrencies.getAbbreviation(txt.substring(pos + 10, pos + 10 + 3));
-                logger.info("Found currency: {}", currency);
-                if (config.currency == null || config.currency.isEmpty() || config.currency.equals(currency.toUpperCase())) {
+                logger.info("Account currency: {}", currency);
+                if (thing.getUID().getId().equals(currency.toUpperCase())) {
                     int posEnd = txt.indexOf("Recent News");
                     String subs = txt.substring(pos, posEnd);
 
@@ -269,7 +271,7 @@ public class MintosAccountHandler extends BaseThingHandler {
                 txt = txt.substring(pos + 8);
                 pos = txt.indexOf("bindTabs('");
             }
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot find currency " + config.currency);
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot find currency " + thing.getUID().getId());
         } else {
             logger.error("Got response code: {} and message: {}", response.getStatus(), response.getContentAsString());
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Got response code: " + response.getStatus());
