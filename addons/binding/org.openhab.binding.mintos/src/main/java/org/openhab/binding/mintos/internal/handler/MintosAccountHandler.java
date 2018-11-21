@@ -318,7 +318,7 @@ public class MintosAccountHandler extends BaseThingHandler {
         String subs = content.substring(pos);
         pos = subs.indexOf(OVERVIEW_INDEX);
         int posEnd = subs.indexOf(END_DIV_INDEX);
-        String value = subs.substring(pos + OVERVIEW_INDEX.length(), posEnd).replaceAll("[^\\d.]", "");
+        String value = subs.substring(pos + OVERVIEW_INDEX.length(), posEnd).replaceAll("[^\\d.-]", "");
         logger.info(item + ": {}", value);
 
         return Double.parseDouble(value);
@@ -330,7 +330,7 @@ public class MintosAccountHandler extends BaseThingHandler {
         pos = subs.indexOf(TOOLTIP_INDEX);
         subs = subs.substring(pos + TOOLTIP_INDEX.length());
         int posEnd = subs.indexOf(END_INDEX);
-        String value = subs.substring(0, posEnd).replaceAll("[^\\d.]", "");
+        String value = subs.substring(0, posEnd).replaceAll("[^\\d.-]", "");
         logger.info(item + ": {}", value);
 
         return Double.parseDouble(value);
@@ -339,8 +339,8 @@ public class MintosAccountHandler extends BaseThingHandler {
     private Double getOverviewItemTab(String item, String content) {
         int pos = content.indexOf(item + OVERVIEW_TAB_INDEX);
         String subs = content.substring(pos + item.length() + OVERVIEW_TAB_INDEX.length());
-        int posEnd = subs.indexOf(END_INDEX);
-        String value = subs.substring(0, posEnd).replaceAll("[^\\d.]", "");
+        int posEnd = subs.indexOf("<");
+        String value = subs.substring(0, posEnd).replaceAll("[^\\d.-]", "");
         logger.info(item + ": {}", value);
 
         return Double.parseDouble(value);
