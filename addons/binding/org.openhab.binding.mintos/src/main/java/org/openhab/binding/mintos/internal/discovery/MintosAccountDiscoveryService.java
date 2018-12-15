@@ -106,7 +106,7 @@ public class MintosAccountDiscoveryService extends AbstractDiscoveryService impl
 
         if (bridge.getThing().getStatus().equals(ThingStatus.ONLINE)) {
             List<String> accounts = bridge.getAccounts();
-            for(String currency : accounts) {
+            for (String currency : accounts) {
                 accountDiscovered(currency);
             }
         }

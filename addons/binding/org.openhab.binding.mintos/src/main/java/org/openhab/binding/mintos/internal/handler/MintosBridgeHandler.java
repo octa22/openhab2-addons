@@ -21,7 +21,10 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
 import org.eclipse.smarthome.core.cache.ExpiringCache;
-import org.eclipse.smarthome.core.thing.*;
+import org.eclipse.smarthome.core.thing.Bridge;
+import org.eclipse.smarthome.core.thing.ChannelUID;
+import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.mintos.internal.MintosAccountOverview;
@@ -36,7 +39,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static org.openhab.binding.mintos.internal.MintosBindingConstants.*;
+import static org.openhab.binding.mintos.internal.MintosBindingConstants.AGENT;
+import static org.openhab.binding.mintos.internal.MintosBindingConstants.LOGOUT_URL;
 
 /**
  * The {@link MintosBridgeHandler} is responsible for handling commands, which are
@@ -86,7 +90,7 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
             return;
         }
 
-        if (config != null && !config.getLogin().isEmpty() && !config.getPassword().isEmpty() ) {
+        if (config != null && !config.getLogin().isEmpty() && !config.getPassword().isEmpty()) {
             getOverview();
         } else {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR);
@@ -118,7 +122,7 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
     @Override
     public void dispose() {
         super.dispose();
-        if(httpClient != null && httpClient.isRunning()) {
+        if (httpClient != null && httpClient.isRunning()) {
             try {
                 httpClient.stop();
             } catch (Exception e) {
@@ -127,7 +131,7 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
         }
     }
 
-    public MintosBridgeConfiguration getBridgeConfiguration(){
+    public MintosBridgeConfiguration getBridgeConfiguration() {
         return config;
     }
 
@@ -193,16 +197,16 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
         }
         String response = getOverview();
         logout();
-        return parseAccounts(response);
+        return response != null ? parseAccounts(response) : new ArrayList<>();
     }
 
     private List<String> parseAccounts(String page) {
         final String SPAN = "<span title=\"";
         List<String> accounts = new ArrayList<>();
         int pos = page.indexOf(SPAN);
-        while( pos >= 0 ) {
+        while (pos >= 0) {
             page = page.substring(pos + SPAN.length());
-            String currency = page.substring(0,3);
+            String currency = page.substring(0, 3);
             logger.debug("Found currency: {}", currency);
             accounts.add(currency);
             pos = page.indexOf(SPAN);
