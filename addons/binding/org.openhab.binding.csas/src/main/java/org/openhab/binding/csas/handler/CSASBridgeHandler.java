@@ -211,7 +211,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
         logger.debug("Getting cached balance for account id: {}", accountId);
         CSASAccountBalanceResponse resp = accountBalance.get(accountId);
-        return balanceType.equals(CSASItemType.BALANCE) ? resp.getBalance() : resp.getDisposable();
+        return resp != null ? balanceType.equals(CSASItemType.BALANCE) ? resp.getBalance() : resp.getDisposable() : new CSASAmount();
     }
 
     private CSASAccountBalanceResponse invokeGetAccountBalance(String accountId) {
@@ -611,7 +611,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
 
     private synchronized ArrayList<CSASSimpleTransaction> getCachedTransactions(String accountId, String iban) {
         if (accountTransactions.get(accountId) == null) {
-            logger.info("Putting getTransactions method into cached map...");
+            logger.debug("Putting getTransactions method into cached map...");
             accountTransactions.put(accountId, () -> invokeGetTransactions(iban));
         }
         return accountTransactions.get(accountId);

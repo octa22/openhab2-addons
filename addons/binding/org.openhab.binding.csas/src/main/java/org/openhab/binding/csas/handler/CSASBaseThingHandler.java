@@ -9,6 +9,7 @@
 package org.openhab.binding.csas.handler;
 
 import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 
 /**
@@ -21,8 +22,13 @@ public abstract class CSASBaseThingHandler extends BaseThingHandler {
         super(thing);
     }
 
+    @Override
+    public void initialize() {
+        updateStatus(ThingStatus.ONLINE);
+    }
+
     protected CSASBridgeHandler getBridgeHandler() {
-        return (CSASBridgeHandler) this.getBridge().getHandler();
+        return this.getBridge() != null ? (CSASBridgeHandler) this.getBridge().getHandler() : null;
     }
 
     protected String getThingId() { return thing.getUID().getId(); }

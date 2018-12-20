@@ -10,6 +10,7 @@ package org.openhab.binding.csas.handler;
 
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
+import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.slf4j.Logger;
@@ -35,6 +36,9 @@ public class CSASLoyaltyContractHandler extends CSASBaseThingHandler {
         if (isLinked(channelUID.getId()) && command.equals(RefreshType.REFRESH) && channelUID.getId().equals(CHANNEL_POINTS)) {
             CSASBridgeHandler handler = getBridgeHandler();
             handler.updateLoyaltyPoints(channelUID);
+            if (ThingStatus.ONLINE != thing.getStatus()) {
+                updateStatus(ThingStatus.ONLINE);
+            }
         }
     }
 }
