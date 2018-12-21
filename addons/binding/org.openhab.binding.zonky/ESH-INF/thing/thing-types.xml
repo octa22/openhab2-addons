@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="zonky"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Account Thing Type -->
+	<thing-type id="account">
+		<label>Zonky Account</label>
+		<description>Account provided by Zonky binding</description>
+
+		<channel-groups>
+			<channel-group id="wallet" typeId="wallet" />
+			<channel-group id="weeklyStats" typeId="weeklyStats" />
+			<channel-group id="statistics" typeId="statistics" />
+			<channel-group id="currentOverview" typeId="currentOverview" />
+			<channel-group id="overallOverview" typeId="overallOverview" />
+		</channel-groups>
+
+		<config-description>
+			<parameter name="username" type="text" required="true">
+				<label>User name</label>
+				<description>Your Zonky account user name (email).</description>
+			</parameter>
+			<parameter name="password" type="text" required="true">
+				<context>password</context>
+				<label>Password</label>
+				<description>Your Zonky account password.</description>
+			</parameter>
+			<parameter name="refresh" type="integer">
+				<label>Refresh interval</label>
+				<description>Data refresh interval in milliseconds.</description>
+				<default>60000</default>
+			</parameter>
+		</config-description>
+
+	</thing-type>
+
+	<channel-group-type id="wallet">
+		<label>Wallet</label>
+		<channels>
+			<channel id="balance" typeId="balance" />
+			<channel id="availableBalance" typeId="availableBalance" />
+			<channel id="blockedBalance" typeId="blockedBalance" />
+			<channel id="creditSum" typeId="creditSum" />
+			<channel id="debitSum" typeId="debitSum" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="weeklyStats">
+		<label>Weekly statistics</label>
+		<channels>
+			<channel id="newInvestments" typeId="newInvestments" />
+			<channel id="newInvestmentsAmount" typeId="newInvestmentsAmount" />
+			<channel id="paidInstalments" typeId="paidInstalments" />
+			<channel id="paidInstalmentsAmount" typeId="paidInstalmentsAmount" />
+			<channel id="soldInvestments" typeId="soldInvestments" />
+			<channel id="soldInvestmentsAmount" typeId="soldInvestmentsAmount" />
+			<channel id="boughtInvestments" typeId="boughtInvestments" />
+			<channel id="boughtInvestmentsAmount" typeId="boughtInvestmentsAmount" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="statistics">
+		<label>Statistics</label>
+		<channels>
+			<channel id="currentProfitability" typeId="currentProfitability" />
+			<channel id="expectedProfitability" typeId="expectedProfitability" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="currentOverview">
+		<label>Current overview</label>
+		<channels>
+			<channel id="interestLeft" typeId="interestLeftCO" />
+			<channel id="interestLeftDue" typeId="interestLeftDueCO" />
+			<channel id="interestLeftToPay" typeId="interestLeftToPayCO" />
+			<channel id="interestPaid" typeId="interestPaidCO" />
+			<channel id="penaltyPaid" typeId="penaltyPaidCO" />
+			<channel id="interestPlanned" typeId="interestPlannedCO" />
+			<channel id="investmentCount" typeId="investmentCountCO" />
+			<channel id="principalLeft" typeId="principalLeftCO" />
+			<channel id="principalLeftDue" typeId="principalLeftDueCO" />
+			<channel id="principalLeftToPay" typeId="principalLeftToPayCO" />
+			<channel id="principalPaid" typeId="principalPaidCO" />
+			<channel id="totalInvestment" typeId="totalInvestmentCO" />
+		</channels>
+	</channel-group-type>
+
+	<channel-group-type id="overallOverview">
+		<label>Overall overview</label>
+		<channels>
+			<channel id="feesAmount" typeId="feesAmountOO" />
+			<channel id="feesDiscount" typeId="feesDiscountOO" />
+			<channel id="interestPaid" typeId="interestPaidOO" />
+			<channel id="investmentCount" typeId="investmentCountOO" />
+			<channel id="netIncome" typeId="netIncomeOO" />
+			<channel id="principalLost" typeId="principalLostOO" />
+			<channel id="principalPaid" typeId="principalPaidOO" />
+			<channel id="penaltyPaid" typeId="penaltyPaidOO" />
+			<channel id="totalInvestment" typeId="totalInvestmentOO" />
+		</channels>
+	</channel-group-type>
+
+
+	<!-- Balance Channel Type -->
+	<channel-type id="balance">
+		<item-type>Number</item-type>
+		<label>Balance Channel</label>
+		<description>Channel for Zonky balance</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Available Balance Channel Type -->
+	<channel-type id="availableBalance">
+		<item-type>Number</item-type>
+		<label>Available Balance Channel</label>
+		<description>Channel for Zonky available balance</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Blocked Balance Channel Type -->
+	<channel-type id="blockedBalance">
+		<item-type>Number</item-type>
+		<label>Blocked Balance Channel</label>
+		<description>Channel for Zonky blocked balance</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Credit Sum Channel Type -->
+	<channel-type id="creditSum">
+		<item-type>Number</item-type>
+		<label>Credit Sum Channel</label>
+		<description>Channel for Zonky credit sum</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Debit Sum Channel Type -->
+	<channel-type id="debitSum">
+		<item-type>Number</item-type>
+		<label>Debit Sum Channel</label>
+		<description>Channel for Zonky debit sum</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- New Investments Channel Type -->
+	<channel-type id="newInvestments">
+		<item-type>Number</item-type>
+		<label>New Investments Channel</label>
+		<description>Channel for Zonky new investments in the last week</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- New Investments Amount Channel Type -->
+	<channel-type id="newInvestmentsAmount">
+		<item-type>Number</item-type>
+		<label>New Investments Amount Channel</label>
+		<description>Channel for Zonky new investments amount in the last week</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Paid Instalments Channel Type -->
+	<channel-type id="paidInstalments">
+		<item-type>Number</item-type>
+		<label>Paid Instalments Channel</label>
+		<description>Channel for Zonky paid instalments in the last week</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Paid Instalments Amount Channel Type -->
+	<channel-type id="paidInstalmentsAmount">
+		<item-type>Number</item-type>
+		<label>Paid Instalments Amount Channel</label>
+		<description>Channel for Zonky paid instalments amount in the last week</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Sold Investments Channel Type -->
+	<channel-type id="soldInvestments">
+		<item-type>Number</item-type>
+		<label>Sold Investments Channel</label>
+		<description>Channel for Zonky sold investments in the last week</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Sold Investments Amount Channel Type -->
+	<channel-type id="soldInvestmentsAmount">
+		<item-type>Number</item-type>
+		<label>Sold Investments Amount Channel</label>
+		<description>Channel for Zonky sold investments amount in the last week</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Bought Investments Channel Type -->
+	<channel-type id="boughtInvestments">
+		<item-type>Number</item-type>
+		<label>Bought Investments Channel</label>
+		<description>Channel for Zonky bought investments in the last week</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Bought Investments Amount Channel Type -->
+	<channel-type id="boughtInvestmentsAmount">
+		<item-type>Number</item-type>
+		<label>Bought Investments Amount Channel</label>
+		<description>Channel for Zonky bought investments amount in the last week</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Current Profitability Amount Channel Type -->
+	<channel-type id="currentProfitability">
+		<item-type>Number</item-type>
+		<label>Current Profitability Channel</label>
+		<description>Channel for Zonky current profitability</description>
+		<state pattern="%.2f %%" readOnly="true" />
+	</channel-type>
+
+	<!-- Expected Profitability Amount Channel Type -->
+	<channel-type id="expectedProfitability">
+		<item-type>Number</item-type>
+		<label>Expected Profitability Channel</label>
+		<description>Channel for Zonky expected profitability</description>
+		<state pattern="%.2f %%" readOnly="true" />
+	</channel-type>
+
+	<!-- Interest Left Channel Type -->
+	<channel-type id="interestLeftCO">
+		<item-type>Number</item-type>
+		<label>Interest Left Channel</label>
+		<description>Channel for Zonky interest left from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Interest Left Due Channel Type -->
+	<channel-type id="interestLeftDueCO">
+		<item-type>Number</item-type>
+		<label>Interest Left Due Channel</label>
+		<description>Channel for Zonky interest left due from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Interest Left To Pay Channel Type -->
+	<channel-type id="interestLeftToPayCO">
+		<item-type>Number</item-type>
+		<label>Interest Left To Pay Channel</label>
+		<description>Channel for Zonky interest left to pay from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Interest Paid Channel Type -->
+	<channel-type id="interestPaidCO">
+		<item-type>Number</item-type>
+		<label>Interest Paid Channel</label>
+		<description>Channel for Zonky interest paid from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Penalty Paid Channel Type -->
+	<channel-type id="penaltyPaidCO">
+		<item-type>Number</item-type>
+		<label>Penalty Paid Channel</label>
+		<description>Channel for Zonky penalty paid from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Interest Planned Channel Type -->
+	<channel-type id="interestPlannedCO">
+		<item-type>Number</item-type>
+		<label>Interest Planned Channel</label>
+		<description>Channel for Zonky interest planned from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Investment Count Channel Type -->
+	<channel-type id="investmentCountCO">
+		<item-type>Number</item-type>
+		<label>Investment Count Channel</label>
+		<description>Channel for Zonky investment count from current overview</description>
+		<state pattern="%d" readOnly="true" />
+	</channel-type>
+
+	<!-- Principal Left Channel Type -->
+	<channel-type id="principalLeftCO">
+		<item-type>Number</item-type>
+		<label>Principal Left Channel</label>
+		<description>Channel for Zonky principal left from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Principal Left Due Channel Type -->
+	<channel-type id="principalLeftDueCO">
+		<item-type>Number</item-type>
+		<label>Principal Left Due Channel</label>
+		<description>Channel for Zonky principal left due from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Principal Left To Pay Channel Type -->
+	<channel-type id="principalLeftToPayCO">
+		<item-type>Number</item-type>
+		<label>Principal Left To Pay Channel</label>
+		<description>Channel for Zonky principal left to pay from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Principal Paid Channel Type -->
+	<channel-type id="principalPaidCO">
+		<item-type>Number</item-type>
+		<label>Principal Paid Channel</label>
+		<description>Channel for Zonky principal paid from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Total Investment Channel Type -->
+	<channel-type id="totalInvestmentCO">
+		<item-type>Number</item-type>
+		<label>Total Investment Channel</label>
+		<description>Channel for Zonky total investment from current overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Fees Amount Channel Type -->
+	<channel-type id="feesAmountOO">
+		<item-type>Number</item-type>
+		<label>Fees Amount Channel</label>
+		<description>Channel for Zonky fees amount from overall overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Fees Discount Channel Type -->
+	<channel-type id="feesDiscountOO">
+		<item-type>Number</item-type>
+		<label>Fees Amount Channel</label>
+		<description>Channel for Zonky fees discount from overall overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Interest Paid Channel Type -->
+	<channel-type id="interestPaidOO">
+		<item-type>Number</item-type>
+		<label>Interest Paid Channel</label>
+		<description>Channel for Zonky interest paid from overall overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Penalty Paid Channel Type -->
+	<channel-type id="penaltyPaidOO">
+		<item-type>Number</item-type>
+		<label>Penalty Paid Channel</label>
+		<description>Channel for Zonky penalty paid from overall overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+	
+	<!-- Investment Count Channel Type -->
+	<channel-type id="investmentCountOO">
+		<item-type>Number</item-type>
+		<label>Investment Count Channel</label>
+		<description>Channel for Zonky investment count from overall overview</description>
+		<state pattern="%d" readOnly="true" />
+	</channel-type>
+	
+	<!-- Net Income Channel Type -->
+	<channel-type id="netIncomeOO">
+		<item-type>Number</item-type>
+		<label>Net Income Channel</label>
+		<description>Channel for Zonky net income from overall overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+	
+	<!-- Principal Lost Channel Type -->
+	<channel-type id="principalLostOO">
+		<item-type>Number</item-type>
+		<label>Principal Lost Channel</label>
+		<description>Channel for Zonky principal lost from overall overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+	
+	<!-- Principal Paid Channel Type -->
+	<channel-type id="principalPaidOO">
+		<item-type>Number</item-type>
+		<label>Principal Paid Channel</label>
+		<description>Channel for Zonky principal paid from overall overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+
+	<!-- Total Investment Channel Type -->
+	<channel-type id="totalInvestmentOO">
+		<item-type>Number</item-type>
+		<label>Total Investment Channel</label>
+		<description>Channel for Zonky total investment from overall overview</description>
+		<state pattern="%.2f Kč" readOnly="true" />
+	</channel-type>
+	
+</thing:thing-descriptions>
