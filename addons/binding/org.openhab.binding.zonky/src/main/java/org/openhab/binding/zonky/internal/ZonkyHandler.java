@@ -57,7 +57,8 @@ public class ZonkyHandler extends BaseThingHandler {
     private String refreshToken;
 
     // Future
-    private ScheduledFuture<?> future;
+    @Nullable
+    private ScheduledFuture<?> future = null;
 
     // Gson & parser
     private final Gson gson = new Gson();
@@ -108,6 +109,10 @@ public class ZonkyHandler extends BaseThingHandler {
 
     private boolean login() {
         String url;
+
+        if (config == null) {
+            return false;
+        }
 
         try {
             //login
@@ -216,22 +221,31 @@ public class ZonkyHandler extends BaseThingHandler {
         if (token.isEmpty())
             return;
 
-        String wallet = getWallet();
-        String statistics = getStatistics();
-        String weekly = getWeeklyStatistics();
-        if (wallet == null || statistics == null || weekly == null) {
-            return;
+        try {
+            @Nullable
+            String wallet = getWallet();
+
+            @Nullable
+            String statistics = getStatistics();
+
+            @Nullable
+            String weekly = getWeeklyStatistics();
+            if (wallet == null || statistics == null || weekly == null) {
+                return;
+            }
+
+            logger.trace("Wallet: {}", wallet);
+            logger.trace("Statistis: {}", statistics);
+            logger.trace("Weekly: {}", weekly);
+
+            ZonkyWalletResponse walletResponse = gson.fromJson(wallet, ZonkyWalletResponse.class);
+            ZonkyStatResponse statResponse = gson.fromJson(statistics, ZonkyStatResponse.class);
+            ZonkyWeeklyStatResponse weeklyResponse = gson.fromJson(weekly, ZonkyWeeklyStatResponse.class);
+
+            updateChannelStates(walletResponse, statResponse, weeklyResponse);
+        } catch (Exception ex) {
+            logger.error("Got exception furing refresh", ex);
         }
-
-        logger.trace("Wallet: {}", wallet);
-        logger.trace("Statistis: {}", statistics);
-        logger.trace("Weekly: {}", weekly);
-
-        ZonkyWalletResponse walletResponse = gson.fromJson(wallet, ZonkyWalletResponse.class);
-        ZonkyStatResponse statResponse = gson.fromJson(statistics, ZonkyStatResponse.class);
-        ZonkyWeeklyStatResponse weeklyResponse = gson.fromJson(weekly, ZonkyWeeklyStatResponse.class);
-
-        updateChannelStates(walletResponse, statResponse, weeklyResponse);
     }
 
     private void updateChannelStates(ZonkyWalletResponse walletResponse, ZonkyStatResponse statResponse, ZonkyWeeklyStatResponse weeklyResponse) {
@@ -246,8 +260,8 @@ public class ZonkyHandler extends BaseThingHandler {
                 Number value = getWeeklyStatValue(weeklyResponse, name);
                 newValue = new DecimalType(value.doubleValue());
             } else if (isStatisticsType(name)) {
-                double value = name.replace(STATISTICS, "").equals(CURRENT_PROFITABILITY) ? statResponse.getCurrentProfitability().doubleValue() : statResponse.getExpectedProfitability().doubleValue();
-                newValue = new DecimalType(value * 100);
+                Number value = name.replace(STATISTICS, "").equals(CURRENT_PROFITABILITY) ? statResponse.getCurrentProfitability() : statResponse.getExpectedProfitability();
+                newValue = new DecimalType(value.doubleValue() * 100);
             } else if (isCurrentOverviewType(name)) {
                 ZonkyCurrentOverview currentOverview = statResponse.getCurrentOverview();
                 Number value = getStatCurrentOverviewValue(currentOverview, name);
@@ -260,22 +274,28 @@ public class ZonkyHandler extends BaseThingHandler {
                 logger.debug("Unknown channel found: {}", name);
             }
 
-            updateState(c.getUID(), newValue);
+            if (newValue != null) {
+                updateState(c.getUID(), newValue);
+            }
         }
     }
 
+    @Nullable
     private String getWallet() {
         return sendJsonRequest("users/me/wallet");
     }
 
+    @Nullable
     private String getStatistics() {
         return sendJsonRequest("statistics/overview");
     }
 
+    @Nullable
     private String getWeeklyStatistics() {
         return sendJsonRequest("statistics/weekly-statistics");
     }
 
+    @Nullable
     private String sendJsonRequest(String uri) {
         String url;
 
