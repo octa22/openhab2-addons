@@ -53,7 +53,7 @@ public class ZonkyHandler extends BaseThingHandler {
 
     @Nullable
     private ZonkyConfiguration config;
-    private String token;
+    private String token = null;
     private String refreshToken;
 
     // Future
@@ -102,9 +102,7 @@ public class ZonkyHandler extends BaseThingHandler {
             return;
         }
 
-        if (login()) {
-            future = scheduler.scheduleWithFixedDelay(this::refresh, 0, config.refresh, TimeUnit.MILLISECONDS);
-        }
+        future = scheduler.scheduleWithFixedDelay(this::refresh, 0, config.refresh, TimeUnit.MILLISECONDS);
     }
 
     private boolean login() {
@@ -182,7 +180,7 @@ public class ZonkyHandler extends BaseThingHandler {
 
     @Override
     public void dispose() {
-        if (!token.isEmpty()) {
+        if (token != null && !token.isEmpty()) {
             logout();
         }
         if (future != null && !future.isCancelled()) {
@@ -209,7 +207,7 @@ public class ZonkyHandler extends BaseThingHandler {
 
     private void refresh() {
         //first call
-        if (token.isEmpty()) {
+        if (token == null || token.isEmpty()) {
             login();
         } else {
             if (!refreshToken()) {
@@ -218,7 +216,7 @@ public class ZonkyHandler extends BaseThingHandler {
             }
         }
 
-        if (token.isEmpty())
+        if (token == null || token.isEmpty())
             return;
 
         try {
