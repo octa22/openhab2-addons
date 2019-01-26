@@ -28,8 +28,6 @@ The bridge thing requires this configuration:
 
 The oasis thing require this configuration (it is better to have it autodiscovered):
 
-* serviceId (Jablotron internal service id of your alarm)
-* url (an initialization url for the alarm)
 * refresh (thing status refresh period in seconds)
 
 ## Channels
