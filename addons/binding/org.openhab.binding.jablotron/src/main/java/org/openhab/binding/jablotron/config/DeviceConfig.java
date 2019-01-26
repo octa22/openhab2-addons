@@ -15,17 +15,7 @@ package org.openhab.binding.jablotron.config;
  * @author Ondrej Pecta - Initial contribution
  */
 public class DeviceConfig {
-    private String serviceId;
-    private String url;
     private int refresh;
-
-    public String getServiceId() {
-        return serviceId;
-    }
-
-    public String getUrl() {
-        return url;
-    }
 
     public int getRefresh() {
         return refresh;

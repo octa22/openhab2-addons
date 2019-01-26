@@ -101,10 +101,33 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
     protected abstract boolean updateAlarmStatus();
 
-    protected abstract void logout(boolean setOffline);
-
     protected void logout() {
         logout(true);
+    }
+
+    protected synchronized void logout(boolean setOffline) {
+        String url = JABLOTRON_URL + "logout";
+        try {
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.GET)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, getServiceUrl())
+                    .agent(AGENT)
+                    .timeout(5, TimeUnit.SECONDS)
+                    .send();
+            String line = resp.getContentAsString();
+
+            logger.debug("logout... {}", line);
+        } catch (Exception e) {
+            //Silence
+        } finally {
+            //controlDisabled = true;
+            inService = false;
+            if (setOffline) {
+                updateStatus(ThingStatus.OFFLINE);
+            }
+        }
     }
 
     protected void relogin() {
@@ -149,7 +172,6 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
         try {
             //login
-
             JablotronBridgeHandler bridge = this.getBridge() != null ? (JablotronBridgeHandler) this.getBridge().getHandler() : null;
             if (bridge == null) {
                 logger.error("Bridge handler is null!");
@@ -186,6 +208,10 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         }
     }
 
+    protected String getServiceUrl() {
+        return JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "?service=" + thing.getUID().getId();
+    }
+
     protected void doInit() {
         login();
         initializeService();
@@ -196,8 +222,8 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     }
 
     protected synchronized void initializeService() {
-        String url = thingConfig.getUrl();
-        String serviceId = thingConfig.getServiceId();
+        String url = getServiceUrl();
+        String serviceId = thing.getUID().getId();
         try {
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.GET)

@@ -61,7 +61,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
             if (section != null) {
                 scheduler.execute(() -> {
-                    controlSection(section, command.equals(OnOffType.ON) ? "1" : "0", thingConfig.getUrl());
+                    controlSection(section, command.equals(OnOffType.ON) ? "1" : "0", getServiceUrl());
                 });
             }
         }
@@ -70,7 +70,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             String section = getSectionFromChannel(channelUID.getId());
             if (section != null) {
                 scheduler.execute(() -> {
-                    sendCommand(section, command.toString(), thingConfig.getUrl());
+                    sendCommand(section, command.toString(), getServiceUrl());
                 });
             }
         }
@@ -166,7 +166,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                     .method(HttpMethod.GET)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId())
+                    .header(HttpHeader.REFERER, JABLOTRON_URL + JA100_SERVICE_URL + thing.getUID().getId())
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .timeout(TIMEOUT, TimeUnit.SECONDS)
@@ -462,34 +462,8 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         return null;
     }
 
-    protected synchronized void logout(boolean setOffline) {
-
-        String url = JABLOTRON_URL + "logout";
-        try {
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.GET)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL + JA100_SERVICE_URL + thingConfig.getServiceId())
-                    .agent(AGENT)
-                    .timeout(5, TimeUnit.SECONDS)
-                    .send();
-            String line = resp.getContentAsString();
-
-            logger.debug("logout... {}", line);
-        } catch (Exception e) {
-            //Silence
-        } finally {
-            //controlDisabled = true;
-            inService = false;
-            if (setOffline) {
-                updateStatus(ThingStatus.OFFLINE);
-            }
-        }
-    }
-
     private ArrayList<Ja100Event> getServiceHistory() {
-        String serviceId = thingConfig.getServiceId();
+        String serviceId = thing.getUID().getId();
         try {
             String url = "https://www.jablonet.net/app/ja100/ajax/historie.php";
             String urlParameters = "from=this_month&to=&gps=0&log=0&header=0";

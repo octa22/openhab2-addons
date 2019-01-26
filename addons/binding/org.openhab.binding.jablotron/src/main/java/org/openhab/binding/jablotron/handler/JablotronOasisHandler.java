@@ -67,19 +67,19 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
     public void handleCommand(ChannelUID channelUID, Command command) {
         if (channelUID.getId().equals(CHANNEL_COMMAND) && command instanceof StringType) {
             scheduler.execute(() -> {
-                sendCommand(command.toString(), thingConfig.getUrl());
+                sendCommand(command.toString(), getServiceUrl());
             });
         }
 
         if (channelUID.getId().equals(CHANNEL_STATUS_PGX) && command instanceof OnOffType) {
             scheduler.execute(() -> {
-                controlSection("PGX", command.equals(OnOffType.ON) ? "1" : "0", thingConfig.getUrl());
+                controlSection("PGX", command.equals(OnOffType.ON) ? "1" : "0", getServiceUrl());
             });
         }
 
         if (channelUID.getId().equals(CHANNEL_STATUS_PGY) && command instanceof OnOffType) {
             scheduler.execute(() -> {
-                controlSection("PGY", command.equals(OnOffType.ON) ? "1" : "0", thingConfig.getUrl());
+                controlSection("PGY", command.equals(OnOffType.ON) ? "1" : "0", getServiceUrl());
             });
         }
     }
@@ -154,7 +154,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                     .method(HttpMethod.GET)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId())
+                    .header(HttpHeader.REFERER, JABLOTRON_URL + OASIS_SERVICE_URL + thing.getUID().getId())
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .timeout(TIMEOUT, TimeUnit.SECONDS)
@@ -402,34 +402,8 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         return sendUserCode("ovladani.php", "STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 
-    protected synchronized void logout(boolean setOffline) {
-
-        String url = JABLOTRON_URL + "logout";
-        try {
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.GET)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL + OASIS_SERVICE_URL + thingConfig.getServiceId())
-                    .agent(AGENT)
-                    .timeout(5, TimeUnit.SECONDS)
-                    .send();
-            String line = resp.getContentAsString();
-
-            logger.debug("logout... {}", line);
-        } catch (Exception e) {
-            //Silence
-        } finally {
-            controlDisabled = true;
-            inService = false;
-            if (setOffline) {
-                updateStatus(ThingStatus.OFFLINE);
-            }
-        }
-    }
-
     private ArrayList<OasisEvent> getServiceHistory() {
-        String serviceId = thingConfig.getServiceId();
+        String serviceId = thing.getUID().getId();
         try {
             String url = "https://www.jablonet.net/app/oasis/ajax/historie.php";
             String urlParameters = "from=this_month&to=&gps=0&log=0&header=0";
