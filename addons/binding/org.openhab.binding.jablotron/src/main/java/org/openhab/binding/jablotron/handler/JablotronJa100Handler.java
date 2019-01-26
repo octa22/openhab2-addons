@@ -462,7 +462,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         return null;
     }
 
-    protected void logout(boolean setOffline) {
+    protected synchronized void logout(boolean setOffline) {
 
         String url = JABLOTRON_URL + "logout";
         try {
