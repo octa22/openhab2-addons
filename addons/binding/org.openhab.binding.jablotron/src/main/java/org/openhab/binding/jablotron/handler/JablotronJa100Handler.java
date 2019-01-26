@@ -54,43 +54,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         super(thing);
     }
 
-    private int stav_1 = 0;
-    private int stav_2 = 0;
-    private int stav_3 = 0;
-    private int stav_4 = 0;
-    private int stav_5 = 0;
-    private int stav_6 = 0;
-    private int stav_7 = 0;
-    private int stav_8 = 0;
-    private int stav_9 = 0;
-    private int stav_10 = 0;
-    private int stav_11 = 0;
-    private int stav_12 = 0;
-    private int stav_13 = 0;
-    private int stav_14 = 0;
-    private int stav_15 = 0;
-
-    private int stavPGM_1 = 0;
-    private int stavPGM_2 = 0;
-    private int stavPGM_3 = 0;
-    private int stavPGM_4 = 0;
-    private int stavPGM_5 = 0;
-    private int stavPGM_6 = 0;
-    private int stavPGM_7 = 0;
-    private int stavPGM_8 = 0;
-    private int stavPGM_9 = 0;
-    private int stavPGM_10 = 0;
-    private int stavPGM_11 = 0;
-    private int stavPGM_12 = 0;
-    private int stavPGM_13 = 0;
-    private int stavPGM_14 = 0;
-    private int stavPGM_15 = 0;
-    private int stavPGM_16 = 0;
-    private int stavPGM_17 = 0;
-    private int stavPGM_18 = 0;
-    private int stavPGM_19 = 0;
-    private int stavPGM_20 = 0;
-
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         if (!isAlarmSection(channelUID.getId()) && command instanceof OnOffType) {
