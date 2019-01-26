@@ -40,7 +40,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.mintos.internal.MintosBindingConstants.AGENT;
-import static org.openhab.binding.mintos.internal.MintosBindingConstants.LOGOUT_URL;
 
 /**
  * The {@link MintosBridgeHandler} is responsible for handling commands, which are
@@ -139,15 +138,16 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
         ContentResponse response;
 
         try {
-            response = httpClient.newRequest("https://www.mintos.com/en")
+            response = httpClient.newRequest("https://www.mintos.com/en/login")
                     .method(HttpMethod.GET)
                     .header(":authority", "www.mintos.com")
                     .header(":method", "GET")
                     .header(":path", "/en/")
                     .header(":scheme", "https")
+                    .header("referer", "https://www.mintos.com/en/")
                     .agent(AGENT)
                     .send();
-            csrf = getCsrfToken(response.getContentAsString());
+            csrf = MintosUtils.getCsrfToken(response.getContentAsString());
             logger.debug("Got CSRF token: {}", csrf);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("Cannot send GET command to mintos.com!", e);
@@ -178,7 +178,7 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
             logger.debug("Got login response with length: {}", response.getContentAsString().length());
             updateStatus(ThingStatus.ONLINE);
             String txt = response.getContentAsString();
-            logoutURL = getLogoutUrl(txt);
+            logoutURL = MintosUtils.getLogoutUrl(txt);
             return txt;
         } else {
             logger.error("Got response code: {} and message: {}", response.getStatus(), response.getContentAsString());
@@ -212,17 +212,5 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
             pos = page.indexOf(SPAN);
         }
         return accounts;
-    }
-
-    private String getCsrfToken(String content) {
-        final String field = "_csrf_token";
-        int pos = content.indexOf(field);
-        return content.substring(pos + field.length() + 9, pos + field.length() + 9 + 43);
-    }
-
-    private String getLogoutUrl(String text) {
-        int pos = text.indexOf(LOGOUT_URL);
-        int posEnd = text.indexOf("\" class=\"logout main-nav-logout");
-        return text.substring(pos + 9, posEnd);
     }
 }

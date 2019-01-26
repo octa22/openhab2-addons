@@ -214,15 +214,16 @@ public class MintosAccountHandler extends BaseThingHandler {
         ContentResponse response;
 
         try {
-            response = httpClient.newRequest("https://www.mintos.com/en")
+            response = httpClient.newRequest("https://www.mintos.com/en/login")
                     .method(HttpMethod.GET)
                     .header(":authority", "www.mintos.com")
                     .header(":method", "GET")
                     .header(":path", "/en/")
                     .header(":scheme", "https")
+                    .header("referer", "https://www.mintos.com/en/")
                     .agent(AGENT)
                     .send();
-            csrf = getCsrfToken(response.getContentAsString());
+            csrf = MintosUtils.getCsrfToken(response.getContentAsString());
             logger.debug("Got CSRF token: {}", csrf);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("Cannot send GET command to mintos.com!", e);
@@ -253,7 +254,7 @@ public class MintosAccountHandler extends BaseThingHandler {
             logger.debug("Got login response with length: {}", response.getContentAsString().length());
             String txt = response.getContentAsString();
 
-            logoutURL = getLogoutUrl(txt);
+            logoutURL = MintosUtils.getLogoutUrl(txt);
             logger.debug("logout url: {}", logoutURL);
 
             int pos = txt.indexOf("bindTabs('");
@@ -307,12 +308,6 @@ public class MintosAccountHandler extends BaseThingHandler {
         return overview;
     }
 
-    private String getLogoutUrl(String text) {
-        int pos = text.indexOf(LOGOUT_URL);
-        int posEnd = text.indexOf("\" class=\"logout main-nav-logout");
-        return text.substring(pos + 9, posEnd);
-    }
-
     private Double getOverviewItem(String item, String content) {
         int pos = content.indexOf(item);
         String subs = content.substring(pos);
@@ -344,11 +339,5 @@ public class MintosAccountHandler extends BaseThingHandler {
         logger.info(item + ": {}", value);
 
         return Double.parseDouble(value);
-    }
-
-    private String getCsrfToken(String content) {
-        final String field = "_csrf_token";
-        int pos = content.indexOf(field);
-        return content.substring(pos + field.length() + 9, pos + field.length() + 9 + 43);
     }
 }
