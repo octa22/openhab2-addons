@@ -122,7 +122,9 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                     newState = (stavPGY == 1) ? OnOffType.ON : OnOffType.OFF;
                     break;
                 case CHANNEL_ALARM:
-                    newState = (response.isAlarm()) ? OpenClosedType.OPEN : OpenClosedType.CLOSED;
+                    if(response.isAlarm()) {
+                        triggerChannel(CHANNEL_ALARM);
+                    }
                     break;
                 case CHANNEL_LAST_EVENT_TIME:
                     Date lastEvent = response.getLastEventTime();

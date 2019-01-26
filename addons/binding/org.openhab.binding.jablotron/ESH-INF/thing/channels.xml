@@ -58,7 +58,7 @@
 
 	<!-- Alarm -->
 	<channel-type id="alarm">
-		<item-type>Switch</item-type>
+		<kind>trigger</kind>
 		<label>Alarm Channel</label>
 		<description>Status of the alarm of your alarm</description>
 		<state readOnly="true"/>
