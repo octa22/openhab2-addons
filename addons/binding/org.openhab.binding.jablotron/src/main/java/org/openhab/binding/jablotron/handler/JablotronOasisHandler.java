@@ -402,7 +402,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         return sendUserCode("ovladani.php", "STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 
-    protected void logout(boolean setOffline) {
+    protected synchronized void logout(boolean setOffline) {
 
         String url = JABLOTRON_URL + "logout";
         try {

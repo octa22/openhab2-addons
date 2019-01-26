@@ -195,7 +195,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         }, 1, thingConfig.getRefresh(), TimeUnit.SECONDS);
     }
 
-    protected void initializeService() {
+    protected synchronized void initializeService() {
         String url = thingConfig.getUrl();
         String serviceId = thingConfig.getServiceId();
         try {
