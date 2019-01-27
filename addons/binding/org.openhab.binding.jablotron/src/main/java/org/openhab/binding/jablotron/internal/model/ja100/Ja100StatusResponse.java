@@ -36,25 +36,17 @@ public class Ja100StatusResponse {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronBridgeHandler.class);
 
-    //@SerializedName("last_entry")
-    //OasisLastEntry lastEntry;
     int status;
     JsonElement sekce;
     JsonElement pgm;
     Integer isAlarm;
 
-    @SerializedName("trouble")
-    ArrayList<JablotronTrouble> troubles;
+    //@SerializedName("trouble")
+    //ArrayList<JablotronTrouble> troubles;
     //JsonElement alarm;
     //boolean controlDisabled;
     //int service;
     JsonElement teplomery;
-
-    /*
-    public OasisLastEntry getLast_entry() {
-        return lastEntry;
-    }
-    */
 
     public int getStatus() {
         return status;
@@ -103,19 +95,15 @@ public class Ja100StatusResponse {
     }
 
     public boolean hasTemperature() {
-        return teplomery != null && !teplomery.equals(JsonNull.INSTANCE);
-    }
-
-    public boolean hasTroubles() {
-        return troubles != null && !troubles.equals(JsonNull.INSTANCE);
+        return teplomery != null && !teplomery.isJsonNull() && !teplomery.isJsonArray();
     }
 
     public boolean hasSectionStatus() {
-        return sekce != null && !sekce.equals(JsonNull.INSTANCE);
+        return sekce != null && !sekce.isJsonNull();
     }
 
     public boolean hasPGMStatus() {
-        return pgm != null && !pgm.equals(JsonNull.INSTANCE);
+        return pgm != null && !pgm.isJsonNull();
     }
 
     /*
@@ -247,9 +235,5 @@ public class Ja100StatusResponse {
 
         logger.error("Cannot parse pgm response: {}", pgm.getAsString());
         return 0;
-    }
-
-    public ArrayList<JablotronTrouble> getTroubles() {
-        return troubles;
     }
 }
