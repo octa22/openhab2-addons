@@ -14,6 +14,10 @@
 
 		<channels>
 			<channel id="lastCheckTime" typeId="lastCheckTime"/>
+			<channel id="lastEvent" typeId="lastEvent"/>
+			<channel id="lastEventSection" typeId="lastEventSection"/>
+			<channel id="lastEventClass" typeId="lastEventClass"/>
+			<channel id="lastEventTime" typeId="lastEventTime"/>
 		</channels>
 		<config-description-ref uri="thing-type:jablotron:device"/>
 	</thing-type>

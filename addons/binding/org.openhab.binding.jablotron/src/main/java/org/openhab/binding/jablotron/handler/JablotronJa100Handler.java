@@ -57,100 +57,18 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         if (!isAlarmSection(channelUID.getId()) && command instanceof OnOffType) {
-            String section = getSectionFromChannel(channelUID.getId());
+            String section = channelUID.getId();
 
-            if (section != null) {
-                scheduler.execute(() -> {
-                    controlSection(section, command.equals(OnOffType.ON) ? "1" : "0", getServiceUrl());
-                });
-            }
+            scheduler.execute(() -> {
+                controlSection(section, command.equals(OnOffType.ON) ? "1" : "0", getServiceUrl());
+            });
         }
 
         if (isAlarmSection(channelUID.getId()) && command instanceof StringType) {
-            String section = getSectionFromChannel(channelUID.getId());
-            if (section != null) {
-                scheduler.execute(() -> {
-                    sendCommand(section, command.toString(), getServiceUrl());
-                });
-            }
-        }
-    }
-
-    private String getSectionFromChannel(String channel) {
-        switch (channel) {
-            /*
-            case CHANNEL_STATUS_1:
-                return "STATE_1";
-            case CHANNEL_STATUS_2:
-                return "STATE_2";
-            case CHANNEL_STATUS_3:
-                return "STATE_3";
-            case CHANNEL_STATUS_4:
-                return "STATE_4";
-            case CHANNEL_STATUS_5:
-                return "STATE_5";
-            case CHANNEL_STATUS_6:
-                return "STATE_6";
-            case CHANNEL_STATUS_7:
-                return "STATE_7";
-            case CHANNEL_STATUS_8:
-                return "STATE_8";
-            case CHANNEL_STATUS_9:
-                return "STATE_9";
-            case CHANNEL_STATUS_10:
-                return "STATE_10";
-            case CHANNEL_STATUS_11:
-                return "STATE_11";
-            case CHANNEL_STATUS_12:
-                return "STATE_12";
-            case CHANNEL_STATUS_13:
-                return "STATE_13";
-            case CHANNEL_STATUS_14:
-                return "STATE_14";
-            case CHANNEL_STATUS_15:
-                return "STATE_15";
-            case CHANNEL_STATUS_PGM_1:
-                return "PGM_1";
-            case CHANNEL_STATUS_PGM_2:
-                return "PGM_2";
-            case CHANNEL_STATUS_PGM_3:
-                return "PGM_3";
-            case CHANNEL_STATUS_PGM_4:
-                return "PGM_4";
-            case CHANNEL_STATUS_PGM_5:
-                return "PGM_5";
-            case CHANNEL_STATUS_PGM_6:
-                return "PGM_6";
-            case CHANNEL_STATUS_PGM_7:
-                return "PGM_7";
-            case CHANNEL_STATUS_PGM_8:
-                return "PGM_8";
-            case CHANNEL_STATUS_PGM_9:
-                return "PGM_9";
-            case CHANNEL_STATUS_PGM_10:
-                return "PGM_10";
-            case CHANNEL_STATUS_PGM_11:
-                return "PGM_11";
-            case CHANNEL_STATUS_PGM_12:
-                return "PGM_12";
-            case CHANNEL_STATUS_PGM_13:
-                return "PGM_13";
-            case CHANNEL_STATUS_PGM_14:
-                return "PGM_14";
-            case CHANNEL_STATUS_PGM_15:
-                return "PGM_15";
-            case CHANNEL_STATUS_PGM_16:
-                return "PGM_16";
-            case CHANNEL_STATUS_PGM_17:
-                return "PGM_17";
-            case CHANNEL_STATUS_PGM_18:
-                return "PGM_18";
-            case CHANNEL_STATUS_PGM_19:
-                return "PGM_19";
-            case CHANNEL_STATUS_PGM_20:
-                return "PGM_20";*/
-            default:
-                return null;
+            String section = channelUID.getId();
+            scheduler.execute(() -> {
+                sendCommand(section, command.toString(), getServiceUrl());
+            });
         }
     }
 
@@ -217,6 +135,21 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 logout();
                 return false;
             }
+
+            ArrayList<Ja100Event> history = getServiceHistory();
+            if (history != null) {
+                logger.info("History log contains {} events", history.size());
+                if (history.size() > 0) {
+                    Ja100Event event = history.get(0);
+                    updateLastEvent(event);
+                    logger.info("Last event: {} is of class: {} has section: {}", event.getEvent(), event.getEventClass(), event.getSection());
+                }
+            }
+
+            if (response.isAlarm()) {
+                logger.info("It seems that alarm has been triggered!!!");
+            }
+
             /*
             if (response.hasEvents()) {
                 ArrayList<OasisEvent> events = response.getEvents();
@@ -246,10 +179,10 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 return false;
             }
 
-            if(response.hasSectionStatus()) {
+            if (response.hasSectionStatus()) {
                 processSections(response);
             }
-            if(response.hasPGMStatus()) {
+            if (response.hasPGMStatus()) {
                 processPGMs(response);
             }
 
@@ -268,6 +201,10 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
     private void processTemperatures(Ja100StatusResponse response) {
         ArrayList<Ja100Temperature> temps = response.getTemperatures();
+        if (temps == null) {
+            return;
+        }
+
         for (Ja100Temperature temp : temps) {
             logger.debug("Found a temperature sensor: {} with value: {}", temp.getStateName(), temp.getValue());
             Channel channel = getThing().getChannel(temp.getStateName());
@@ -332,11 +269,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     }
 
     private void createTemperatureChannel(Ja100Temperature temp) {
-        /*
-        ThingBuilder thingBuilder = editThing();
-        Channel channel = ChannelBuilder.create(new ChannelUID(thing.getUID(), temp.getStateName()), "Number").withLabel(temp.getStateName()).build();
-        thingBuilder.withChannel(channel);
-        updateThing(thingBuilder.build());*/
         createChannel(temp.getStateName(), "Number", temp.getStateName());
     }
 
@@ -348,9 +280,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     }
 
     private void updateLastEvent(Ja100Event event) {
-        //ZonedDateTime time = ZonedDateTime.parse("2018-03-15T18:07:32+01:00", DateTimeFormatter.ISO_DATE_TIME);
-        //ZonedDateTime time = ZonedDateTime.parse(event.getDate(), DateTimeFormatter.ISO_DATE_TIME);
-        //DateTimeType typ = new DateTimeType(time);
         updateState(CHANNEL_LAST_EVENT_TIME, new DateTimeType(event.getZonedDateTime()));
         updateState(CHANNEL_LAST_EVENT_SECTION, new StringType(event.getSection()));
         updateState(CHANNEL_LAST_EVENT, new StringType(event.getEvent()));
