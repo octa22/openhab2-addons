@@ -138,7 +138,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
             ArrayList<Ja100Event> history = getServiceHistory();
             if (history != null) {
-                logger.info("History log contains {} events", history.size());
+                logger.debug("History log contains {} events", history.size());
                 if (history.size() > 0) {
                     Ja100Event event = history.get(0);
                     updateLastEvent(event);
@@ -410,22 +410,22 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
             String line = resp.getContentAsString();
 
-            logger.info("History response: {}", line);
+            logger.debug("History response: {}", line);
 
             ArrayList<Ja100Event> result = new ArrayList<>();
 
             JsonParser parser = new JsonParser();
             JsonObject jobject = parser.parse(line).getAsJsonObject();
             if (jobject.has("ResponseCode") && jobject.get("ResponseCode").getAsInt() == 200) {
-                logger.info("History successfully retrieved with total of {} events.", jobject.get("EventsCount").getAsInt());
+                logger.trace("History successfully retrieved with total of {} events.", jobject.get("EventsCount").getAsInt());
                 if (jobject.has("HistoryData")) {
                     jobject = jobject.get("HistoryData").getAsJsonObject();
                     if (jobject.has("Events")) {
                         JsonArray jarray = jobject.get("Events").getAsJsonArray();
-                        logger.info("Parsing events...");
+                        logger.trace("Parsing events...");
                         Ja100Event[] events = gson.fromJson(jarray, Ja100Event[].class);
                         result.addAll(Arrays.asList(events));
-                        logger.info("Last event: {}", events[0].toString());
+                        logger.trace("Last event: {}", events[0].toString());
                     }
                 }
             }
