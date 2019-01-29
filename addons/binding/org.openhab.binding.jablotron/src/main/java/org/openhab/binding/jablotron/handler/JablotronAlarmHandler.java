@@ -31,6 +31,7 @@ import java.net.URLEncoder;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -166,9 +167,24 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         }
     }
 
+    protected synchronized void setLanguage() throws InterruptedException, ExecutionException, TimeoutException {
+            String url = JABLOTRON_URL + "lang/en";
+
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.GET)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, JABLOTRON_URL)
+                    .agent(AGENT)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+                    .send();
+
+            int status = resp.getStatus();
+            logger.debug("Set language returned status: {}", status);
+    }
 
     protected synchronized void login() {
-        String url = null;
+        String url;
 
         try {
             //login
@@ -199,6 +215,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                 return;
 
             logger.debug("Successfully logged to Jablonet cloud!");
+            setLanguage();
         } catch (TimeoutException e) {
             logger.debug("Timeout during getting login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
