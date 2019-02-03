@@ -24,5 +24,38 @@
 				<description>Password for Jablonet portal</description>
 				<required>true</required>
 			</parameter>
+
+			<parameter name="lang" type="text">
+				<default>cz</default>
+				<label>Language</label>
+				<description>Language for Jablonet portal</description>
+				<options>
+					<option value="cz">Česky</option>
+					<option value="da">Dansk</option>
+					<option value="de">Deutsch</option>
+					<option value="en">English</option>
+					<option value="es">Español</option>
+					<option value="fr">Français</option>
+					<option value="hr">Hrvatski</option>
+					<option value="it">Italiano</option>
+					<option value="hu">Magyar</option>
+					<option value="nl">Nederlands</option>
+					<option value="vi">Người việt nam</option>
+					<option value="no">Norsk</option>
+					<option value="pl">Polski</option>
+					<option value="pt">Portugues</option>
+					<option value="ro">Română</option>
+					<option value="sl">Slovenski</option>
+					<option value="sk">Slovensky</option>
+					<option value="sr">Srpski</option>
+					<option value="fi">Suomi</option>
+					<option value="sv">Svenska</option>
+					<option value="tr">Türkçe</option>
+					<option value="el">ελληνικά</option>
+					<option value="ru">Русский</option>
+					<option value="uk">Українська</option>
+				</options>
+				<required>true</required>
+			</parameter>
 	</config-description>
 </config-description:config-descriptions>

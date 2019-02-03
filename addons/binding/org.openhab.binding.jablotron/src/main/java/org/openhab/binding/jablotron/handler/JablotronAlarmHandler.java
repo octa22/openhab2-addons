@@ -22,6 +22,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.config.DeviceConfig;
+import org.openhab.binding.jablotron.config.JablotronConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     protected int lastHours = Utils.getHoursOfDay();
 
     ScheduledFuture<?> future = null;
+
     public JablotronAlarmHandler(Thing thing) {
         super(thing);
     }
@@ -167,20 +169,20 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         }
     }
 
-    protected synchronized void setLanguage() throws InterruptedException, ExecutionException, TimeoutException {
-            String url = JABLOTRON_URL + "lang/en";
+    protected synchronized void setLanguage(String lang) throws InterruptedException, ExecutionException, TimeoutException {
+        String url = JABLOTRON_URL + "lang/" + lang;
 
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.GET)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL)
-                    .agent(AGENT)
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
-                    .send();
+        ContentResponse resp = httpClient.newRequest(url)
+                .method(HttpMethod.GET)
+                .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                .header(HttpHeader.REFERER, JABLOTRON_URL)
+                .agent(AGENT)
+                .timeout(TIMEOUT, TimeUnit.SECONDS)
+                .send();
 
-            int status = resp.getStatus();
-            logger.debug("Set language returned status: {}", status);
+        int status = resp.getStatus();
+        logger.debug("Set language returned status: {}", status);
     }
 
     protected synchronized void login() {
@@ -194,7 +196,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                 return;
             }
             url = JABLOTRON_URL + "ajax/login.php";
-            String urlParameters = "login=" + URLEncoder.encode(bridge.bridgeConfig.getLogin(),"UTF-8") + "&heslo=" + URLEncoder.encode(bridge.bridgeConfig.getPassword(), "UTF-8") + "&aStatus=200&loginType=Login";
+            String urlParameters = "login=" + URLEncoder.encode(bridge.bridgeConfig.getLogin(), "UTF-8") + "&heslo=" + URLEncoder.encode(bridge.bridgeConfig.getPassword(), "UTF-8") + "&aStatus=200&loginType=Login";
 
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
@@ -215,7 +217,10 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                 return;
 
             logger.debug("Successfully logged to Jablonet cloud!");
-            setLanguage();
+            if (getLanguage() != null && !getLanguage().equals("cz")) {
+                //czech language is default
+                setLanguage(getLanguage());
+            }
         } catch (TimeoutException e) {
             logger.debug("Timeout during getting login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
@@ -223,6 +228,11 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
             logger.error("Cannot get Jablotron login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
         }
+    }
+
+    private String getLanguage() {
+        JablotronBridgeHandler bridgeHandler = (JablotronBridgeHandler) getBridge().getHandler();
+        return bridgeHandler.getBridgeConfig().getLang();
     }
 
     protected String getServiceUrl() {

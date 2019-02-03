@@ -182,13 +182,16 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             if (lastHours >= 0 && lastHours != hours) {
                 relogin();
             } else {
-                initializeService();
+                //initializeService();
             }
             lastHours = hours;
 
             OasisStatusResponse response = sendGetStatusRequest();
 
             if (response == null || response.getStatus() != 200) {
+                if (response.getStatus() != 200) {
+                    logger.info("Received response code: {}", response.getStatus());
+                }
                 controlDisabled = true;
                 inService = false;
                 login();
@@ -315,6 +318,11 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 login();
                 initializeService();
             }
+            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
+                logger.error("Cannot send user code - alarm is not online!");
+                return;
+            }
+
             if (!updateAlarmStatus()) {
                 logger.error("Cannot send user code due to alarm status!");
                 return;
