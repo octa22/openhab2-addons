@@ -112,7 +112,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             if (lastHours >= 0 && lastHours != hours) {
                 relogin();
             } else {
-                initializeService();
+                //initializeService();
             }
             lastHours = hours;
 
@@ -293,6 +293,10 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
                 login();
                 initializeService();
+            }
+            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
+                logger.error("Cannot send user code - alarm is not online!");
+                return;
             }
             if (!updateAlarmStatus()) {
                 logger.error("Cannot send user code due to alarm status!");

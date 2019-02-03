@@ -76,9 +76,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
     @Override
     public void initialize() {
-        String thingUid = getThing().getUID().toString();
         bridgeConfig = getConfigAs(JablotronConfig.class);
-        bridgeConfig.setThingUid(thingUid);
 
         sslContextFactory.setExcludeProtocols("");
         sslContextFactory.setExcludeCipherSuites("");
@@ -105,6 +103,9 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
         }
     }
 
+    public JablotronConfig getBridgeConfig() {
+        return bridgeConfig;
+    }
 
     private void login() {
         String url = JABLOTRON_URL + "ajax/login.php";
