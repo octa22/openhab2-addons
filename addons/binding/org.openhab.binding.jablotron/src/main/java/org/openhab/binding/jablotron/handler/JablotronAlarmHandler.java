@@ -145,7 +145,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         return new DateTimeType(zdt);
     }
 
-    protected void handleHttpRequestStatus(int status) throws InterruptedException {
+    protected void handleHttpRequestStatus(int status) {
         switch (status) {
             case 0:
                 logout();
@@ -162,7 +162,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
                 break;
             case 200:
                 scheduler.schedule((Runnable) this::updateAlarmStatus, 1, TimeUnit.SECONDS);
-                scheduler.schedule((Runnable) this::updateAlarmStatus, 15, TimeUnit.SECONDS);
+                //scheduler.schedule((Runnable) this::updateAlarmStatus, 15, TimeUnit.SECONDS);
                 break;
             default:
                 logger.error("Unknown status code received: {}", status);

@@ -189,7 +189,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             OasisStatusResponse response = sendGetStatusRequest();
 
             if (response == null || response.getStatus() != 200) {
-                if (response.getStatus() != 200) {
+                if (response != null) {
                     logger.info("Received response code: {}", response.getStatus());
                 }
                 controlDisabled = true;
@@ -272,31 +272,12 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
     public synchronized void controlSection(String section, String status, String serviceUrl) {
         try {
-            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
-                login();
-                initializeService();
-            }
-            if (!updateAlarmStatus()) {
-                logger.error("Cannot control section due to alarm status!");
+            if (!isReady()) {
                 return;
             }
-            int timeout = 30;
-            while (controlDisabled && --timeout >= 0) {
-                logger.info("Waiting for control enabling...");
-                Thread.sleep(1000);
-                boolean ok = updateAlarmStatus();
-                if (!ok) {
-                    return;
-                }
-            }
-            if (timeout < 0) {
-                logger.warn("Timeout during waiting for control enabling");
-                return;
-            }
-
 
             logger.debug("Controlling section: {} with status: {}", section, status);
-            OasisControlResponse response = sendUserCode("ovladani.php", section, status, "", serviceUrl);
+            OasisControlResponse response = sendUserCode(section, status, "", serviceUrl);
 
             if (response != null && response.getVysledek() != null) {
                 handleHttpRequestStatus(response.getStatus());
@@ -310,34 +291,41 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    public synchronized void sendCommand(String code, String serviceUrl) {
-        int status = 0;
-        Integer result = 0;
-        try {
-            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
-                login();
-                initializeService();
+    private boolean isReady() throws InterruptedException {
+        if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
+            login();
+            initializeService();
+        }
+        if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
+            logger.error("Cannot send user code - alarm is not online!");
+            return false;
+        }
+        /*
+        if (!updateAlarmStatus()) {
+            logger.error("Cannot control section due to alarm status!");
+            return false;
+        }*/
+        int timeout = 30;
+        while (controlDisabled && --timeout >= 0) {
+            logger.info("Waiting for control enabling...");
+            Thread.sleep(1000);
+            boolean ok = updateAlarmStatus();
+            if (!ok) {
+                return false;
             }
-            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
-                logger.error("Cannot send user code - alarm is not online!");
-                return;
-            }
+        }
+        if (timeout < 0) {
+            logger.warn("Timeout during waiting for control enabling");
+            return false;
+        }
+        return true;
+    }
 
-            if (!updateAlarmStatus()) {
-                logger.error("Cannot send user code due to alarm status!");
-                return;
-            }
-            int timeout = 30;
-            while (controlDisabled && --timeout >= 0) {
-                logger.info("Waiting for control enabling...");
-                Thread.sleep(1000);
-                boolean ok = updateAlarmStatus();
-                if (!ok) {
-                    return;
-                }
-            }
-            if (timeout < 0) {
-                logger.warn("Timeout during waiting for control enabling");
+    public synchronized void sendCommand(String code, String serviceUrl) {
+        int status;
+        Integer result;
+        try {
+            if (!isReady()) {
                 return;
             }
 
@@ -371,14 +359,14 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    protected synchronized OasisControlResponse sendUserCode(String site, String section, String status, String code, String serviceUrl) {
+    protected synchronized OasisControlResponse sendUserCode(String section, String status, String code, String serviceUrl) {
         String url;
 
         try {
-            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/" + site;
+            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/ovladani.php";
             String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
 
-            logger.info("Sending POST to url address: {} to control section: {}", url, section);
+            logger.debug("Sending POST to url address: {} to control section: {}", url, section);
 
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
@@ -394,7 +382,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             String line = resp.getContentAsString();
 
 
-            logger.info("Control response: {}", line);
+            logger.debug("Control response: {}", line);
             OasisControlResponse response = gson.fromJson(line, OasisControlResponse.class);
             logger.debug("sendUserCode result: {}", response.getVysledek());
             return response;
@@ -407,7 +395,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
     }
 
     private synchronized OasisControlResponse sendUserCode(String code, String serviceUrl) {
-        return sendUserCode("ovladani.php", "STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
+        return sendUserCode("STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 
     private ArrayList<OasisEvent> getServiceHistory() {
