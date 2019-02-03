@@ -290,16 +290,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         int status;
         Integer result;
         try {
-            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
-                login();
-                initializeService();
-            }
-            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
-                logger.error("Cannot send user code - alarm is not online!");
-                return;
-            }
-            if (!updateAlarmStatus()) {
-                logger.error("Cannot send user code due to alarm status!");
+            if (!isReady()) {
                 return;
             }
 
@@ -331,22 +322,17 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
 
     private synchronized Ja100ControlResponse sendUserCode(String section, String code, String serviceUrl) {
-        return sendUserCode("ovladani2.php", section, code.isEmpty() ? "1" : "", code, serviceUrl);
+        return sendUserCode(section, code.isEmpty() ? "1" : "", code, serviceUrl);
     }
 
     public synchronized void controlSection(String section, String status, String serviceUrl) {
         try {
-            if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
-                login();
-                initializeService();
-            }
-            if (!updateAlarmStatus()) {
-                logger.error("Cannot control section due to alarm status!");
+            if (!isReady()) {
                 return;
             }
 
             logger.debug("Controlling section: {} with status: {}", section, status);
-            Ja100ControlResponse response = sendUserCode("ovladani2.php", section, status, "", serviceUrl);
+            Ja100ControlResponse response = sendUserCode(section, status, "", serviceUrl);
 
             if (response != null && response.getResult() != null) {
                 handleHttpRequestStatus(response.getResponseCode());
@@ -360,11 +346,28 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }
     }
 
-    protected synchronized Ja100ControlResponse sendUserCode(String site, String section, String status, String code, String serviceUrl) {
+    private boolean isReady() {
+        if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
+            login();
+            initializeService();
+        }
+        if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
+            logger.error("Cannot send user code - alarm is not online!");
+            return false;
+        }
+        /*
+        if (!updateAlarmStatus()) {
+            logger.error("Cannot control section due to alarm status!");
+            return false;
+        }*/
+        return true;
+    }
+
+    protected synchronized Ja100ControlResponse sendUserCode(String section, String status, String code, String serviceUrl) {
         String url;
 
         try {
-            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/" + site;
+            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/ovladani2.php";
             String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
 
             logger.info("Sending POST to url address: {} to control section: {}", url, section);
