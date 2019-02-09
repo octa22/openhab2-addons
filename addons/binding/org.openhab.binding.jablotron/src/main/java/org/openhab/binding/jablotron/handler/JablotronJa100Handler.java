@@ -60,7 +60,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             String section = channelUID.getId();
 
             scheduler.execute(() -> {
-                controlSection(section, command.equals(OnOffType.ON) ? "1" : "0", getServiceUrl());
+                controlSection(section, command.equals(OnOffType.ON) ? "1" : "0");
             });
         }
 
@@ -294,7 +294,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 return;
             }
 
-            Ja100ControlResponse response = sendUserCode(section, "", serviceUrl);
+            Ja100ControlResponse response = sendUserCode(section, code, serviceUrl);
             if (response == null) {
                 logger.warn("null response received");
                 return;
@@ -321,18 +321,18 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     }
 
 
-    private synchronized Ja100ControlResponse sendUserCode(String section, String code, String serviceUrl) {
-        return sendUserCode(section, code.isEmpty() ? "1" : "", code, serviceUrl);
+    private synchronized Ja100ControlResponse sendUserCode(String section, String code) {
+        return sendUserCode(section, code.isEmpty() ? "1" : "", code);
     }
 
-    public synchronized void controlSection(String section, String status, String serviceUrl) {
+    public synchronized void controlSection(String section, String status) {
         try {
             if (!isReady()) {
                 return;
             }
 
             logger.debug("Controlling section: {} with status: {}", section, status);
-            Ja100ControlResponse response = sendUserCode(section, status, "", serviceUrl);
+            Ja100ControlResponse response = sendUserCode(section, status, "");
 
             if (response != null && response.getResult() != null) {
                 handleHttpRequestStatus(response.getResponseCode());
@@ -363,7 +363,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         return true;
     }
 
-    protected synchronized Ja100ControlResponse sendUserCode(String section, String status, String code, String serviceUrl) {
+    protected synchronized Ja100ControlResponse sendUserCode(String section, String status, String code) {
         String url;
 
         try {
@@ -376,7 +376,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                     .method(HttpMethod.POST)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, serviceUrl)
+                    .header(HttpHeader.REFERER, getServiceUrl())
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
