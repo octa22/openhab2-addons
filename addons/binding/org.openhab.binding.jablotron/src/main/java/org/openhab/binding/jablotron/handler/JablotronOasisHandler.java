@@ -67,19 +67,19 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
     public void handleCommand(ChannelUID channelUID, Command command) {
         if (channelUID.getId().equals(CHANNEL_COMMAND) && command instanceof StringType) {
             scheduler.execute(() -> {
-                sendCommand(command.toString(), getServiceUrl());
+                sendCommand(command.toString());
             });
         }
 
         if (channelUID.getId().equals(CHANNEL_STATUS_PGX) && command instanceof OnOffType) {
             scheduler.execute(() -> {
-                controlSection("PGX", command.equals(OnOffType.ON) ? "1" : "0", getServiceUrl());
+                controlSection("PGX", command.equals(OnOffType.ON) ? "1" : "0");
             });
         }
 
         if (channelUID.getId().equals(CHANNEL_STATUS_PGY) && command instanceof OnOffType) {
             scheduler.execute(() -> {
-                controlSection("PGY", command.equals(OnOffType.ON) ? "1" : "0", getServiceUrl());
+                controlSection("PGY", command.equals(OnOffType.ON) ? "1" : "0");
             });
         }
     }
@@ -270,14 +270,14 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         updateState(CHANNEL_LAST_TROUBLE_DETAIL, new StringType(trouble.getName()));
     }
 
-    public synchronized void controlSection(String section, String status, String serviceUrl) {
+    public synchronized void controlSection(String section, String status) {
         try {
             if (!isReady()) {
                 return;
             }
 
             logger.debug("Controlling section: {} with status: {}", section, status);
-            OasisControlResponse response = sendUserCode(section, status, "", serviceUrl);
+            OasisControlResponse response = sendUserCode(section, status, "");
 
             if (response != null && response.getVysledek() != null) {
                 handleHttpRequestStatus(response.getStatus());
@@ -321,7 +321,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         return true;
     }
 
-    public synchronized void sendCommand(String code, String serviceUrl) {
+    public synchronized void sendCommand(String code) {
         int status;
         Integer result;
         try {
@@ -329,6 +329,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 return;
             }
 
+            /*
             OasisControlResponse response = sendUserCode("", serviceUrl);
             if (response == null) {
                 logger.warn("null response received");
@@ -353,13 +354,20 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             } else {
                 logger.warn("null status received");
                 logout();
+            }*/
+            OasisControlResponse response = sendUserCode(code);
+            if (response != null && response.getVysledek() != null) {
+                handleHttpRequestStatus(response.getStatus());
+            } else {
+                logger.warn("null response/status received");
+                logout();
             }
         } catch (Exception e) {
             logger.error("internalReceiveCommand exception", e);
         }
     }
 
-    protected synchronized OasisControlResponse sendUserCode(String section, String status, String code, String serviceUrl) {
+    protected synchronized OasisControlResponse sendUserCode(String section, String status, String code) {
         String url;
 
         try {
@@ -372,7 +380,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                     .method(HttpMethod.POST)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, serviceUrl)
+                    .header(HttpHeader.REFERER, getServiceUrl())
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
@@ -394,8 +402,8 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         return null;
     }
 
-    private synchronized OasisControlResponse sendUserCode(String code, String serviceUrl) {
-        return sendUserCode("STATE", code.isEmpty() ? "1" : "", code, serviceUrl);
+    private synchronized OasisControlResponse sendUserCode(String code) {
+        return sendUserCode("STATE", code.isEmpty() ? "1" : "", code);
     }
 
     private ArrayList<OasisEvent> getServiceHistory() {
