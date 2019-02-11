@@ -10,12 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
+
 package org.openhab.binding.jablotron.internal.model.ja100;
 
 import com.google.gson.*;
-import com.google.gson.annotations.SerializedName;
 import org.openhab.binding.jablotron.handler.JablotronBridgeHandler;
-import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,7 +150,7 @@ public class Ja100StatusResponse {
                 result.add(ev);
             }
         }
-       return result;
+        return result;
     }
 
     public ArrayList<Ja100Section> getPGMs() {
@@ -169,14 +168,26 @@ public class Ja100StatusResponse {
 
         ArrayList<Ja100Section> result = new ArrayList<>();
 
-        JsonObject jobject = section.getAsJsonObject();
-        for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-            String key = entry.getKey();
-            if (jobject.get(key) instanceof JsonObject) {
-                //each device
-                JsonObject status = jobject.get(key).getAsJsonObject();
-                Ja100Section ev = gson.fromJson(status, Ja100Section.class);
-                result.add(ev);
+        if (section.isJsonArray()) {
+
+            for (JsonElement element : section.getAsJsonArray()) {
+                if (element instanceof JsonObject) {
+                    //each device
+                    Ja100Section ev = gson.fromJson(element, Ja100Section.class);
+                    result.add(ev);
+                }
+            }
+
+        } else { // TODO is this needed? Response seems always to be an JsonArray.
+            JsonObject jobject = section.getAsJsonObject();
+            for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
+                String key = entry.getKey();
+                if (jobject.get(key) instanceof JsonObject) {
+                    //each device
+                    JsonObject status = jobject.get(key).getAsJsonObject();
+                    Ja100Section ev = gson.fromJson(status, Ja100Section.class);
+                    result.add(ev);
+                }
             }
         }
         return result;
