@@ -151,7 +151,7 @@ public class Ja100StatusResponse {
                 result.add(ev);
             }
         }
-       return result;
+        return result;
     }
 
     public ArrayList<Ja100Section> getPGMs() {
@@ -169,75 +169,25 @@ public class Ja100StatusResponse {
 
         ArrayList<Ja100Section> result = new ArrayList<>();
 
-        JsonObject jobject = section.getAsJsonObject();
-        for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-            String key = entry.getKey();
-            if (jobject.get(key) instanceof JsonObject) {
-                //each device
-                JsonObject status = jobject.get(key).getAsJsonObject();
-                Ja100Section ev = gson.fromJson(status, Ja100Section.class);
-                result.add(ev);
+        if (section.isJsonArray()) {
+            //sections sent as an array
+            JsonArray jArray = section.getAsJsonArray();
+            for (JsonElement el : jArray) {
+                JsonObject status = el.getAsJsonObject();
+                Ja100Section sec = gson.fromJson(status, Ja100Section.class);
+                result.add(sec);
+            }
+        } else { JsonObject jobject = section.getAsJsonObject();
+            for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
+                String key = entry.getKey();
+                if (jobject.get(key) instanceof JsonObject) {
+                    //each device
+                    JsonObject status = jobject.get(key).getAsJsonObject();
+                    Ja100Section sec = gson.fromJson(status, Ja100Section.class);
+                    result.add(sec);
+                }
             }
         }
         return result;
-    }
-
-    public int getSekceStatus(int sekceId) {
-
-        if (sekce.isJsonArray()) {
-            if (sekce.getAsJsonArray().size() > sekceId) {
-                JsonObject event = sekce.getAsJsonArray().get(sekceId).getAsJsonObject();
-                return event.get("stav").getAsInt();
-            }
-            return 0;
-        }
-
-        if (sekce.isJsonObject()) {
-            JsonObject jobject = sekce.getAsJsonObject();
-
-            for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                String key = entry.getKey();
-                if (key.equals(String.valueOf(sekceId))) {
-                    if (jobject.get(key) instanceof JsonObject) {
-                        //each day
-                        JsonObject event = jobject.get(key).getAsJsonObject();
-                        return event.get("stav").getAsInt();
-                    }
-                }
-            }
-            return 0;
-        }
-        logger.error("Cannot parse sekce response: {}", sekce.getAsString());
-        return 0;
-    }
-
-    public int getPgmStatus(int pgmId) {
-
-        if (pgm.isJsonArray()) {
-            if (pgm.getAsJsonArray().size() > pgmId) {
-                JsonObject event = pgm.getAsJsonArray().get(pgmId).getAsJsonObject();
-                return event.get("stav").getAsInt();
-            }
-            return 0;
-        }
-
-        if (pgm.isJsonObject()) {
-            JsonObject jobject = pgm.getAsJsonObject();
-
-            for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                String key = entry.getKey();
-                if (key.equals(String.valueOf(pgmId))) {
-                    if (jobject.get(key) instanceof JsonObject) {
-                        //each day
-                        JsonObject event = jobject.get(key).getAsJsonObject();
-                        return event.get("stav").getAsInt();
-                    }
-                }
-            }
-            return 0;
-        }
-
-        logger.error("Cannot parse pgm response: {}", pgm.getAsString());
-        return 0;
     }
 }
