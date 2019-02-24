@@ -12,11 +12,6 @@
  */
 package org.openhab.binding.jablotron.internal.model.ja100;
 
-import com.google.gson.annotations.SerializedName;
-
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
 /**
  * The {@link Ja100StatusResponse} class defines the JA100 temperature sensor
  * object.

@@ -10,11 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
 package org.openhab.binding.jablotron.internal.model.ja100;
 
 import com.google.gson.*;
+import com.google.gson.annotations.SerializedName;
 import org.openhab.binding.jablotron.handler.JablotronBridgeHandler;
+import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,86 +170,24 @@ public class Ja100StatusResponse {
         ArrayList<Ja100Section> result = new ArrayList<>();
 
         if (section.isJsonArray()) {
-
-            for (JsonElement element : section.getAsJsonArray()) {
-                if (element instanceof JsonObject) {
-                    //each device
-                    Ja100Section ev = gson.fromJson(element, Ja100Section.class);
-                    result.add(ev);
-                }
+            //sections sent as an array
+            JsonArray jArray = section.getAsJsonArray();
+            for (JsonElement el : jArray) {
+                JsonObject status = el.getAsJsonObject();
+                Ja100Section sec = gson.fromJson(status, Ja100Section.class);
+                result.add(sec);
             }
-
-        } else { // TODO is this needed? Response seems always to be an JsonArray.
-            JsonObject jobject = section.getAsJsonObject();
+        } else { JsonObject jobject = section.getAsJsonObject();
             for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
                 String key = entry.getKey();
                 if (jobject.get(key) instanceof JsonObject) {
                     //each device
                     JsonObject status = jobject.get(key).getAsJsonObject();
-                    Ja100Section ev = gson.fromJson(status, Ja100Section.class);
-                    result.add(ev);
+                    Ja100Section sec = gson.fromJson(status, Ja100Section.class);
+                    result.add(sec);
                 }
             }
         }
         return result;
-    }
-
-    public int getSekceStatus(int sekceId) {
-
-        if (sekce.isJsonArray()) {
-            if (sekce.getAsJsonArray().size() > sekceId) {
-                JsonObject event = sekce.getAsJsonArray().get(sekceId).getAsJsonObject();
-                return event.get("stav").getAsInt();
-            }
-            return 0;
-        }
-
-        if (sekce.isJsonObject()) {
-            JsonObject jobject = sekce.getAsJsonObject();
-
-            for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                String key = entry.getKey();
-                if (key.equals(String.valueOf(sekceId))) {
-                    if (jobject.get(key) instanceof JsonObject) {
-                        //each day
-                        JsonObject event = jobject.get(key).getAsJsonObject();
-                        return event.get("stav").getAsInt();
-                    }
-                }
-            }
-            return 0;
-        }
-        logger.error("Cannot parse sekce response: {}", sekce.getAsString());
-        return 0;
-    }
-
-    public int getPgmStatus(int pgmId) {
-
-        if (pgm.isJsonArray()) {
-            if (pgm.getAsJsonArray().size() > pgmId) {
-                JsonObject event = pgm.getAsJsonArray().get(pgmId).getAsJsonObject();
-                return event.get("stav").getAsInt();
-            }
-            return 0;
-        }
-
-        if (pgm.isJsonObject()) {
-            JsonObject jobject = pgm.getAsJsonObject();
-
-            for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                String key = entry.getKey();
-                if (key.equals(String.valueOf(pgmId))) {
-                    if (jobject.get(key) instanceof JsonObject) {
-                        //each day
-                        JsonObject event = jobject.get(key).getAsJsonObject();
-                        return event.get("stav").getAsInt();
-                    }
-                }
-            }
-            return 0;
-        }
-
-        logger.error("Cannot parse pgm response: {}", pgm.getAsString());
-        return 0;
     }
 }

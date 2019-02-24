@@ -37,6 +37,7 @@ public class JablotronBindingConstants {
     public static final String CHANNEL_LAST_EVENT = "lastEvent";
     public static final String CHANNEL_LAST_EVENT_CLASS = "lastEventClass";
     public static final String CHANNEL_LAST_EVENT_TIME = "lastEventTime";
+    public static final String CHANNEL_LAST_CHECK_TIME = "lastCheckTime";
 
     // List of all OASIS Channel ids
     public static final String CHANNEL_LAST_EVENT_CODE = "lastEventCode";
