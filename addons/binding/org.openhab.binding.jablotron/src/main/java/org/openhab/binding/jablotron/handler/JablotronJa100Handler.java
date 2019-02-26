@@ -60,19 +60,20 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (!isAlarmSection(channelUID.getId()) && command instanceof OnOffType) {
-            String section = channelUID.getId();
-
-            scheduler.execute(() -> {
-                controlSection(section, command.equals(OnOffType.ON) ? "1" : "0");
-            });
+        String section = channelUID.getId();
+        if (!isAlarmSection(section) && command instanceof OnOffType) {
+            logger.info("sending command: {} to PG section: {}", command.toString(), section);
+            scheduler.execute(() -> sendCommand(section, command));
         }
 
-        if (isAlarmSection(channelUID.getId()) && command instanceof StringType) {
-            String section = channelUID.getId();
-            scheduler.execute(() -> {
-                sendCommand(section, command.toString(), getServiceUrl());
-            });
+        if (isAlarmSection(section)) {
+            logger.info("sending command: {} to STATUS section: {}", command.toString(), section);
+            if (command instanceof StringType) {
+                scheduler.execute(() -> sendCommand(section, command.toString()));
+            }
+            if (command instanceof OnOffType) {
+                scheduler.execute(() -> sendCommand(section, command));
+            }
         }
     }
 
@@ -290,7 +291,11 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         updateState(CHANNEL_LAST_EVENT_CLASS, new StringType(event.getEventClass()));
     }
 
-    public synchronized void sendCommand(String section, String code, String serviceUrl) {
+    public void sendCommand(String section, Command command) {
+        sendCommand(section, command.equals(OnOffType.ON) ? "1" : "0");
+    }
+
+    public synchronized void sendCommand(String section, String code) {
         int status;
         Integer result;
         try {
@@ -298,7 +303,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 return;
             }
 
-            Ja100ControlResponse response = sendUserCode(section, code, serviceUrl);
+            Ja100ControlResponse response = sendUserCode(section, code);
             if (response == null) {
                 logger.warn("null response received");
                 return;
@@ -324,11 +329,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         }
     }
 
-
-    private synchronized Ja100ControlResponse sendUserCode(String section, String code) {
-        return sendUserCode(section, code.isEmpty() ? "1" : "", code);
-    }
-
+    /*
     public synchronized void controlSection(String section, String status) {
         try {
             if (!isReady()) {
@@ -336,7 +337,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             }
 
             logger.debug("Controlling section: {} with status: {}", section, status);
-            Ja100ControlResponse response = sendUserCode(section, status, "");
+            Ja100ControlResponse response = sendUserCode(section, status);
 
             if (response != null && response.getResult() != null) {
                 handleHttpRequestStatus(response.getResponseCode());
@@ -346,9 +347,9 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             }
 
         } catch (Exception e) {
-            logger.error("internalReceiveCommand exception", e);
+            logger.error("controlSection exception", e);
         }
-    }
+    }*/
 
     private boolean isReady() {
         if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
@@ -367,12 +368,12 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         return true;
     }
 
-    protected synchronized Ja100ControlResponse sendUserCode(String section, String status, String code) {
+    protected synchronized Ja100ControlResponse sendUserCode(String section, String status) {
         String url;
 
         try {
             url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/ovladani2.php";
-            String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
+            String urlParameters = "section=" + section + "&status=" + status + "&code=" + thingConfig.getCode();
 
             logger.info("Sending POST to url address: {} to control section: {}", url, section);
 

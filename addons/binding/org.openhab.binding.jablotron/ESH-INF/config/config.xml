@@ -11,6 +11,21 @@
 		</parameter>
 	</config-description>
 
+	<config-description uri="thing-type:jablotron:ja100device">
+		<parameter name="refresh" type="integer" required="false">
+			<label>Refresh refresh</label>
+			<description>Specifies the refresh of thing states in seconds</description>
+			<default>180</default>
+		</parameter>
+
+		<parameter name="code" type="text">
+			<context>password</context>
+			<label>Code</label>
+			<description>Code for the JA100 alarm</description>
+			<required>false</required>
+		</parameter>
+	</config-description>
+
 	<config-description uri="bridge-type:jablotron:bridge">
 			<parameter name="login" type="text">
 				<label>Login</label>

@@ -20,8 +20,13 @@ package org.openhab.binding.jablotron.config;
  */
 public class DeviceConfig {
     private int refresh;
+    private String code;
 
     public int getRefresh() {
         return refresh;
+    }
+
+    public String getCode() {
+        return code;
     }
 }

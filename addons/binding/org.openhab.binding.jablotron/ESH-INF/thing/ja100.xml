@@ -19,7 +19,7 @@
 			<channel id="lastEventClass" typeId="lastEventClass"/>
 			<channel id="lastEventTime" typeId="lastEventTime"/>
 		</channels>
-		<config-description-ref uri="thing-type:jablotron:device"/>
+		<config-description-ref uri="thing-type:jablotron:ja100device"/>
 	</thing-type>
 
 </thing:thing-descriptions>
