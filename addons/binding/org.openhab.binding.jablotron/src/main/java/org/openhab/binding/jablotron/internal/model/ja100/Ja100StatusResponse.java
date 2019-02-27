@@ -45,8 +45,9 @@ public class Ja100StatusResponse {
     JsonElement pgm;
     Integer isAlarm;
 
-    //@SerializedName("trouble")
-    //ArrayList<JablotronTrouble> troubles;
+    @SerializedName("trouble")
+    ArrayList<JablotronTrouble> troubles;
+
     //JsonElement alarm;
     //boolean controlDisabled;
     //int service;
@@ -98,6 +99,10 @@ public class Ja100StatusResponse {
         return false;
     }
 
+    public boolean hasTroubles() {
+        return troubles != null && troubles.size() > 0;
+    }
+
     public boolean hasTemperature() {
         return teplomery != null && !teplomery.isJsonNull() && !teplomery.isJsonArray();
     }
@@ -117,6 +122,10 @@ public class Ja100StatusResponse {
         } else
             return null;
     }*/
+
+    public ArrayList<JablotronTrouble> getTroubles() {
+        return troubles;
+    }
 
     private Date getZonedDateTime(long lastEventTime) {
         Instant dt = Instant.ofEpochSecond(lastEventTime);

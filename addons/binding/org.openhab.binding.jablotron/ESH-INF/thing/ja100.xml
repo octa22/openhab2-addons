@@ -18,6 +18,8 @@
 			<channel id="lastEventSection" typeId="lastEventSection"/>
 			<channel id="lastEventClass" typeId="lastEventClass"/>
 			<channel id="lastEventTime" typeId="lastEventTime"/>
+			<channel id="lastTrouble" typeId="lastTrouble"/>
+			<channel id="lastTroubleDetail" typeId="lastTroubleDetail"/>
 		</channels>
 		<config-description-ref uri="thing-type:jablotron:ja100device"/>
 	</thing-type>

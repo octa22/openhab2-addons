@@ -20,6 +20,7 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
+import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
@@ -29,6 +30,7 @@ import org.openhab.binding.jablotron.config.DeviceConfig;
 import org.openhab.binding.jablotron.config.JablotronConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
+import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -280,5 +282,10 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
             logger.error("Cannot initialize Jablotron service: {}", serviceId, ex);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize " + thing.getThingTypeUID().getId() + " service");
         }
+    }
+
+    protected void updateLastTrouble(JablotronTrouble trouble) {
+        updateState(CHANNEL_LAST_TROUBLE, new StringType(trouble.getMessage()));
+        updateState(CHANNEL_LAST_TROUBLE_DETAIL, new StringType(trouble.getName()));
     }
 }

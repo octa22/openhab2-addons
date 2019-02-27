@@ -30,6 +30,7 @@ import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.Utils;
+import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 import org.openhab.binding.jablotron.internal.model.ja100.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +154,13 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 logger.info("It seems that alarm has been triggered!!!");
             }
 
+            if (response.hasTroubles()) {
+                ArrayList<JablotronTrouble> troubles = response.getTroubles();
+                for (JablotronTrouble trouble : troubles) {
+                    logger.debug("Found trouble: {} {} {} ({})", trouble.getZekdy(), trouble.getCas(), trouble.getMessage(), trouble.getName());
+                }
+                updateLastTrouble(troubles.get(0));
+            }
             /*
             if (response.hasEvents()) {
                 ArrayList<OasisEvent> events = response.getEvents();

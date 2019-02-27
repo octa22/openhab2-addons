@@ -269,11 +269,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         updateState(CHANNEL_LAST_EVENT_CLASS, new StringType(event.getEventClass()));
     }
 
-    private void updateLastTrouble(JablotronTrouble trouble) {
-        updateState(CHANNEL_LAST_TROUBLE, new StringType(trouble.getMessage()));
-        updateState(CHANNEL_LAST_TROUBLE_DETAIL, new StringType(trouble.getName()));
-    }
-
     public synchronized void controlSection(String section, String status) {
         try {
             if (!isReady()) {
