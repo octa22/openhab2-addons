@@ -61,6 +61,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         String section = channelUID.getId();
+        logger.debug("handleCommand(): Command Received - {} {}.", channelUID, command);
         if (!isAlarmSection(section) && command instanceof OnOffType) {
             logger.info("sending command: {} to PG section: {}", command.toString(), section);
             scheduler.execute(() -> sendCommand(section, command));
@@ -68,11 +69,8 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
         if (isAlarmSection(section)) {
             logger.info("sending command: {} to STATUS section: {}", command.toString(), section);
-            if (command instanceof StringType) {
+            if (command instanceof StringType || command instanceof DecimalType) {
                 scheduler.execute(() -> sendCommand(section, command.toString()));
-            }
-            if (command instanceof OnOffType) {
-                scheduler.execute(() -> sendCommand(section, command));
             }
         }
     }
