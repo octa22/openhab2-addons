@@ -13,7 +13,7 @@ Please contact me if you want to add other alarms (e.g. JA-100 etc)
 
 ## Discovery
 
-This binding support auto discovery. Just manually add bridge thing and supply login & password to your Jablonet account.
+This binding supports auto discovery. Just manually add bridge thing and supply login & password to your Jablonet account.
 
 ## Binding Configuration
 
@@ -26,9 +26,16 @@ The bridge thing requires this configuration:
 * login (login to your jablonet account)
 * password (password to your jablonet account)
 
-The oasis thing require this configuration (it is better to have it autodiscovered):
+optionally you can set
+* lang (language of the alarm texts)
 
-* refresh (thing status refresh period in seconds)
+The both alarm things have this configuration:
+
+* refresh (thing status refresh period in seconds, default is 180s)
+
+The Ja100 alarm thing has one extra parameter
+
+ * code (alarm master code, used for controlling the sections & PGMs)
 
 ## Channels
 
@@ -46,11 +53,22 @@ The oasis thing exposes these channels:
 * lastEventClass (the class of the last event - arm, disarm, service)
 * lastEventTime (the time of the last event)
 * lastCheckTime (the time of the last checking)
+* lastTrouble (the last problem reported by alarm)
+* lastTroubleDetail (the detail info about the last problem)
 * alarm (the alarm status OFF/ON)
+
+The JA100 thing has these channels:
+* lastEvent (the text description of the last event)
+* lastEventSection (the section of the last event)
+* lastEventClass (the class of the last event - arm, disarm, service)
+* lastEventTime (the time of the last event)
+* lastCheckTime (the time of the last checking)
+
+all other channels (sections, PGMs, temperature sensors) are dynamicaly created according to your configuration 
 
 ## Full Example
 
-#items file
+#items file for JA80
 
 ```
 String  HouseAlarm "Alarm [%s]" <alarm>
@@ -65,7 +83,7 @@ Switch	ArmControlPGX	"PGX"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5
 Switch	ArmControlPGY	"PGY"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5ed:50139:statusPGY" }
 ```
 
-#sitemap example
+#sitemap example for JA80
 
 ```
 Text item=HouseAlarm icon="alarm" {
@@ -84,7 +102,7 @@ Text item=HouseAlarm icon="alarm" {
       }
 ```
 
-#rule example
+#rule example for JA80
 
 ```
 rule "Alarm"
