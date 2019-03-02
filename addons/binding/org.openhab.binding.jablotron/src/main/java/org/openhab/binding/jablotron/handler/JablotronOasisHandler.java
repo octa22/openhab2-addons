@@ -185,8 +185,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             int hours = Utils.getHoursOfDay();
             if (lastHours >= 0 && lastHours != hours) {
                 relogin();
-            } else {
-                //initializeService();
             }
             lastHours = hours;
 
@@ -290,7 +288,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    private boolean isReady() throws InterruptedException {
+    private synchronized boolean isReady() throws InterruptedException {
         if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
             login();
             initializeService();
@@ -299,11 +297,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             logger.error("Cannot send user code - alarm is not online!");
             return false;
         }
-        /*
-        if (!updateAlarmStatus()) {
-            logger.error("Cannot control section due to alarm status!");
-            return false;
-        }*/
         int timeout = 30;
         while (controlDisabled && --timeout >= 0) {
             logger.info("Waiting for control enabling...");

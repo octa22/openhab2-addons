@@ -115,16 +115,12 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             int hours = Utils.getHoursOfDay();
             if (lastHours >= 0 && lastHours != hours) {
                 relogin();
-            } else {
-                //initializeService();
             }
             lastHours = hours;
 
             Ja100StatusResponse response = sendGetStatusRequest();
 
             if (response == null || response.getStatus() != 200) {
-                //controlDisabled = true;
-                //inService = false;
                 login();
                 initializeService();
                 response = sendGetStatusRequest();
@@ -319,13 +315,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             result = response.getResult();
             if (result != null) {
                 handleHttpRequestStatus(status);
-                /*
-                if (response != null && response.getResult() != null) {
-                    handleHttpRequestStatus(response.getResponseCode());
-                } else {
-                    logger.warn("null response/status received");
-                    logout();
-                }*/
             } else {
                 logger.warn("null status received");
                 logout();
@@ -334,28 +323,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             logger.error("internalReceiveCommand exception", e);
         }
     }
-
-    /*
-    public synchronized void controlSection(String section, String status) {
-        try {
-            if (!isReady()) {
-                return;
-            }
-
-            logger.debug("Controlling section: {} with status: {}", section, status);
-            Ja100ControlResponse response = sendUserCode(section, status);
-
-            if (response != null && response.getResult() != null) {
-                handleHttpRequestStatus(response.getResponseCode());
-            } else {
-                logger.warn("null response/status received");
-                logout();
-            }
-
-        } catch (Exception e) {
-            logger.error("controlSection exception", e);
-        }
-    }*/
 
     private boolean isReady() {
         if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
@@ -366,11 +333,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             logger.error("Cannot send user code - alarm is not online!");
             return false;
         }
-        /*
-        if (!updateAlarmStatus()) {
-            logger.error("Cannot control section due to alarm status!");
-            return false;
-        }*/
         return true;
     }
 
