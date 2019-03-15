@@ -3,13 +3,6 @@
 	xmlns:thing="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="http://eclipse.org/smarthome/schemas/thing-description/v1.0.0 http://eclipse.org/smarthome/schemas/thing-description-1.0.0.xsd">
 
-	<channel-type id="points">
-		<item-type>Number</item-type>
-		<label>CSAS Loyalty Points</label>
-		<description>An amount of point in CSAS loyalty program</description>
-		<state readOnly="true" pattern="%d"></state>
-	</channel-type>
-
 	<channel-type id="balance">
 		<item-type>Number</item-type>
 		<label>CSAS Account Balance</label>

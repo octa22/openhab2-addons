@@ -41,7 +41,6 @@ public class CSASHandlerFactory extends BaseThingHandlerFactory {
             THING_TYPE_CARD_ACCOUNT,
             THING_TYPE_SECURITIES_ACCOUNT,
             THING_TYPE_INSURANCE_CONTRACT,
-            THING_TYPE_LOYALTY_CONTRACT,
             THING_TYPE_PENSION_CONTRACT
         ));
     private Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
@@ -77,9 +76,6 @@ public class CSASHandlerFactory extends BaseThingHandlerFactory {
         }
         if (thingTypeUID.equals(THING_TYPE_INSURANCE_CONTRACT)) {
             return new CSASAccountHandler(thing);
-        }
-        if (thingTypeUID.equals(THING_TYPE_LOYALTY_CONTRACT)) {
-            return new CSASLoyaltyContractHandler(thing);
         }
         return null;
     }

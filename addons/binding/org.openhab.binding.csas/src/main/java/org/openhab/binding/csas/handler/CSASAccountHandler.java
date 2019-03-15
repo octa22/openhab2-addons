@@ -30,7 +30,7 @@ public class CSASAccountHandler extends CSASBaseThingHandler {
         super(thing);
     }
 
-    private final Logger logger = LoggerFactory.getLogger(CSASLoyaltyContractHandler.class);
+    private final Logger logger = LoggerFactory.getLogger(CSASAccountHandler.class);
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {

@@ -180,26 +180,7 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
             getPensions();
             getInsurances();
             getSecurities();
-            getLoyalty();
             listAccounts();
-        }
-    }
-
-    private void getLoyalty() {
-        String url;
-
-        try {
-            url = NETBANKING_V3 + "cz/my/contracts/loyalty";
-
-            String line = DoNetbankingRequest(url);
-            logger.debug("CSAS getLoyalty: {}", line);
-
-            CSASLoyaltyResponse resp = gson.fromJson(line, CSASLoyaltyResponse.class);
-            if (resp.getState().equals(REGISTERED)) {
-                discoveryService.loyaltyContractDiscovered();
-            }
-        } catch (Exception e) {
-            logger.error("Cannot get CSAS loyalty points", e);
         }
     }
 
@@ -516,25 +497,6 @@ public class CSASBridgeHandler extends ConfigStatusBridgeHandler {
     public void updateCurrency(ChannelUID channelUID, String id) {
         String currency = getAccountCurrency(id);
         updateState(channelUID, new StringType(currency));
-    }
-
-    public void updateLoyaltyPoints(ChannelUID channelUID) {
-        String url;
-
-        try {
-            url = NETBANKING_V3 + "cz/my/contracts/loyalty";
-
-            String line = DoNetbankingRequest(url);
-            logger.debug("CSAS getLoyalty: {}", line);
-
-            CSASLoyaltyResponse resp = gson.fromJson(line, CSASLoyaltyResponse.class);
-            if (resp.getState().equals(REGISTERED)) {
-                State state = new DecimalType(Integer.parseInt(resp.getPointsCount()));
-                updateState(channelUID, state);
-            }
-        } catch (Exception e) {
-            logger.error("Cannot get CSAS loyalty points", e);
-        }
     }
 
     private CSASSimpleTransaction createTransaction(CSASTransaction csasTran) {

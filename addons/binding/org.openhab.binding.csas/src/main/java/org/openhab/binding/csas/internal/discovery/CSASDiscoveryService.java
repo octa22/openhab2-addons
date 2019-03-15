@@ -52,7 +52,6 @@ public class CSASDiscoveryService extends AbstractDiscoveryService
                 THING_TYPE_CARD_ACCOUNT,
                 THING_TYPE_SECURITIES_ACCOUNT,
                 THING_TYPE_INSURANCE_CONTRACT,
-                THING_TYPE_LOYALTY_CONTRACT,
                 THING_TYPE_PENSION_CONTRACT
         ));
     }
@@ -128,9 +127,5 @@ public class CSASDiscoveryService extends AbstractDiscoveryService
 
     public void securitiesAccountDiscovered(String id, String accountNr) {
         deviceDiscovered(id, accountNr, THING_TYPE_SECURITIES_ACCOUNT);
-    }
-
-    public void loyaltyContractDiscovered() {
-        deviceDiscovered(IBOD, IBOD, THING_TYPE_LOYALTY_CONTRACT);
     }
 }

@@ -43,11 +43,7 @@ public class CSASBindingConstants {
     // Insurance contract
     public static final ThingTypeUID THING_TYPE_INSURANCE_CONTRACT = new ThingTypeUID(BINDING_ID, "insurance_contract");
 
-    // Loyalty contract
-    public static final ThingTypeUID THING_TYPE_LOYALTY_CONTRACT = new ThingTypeUID(BINDING_ID, "loyalty_contract");
-
     // List of all Channel ids
-    public static final String CHANNEL_POINTS = "points";
     public static final String CHANNEL_CURRENCY = "currency";
     public static final String CHANNEL_BALANCE = "balance";
     public static final String CHANNEL_BALANCE_FULL = "balance_full";
@@ -61,7 +57,6 @@ public class CSASBindingConstants {
     public static final String CREDIT = "CREDIT";
     public static final String REGISTERED = "REGISTERED";
     public static final String ACTIVE = "ACTIVE";
-    public static final String IBOD = "IBOD";
     public static final String TRAN = "tran";
     public static final int DISCOVERY_TIMEOUT_SEC = 10;
     public static final int CACHE_EXPIRY = 10 * 1000;
