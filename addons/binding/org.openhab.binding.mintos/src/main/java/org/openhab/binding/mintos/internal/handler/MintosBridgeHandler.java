@@ -213,4 +213,8 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
         }
         return accounts;
     }
+
+    public void setBridgeStatus(ThingStatus status) {
+        updateStatus(status);
+    }
 }

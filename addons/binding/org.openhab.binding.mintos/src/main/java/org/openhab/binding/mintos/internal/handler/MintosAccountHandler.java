@@ -266,6 +266,7 @@ public class MintosAccountHandler extends BaseThingHandler {
                     String subs = txt.substring(pos, posEnd);
 
                     updateStatus(ThingStatus.ONLINE);
+                    updateBridgeStatus(ThingStatus.ONLINE);
                     return parseOverview(subs);
                 }
                 //skip "bindTabs"
@@ -278,6 +279,15 @@ public class MintosAccountHandler extends BaseThingHandler {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Got response code: " + response.getStatus());
         }
         return new MintosAccountOverview();
+    }
+
+    private void updateBridgeStatus(ThingStatus status) {
+        if (getBridge() != null) {
+           MintosBridgeHandler handler = (MintosBridgeHandler) getBridge().getHandler();
+           if (handler != null) {
+               handler.setBridgeStatus(status);
+           }
+        }
     }
 
     private MintosAccountOverview parseOverview(String text) {
