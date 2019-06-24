@@ -53,14 +53,14 @@ import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 public class JablotronDiscoveryService extends AbstractDiscoveryService implements ExtendedDiscoveryService {
     private final Logger logger = LoggerFactory.getLogger(JablotronDiscoveryService.class);
     private JablotronBridgeHandler bridge;
-    private DiscoveryServiceCallback discoveryServiceCallback;
+    private @Nullable DiscoveryServiceCallback discoveryServiceCallback;
 
     // Instantiate and configure the SslContextFactory
-    SslContextFactory sslContextFactory = new SslContextFactory(true);
+    private SslContextFactory sslContextFactory = new SslContextFactory(true);
 
-    HttpClient httpClient;
+    private @Nullable HttpClient httpClient;
 
-    ScheduledFuture<?> discoveryJob = null;
+    private @Nullable ScheduledFuture<?> discoveryJob = null;
 
     private Gson gson = new Gson();
     private static final int DISCOVERY_TIMEOUT_SEC = 10;
