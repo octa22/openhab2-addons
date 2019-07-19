@@ -54,22 +54,20 @@ public class MintosAccountHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(MintosAccountHandler.class);
 
-    @Nullable
-    private MintosAccountConfiguration config;
-    private MintosBridgeConfiguration bridgeConfig;
+    private @Nullable MintosAccountConfiguration config;
+    private @Nullable MintosBridgeConfiguration bridgeConfig;
 
-    private ExpiringCache<MintosAccountOverview> accountOverview;
+    private @Nullable ExpiringCache<MintosAccountOverview> accountOverview;
 
     private SslContextFactory sslContext = new SslContextFactory();
 
-    private HttpClient httpClient;
+    private @Nullable HttpClient httpClient;
 
     private String csrf = "";
     private String logoutURL = "";
 
     //Future
-    @Nullable
-    ScheduledFuture<?> future;
+    private @Nullable ScheduledFuture<?> future;
 
     public MintosAccountHandler(Thing thing) {
         super(thing);
@@ -174,7 +172,10 @@ public class MintosAccountHandler extends BaseThingHandler {
         }
     }
 
-    private void updateChannelStates(MintosAccountOverview overview) {
+    private void updateChannelStates(@Nullable MintosAccountOverview overview) {
+        if (overview == null) {
+            return;
+        }
         updateState(ACCOUNT_BALANCE, new DecimalType(overview.getAccountBalance()));
         updateState(AVAILABLE_FUNDS, new DecimalType(overview.getAvailableFunds()));
         updateState(INVESTED_FUNDS, new DecimalType(overview.getInvestedFunds()));

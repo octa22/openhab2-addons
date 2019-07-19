@@ -52,14 +52,11 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
 
     private final Logger logger = LoggerFactory.getLogger(MintosBridgeHandler.class);
 
-    @Nullable
-    private MintosBridgeConfiguration config;
-
-    private ExpiringCache<MintosAccountOverview> accountOverview;
+    private @Nullable MintosBridgeConfiguration config;
 
     private SslContextFactory sslContext = new SslContextFactory();
 
-    private HttpClient httpClient;
+    private @Nullable HttpClient httpClient;
 
     private String csrf = "";
     private String logoutURL = "";
@@ -130,11 +127,11 @@ public class MintosBridgeHandler extends ConfigStatusBridgeHandler {
         }
     }
 
-    public MintosBridgeConfiguration getBridgeConfiguration() {
+    public @Nullable MintosBridgeConfiguration getBridgeConfiguration() {
         return config;
     }
 
-    private synchronized String getOverview() {
+    private synchronized @Nullable String getOverview() {
         ContentResponse response;
 
         try {

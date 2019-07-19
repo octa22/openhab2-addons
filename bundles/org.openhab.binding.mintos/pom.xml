@@ -4,15 +4,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>pom</artifactId>
-    <groupId>org.openhab.binding</groupId>
+    <artifactId>org.openhab.addons.reactor.bundles</artifactId>
+    <groupId>org.openhab.addons.bundles</groupId>
     <version>2.5.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.binding.mintos</artifactId>
-  <packaging>eclipse-plugin</packaging>
 
-  <name>Mintos Binding</name>
+  <name>openHAB Add-ons :: Bundles :: Mintos Binding</name>
 
 
 </project>
