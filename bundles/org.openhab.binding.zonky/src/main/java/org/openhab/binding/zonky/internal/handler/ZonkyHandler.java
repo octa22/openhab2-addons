@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.zonky.internal;
+package org.openhab.binding.zonky.internal.handler;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -22,13 +22,13 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.core.library.types.DecimalType;
 import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.RefreshType;
 import org.eclipse.smarthome.core.types.State;
+import org.openhab.binding.zonky.internal.config.ZonkyConfiguration;
 import org.openhab.binding.zonky.internal.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,27 +51,22 @@ public class ZonkyHandler extends BaseThingHandler {
 
     private final Logger logger = LoggerFactory.getLogger(ZonkyHandler.class);
 
-    @Nullable
-    private ZonkyConfiguration config;
-    private String token = null;
-    private String refreshToken;
+    private @Nullable ZonkyConfiguration config;
+    private @Nullable String token = null;
+    private @Nullable String refreshToken;
 
     // Future
-    @Nullable
-    private ScheduledFuture<?> future = null;
+    private @Nullable ScheduledFuture<?> future = null;
 
     // Gson & parser
     private final Gson gson = new Gson();
 
-    // Instantiate and configure the SslContextFactory
-    private SslContextFactory sslContextFactory = new SslContextFactory();
-
-    // Instantiate HttpClient with the SslContextFactory
-    private HttpClient httpClient = new HttpClient(sslContextFactory);
+    private final HttpClient httpClient;
 
 
-    public ZonkyHandler(Thing thing) {
+    public ZonkyHandler(Thing thing, HttpClient httpClient) {
         super(thing);
+        this.httpClient = httpClient;
     }
 
     @Override
@@ -90,18 +85,6 @@ public class ZonkyHandler extends BaseThingHandler {
         updateStatus(ThingStatus.UNKNOWN);
 
         httpClient.setFollowRedirects(false);
-
-        try {
-            if (httpClient.isStarted()) {
-                httpClient.stop();
-            }
-            httpClient.start();
-        } catch (Exception e) {
-            logger.debug("Cannot start http client", e);
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.HANDLER_INITIALIZING_ERROR, "Cannot start http client");
-            return;
-        }
-
         future = scheduler.scheduleWithFixedDelay(this::refresh, 0, config.refresh, TimeUnit.MILLISECONDS);
     }
 
@@ -137,6 +120,9 @@ public class ZonkyHandler extends BaseThingHandler {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.debug("Cannot get login cookie!", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot get login cookie");
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
         }
         return false;
     }
@@ -164,6 +150,9 @@ public class ZonkyHandler extends BaseThingHandler {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.debug("Cannot refresh token!", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot refresh token");
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
         }
         return false;
     }
@@ -220,14 +209,11 @@ public class ZonkyHandler extends BaseThingHandler {
             return;
 
         try {
-            @Nullable
-            String wallet = getWallet();
+            @Nullable String wallet = getWallet();
 
-            @Nullable
-            String statistics = getStatistics();
+            @Nullable String statistics = getStatistics();
 
-            @Nullable
-            String weekly = getWeeklyStatistics();
+            @Nullable String weekly = getWeeklyStatistics();
             if (wallet == null || statistics == null || weekly == null) {
                 return;
             }
@@ -313,6 +299,9 @@ public class ZonkyHandler extends BaseThingHandler {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.debug("Cannot get login cookie!", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot get login cookie");
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
         }
         return null;
     }
