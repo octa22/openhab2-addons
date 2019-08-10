@@ -26,7 +26,7 @@ import static org.openhab.binding.mintos.internal.MintosBindingConstants.LOGOUT_
 public class MintosUtils {
 
     public static String getCsrfToken(String content) {
-        final String field = "_csrf_token\" value=\"";
+        final String field = "token=\"";
         int pos = content.indexOf(field);
         return content.substring(pos + field.length(), pos + field.length() + 43);
     }
