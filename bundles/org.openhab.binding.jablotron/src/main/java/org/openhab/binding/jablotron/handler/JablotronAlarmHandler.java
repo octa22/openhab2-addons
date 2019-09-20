@@ -18,7 +18,6 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Thing;
@@ -63,14 +62,12 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
     ScheduledFuture<?> future = null;
 
-    public JablotronAlarmHandler(Thing thing) {
+    public JablotronAlarmHandler(Thing thing, HttpClient httpClient) {
         super(thing);
+        this.httpClient = httpClient;
     }
 
-    // Instantiate and configure the SslContextFactory
-    SslContextFactory sslContextFactory = new SslContextFactory(true);
-
-    HttpClient httpClient;
+    final HttpClient httpClient;
 
     @Override
     public void dispose() {
@@ -79,29 +76,11 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         if (future != null) {
             future.cancel(true);
         }
-        try {
-            httpClient.stop();
-        } catch (Exception e) {
-            logger.error("Cannot stop http client", e);
-        }
     }
 
     @Override
     public void initialize() {
         thingConfig = getConfigAs(DeviceConfig.class);
-
-        sslContextFactory.setExcludeProtocols("");
-        sslContextFactory.setExcludeCipherSuites("");
-        httpClient = new HttpClient(sslContextFactory);
-        httpClient.setFollowRedirects(false);
-
-        try {
-            httpClient.start();
-        } catch (Exception e) {
-            logger.error("Cannot start http client!", e);
-            return;
-        }
-
         scheduler.execute(() -> {
             doInit();
         });

@@ -16,6 +16,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpHeader;
@@ -62,8 +63,8 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
     private int stavPGY = 0;
     private boolean controlDisabled = true;
 
-    public JablotronOasisHandler(Thing thing) {
-        super(thing);
+    public JablotronOasisHandler(Thing thing, HttpClient httpClient) {
+        super(thing, httpClient);
     }
 
     @Override

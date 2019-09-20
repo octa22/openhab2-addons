@@ -28,7 +28,9 @@ import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.jablotron.config.JablotronConfig;
+import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
+import org.openhab.binding.jablotron.internal.model.JablotronWidgetsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,18 +52,16 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
     private Gson gson = new Gson();
 
-    // Instantiate and configure the SslContextFactory
-    SslContextFactory sslContextFactory = new SslContextFactory(true);
-
-    HttpClient httpClient;
+    final HttpClient httpClient;
 
     /**
      * Our configuration
      */
     public JablotronConfig bridgeConfig;
 
-    public JablotronBridgeHandler(Thing thing) {
+    public JablotronBridgeHandler(Thing thing, HttpClient httpClient) {
         super(thing);
+        this.httpClient = httpClient;
     }
 
     @Override
@@ -80,18 +80,6 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
     @Override
     public void initialize() {
         bridgeConfig = getConfigAs(JablotronConfig.class);
-
-        sslContextFactory.setExcludeProtocols("");
-        sslContextFactory.setExcludeCipherSuites("");
-        httpClient = new HttpClient(sslContextFactory);
-        httpClient.setFollowRedirects(false);
-
-        try {
-            httpClient.start();
-        } catch (Exception e) {
-            logger.error("Cannot start http client!", e);
-            return;
-        }
         scheduler.execute(this::login);
     }
 
@@ -99,11 +87,6 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
     public void dispose() {
         super.dispose();
         logout();
-        try {
-            httpClient.stop();
-        } catch (Exception e) {
-            logger.error("Cannot stop http client", e);
-        }
     }
 
     public JablotronConfig getBridgeConfig() {
@@ -165,5 +148,33 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             //Silence
             //logger.error(e.toString());
         }
+    }
+
+    public synchronized JablotronWidgetsResponse discoverServices() {
+        try {
+            String url = JABLOTRON_URL + "ajax/widget-new.php?" + Utils.getBrowserTimestamp();
+
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.GET)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
+                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.REFERER, JABLOTRON_URL + "cloud")
+                    .header("X-Requested-With", "XMLHttpRequest")
+                    .agent(AGENT)
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+                    .send();
+
+            String line = resp.getContentAsString();
+
+            logger.debug("Response: {}", line);
+            JablotronWidgetsResponse response = gson.fromJson(line, JablotronWidgetsResponse.class);
+
+            return response;
+        } catch (TimeoutException ex) {
+            logger.debug("Timeout during discovering services", ex);
+        } catch (Exception ex) {
+            logger.error("Cannot discover Jablotron services!", ex);
+        }
+        return null;
     }
 }

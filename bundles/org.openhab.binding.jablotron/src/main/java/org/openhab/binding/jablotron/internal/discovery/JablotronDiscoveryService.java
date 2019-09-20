@@ -12,24 +12,16 @@
  */
 package org.openhab.binding.jablotron.internal.discovery;
 
-import com.google.gson.Gson;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.util.StringContentProvider;
-import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
 import org.eclipse.smarthome.config.discovery.DiscoveryResultBuilder;
 import org.eclipse.smarthome.config.discovery.DiscoveryServiceCallback;
 import org.eclipse.smarthome.config.discovery.ExtendedDiscoveryService;
+import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.jablotron.handler.JablotronBridgeHandler;
-import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
 import org.openhab.binding.jablotron.internal.model.JablotronWidgetsResponse;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Deactivate;
@@ -39,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
@@ -55,30 +46,19 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
     private JablotronBridgeHandler bridge;
     private @Nullable DiscoveryServiceCallback discoveryServiceCallback;
 
-    // Instantiate and configure the SslContextFactory
-    private SslContextFactory sslContextFactory = new SslContextFactory(true);
-
-    private @Nullable HttpClient httpClient;
-
     private @Nullable ScheduledFuture<?> discoveryJob = null;
 
-    private Gson gson = new Gson();
     private static final int DISCOVERY_TIMEOUT_SEC = 10;
 
     public JablotronDiscoveryService(JablotronBridgeHandler bridgeHandler) {
         super(DISCOVERY_TIMEOUT_SEC);
         logger.debug("Creating discovery service");
         this.bridge = bridgeHandler;
-
-        sslContextFactory.setExcludeProtocols("");
-        sslContextFactory.setExcludeCipherSuites("");
-
     }
 
     private void startDiscovery() {
-        if (login()) {
-            discoverServices();
-            logout();
+        if (this.bridge.getThing().getStatus() == ThingStatus.ONLINE) {
+                discoverServices();
         }
     }
 
@@ -116,11 +96,6 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
         super.deactivate();
         if (discoveryJob != null) {
             discoveryJob.cancel(true);
-        }
-        try {
-            httpClient.stop();
-        } catch (Exception e) {
-            logger.error("Cannot stop http client", e);
         }
     }
 
@@ -171,25 +146,10 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
 
     private synchronized void discoverServices() {
         try {
-            String url = JABLOTRON_URL + "ajax/widget-new.php?" + Utils.getBrowserTimestamp();
+            JablotronWidgetsResponse response = bridge.discoverServices();
 
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.GET)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL + "cloud")
-                    .header("X-Requested-With", "XMLHttpRequest")
-                    .agent(AGENT)
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
-                    .send();
-
-            String line = resp.getContentAsString();
-
-            logger.debug("Response: {}", line);
-            JablotronWidgetsResponse response = gson.fromJson(line, JablotronWidgetsResponse.class);
-
-            if (!response.isOKStatus()) {
-                logger.error("Invalid widgets response: {}", line);
+            if (response == null || !response.isOKStatus()) {
+                logger.error("Invalid widgets response");
                 return;
             }
 
@@ -200,7 +160,7 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
 
             for (int i = 0; i < response.getCntWidgets(); i++) {
                 String serviceId = String.valueOf(response.getWidgets().get(i).getId());
-                url = response.getWidgets().get(i).getUrl();
+                String url = response.getWidgets().get(i).getUrl();
                 logger.debug("Found Jablotron service: {} id: {}", response.getWidgets().get(i).getName(), serviceId);
 
                 String device = response.getWidgets().get(i).getTemplateService();
@@ -212,79 +172,8 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
                     logger.error("Unsupported device type discovered: {} with serviceId: {} and url: {}", response.getWidgets().get(i).getTemplateService(), serviceId, url);
                 }
             }
-        } catch (TimeoutException ex) {
-            logger.debug("Timeout during discovering services", ex);
         } catch (Exception ex) {
             logger.error("Cannot discover Jablotron services!", ex);
-        }
-    }
-
-    protected synchronized boolean login() {
-        String url;
-
-        httpClient = new HttpClient(sslContextFactory);
-        httpClient.setFollowRedirects(false);
-
-        try {
-            httpClient.start();
-        } catch (Exception e) {
-            logger.error("Cannot start http client!", e);
-            return false;
-        }
-
-        try {
-            url = JABLOTRON_URL + "ajax/login.php";
-            String urlParameters = "login=" + bridge.bridgeConfig.getLogin() + "&heslo=" + bridge.bridgeConfig.getPassword() + "&aStatus=200&loginType=Login";
-
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL)
-                    .header("X-Requested-With", "XMLHttpRequest")
-                    .agent(AGENT)
-                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
-                    .send();
-
-            String line = resp.getContentAsString();
-
-            JablotronLoginResponse response = gson.fromJson(line, JablotronLoginResponse.class);
-
-            if (response.isOKStatus()) {
-                logger.debug("Successfully logged to Jablonet cloud!");
-                return true;
-            } else {
-                logger.debug("Received error response: {}", line);
-            }
-        } catch (TimeoutException e) {
-            logger.debug("Timeout during getting login cookie", e);
-        } catch (Exception e) {
-            logger.error("Cannot get Jablotron login cookie", e);
-        }
-        return false;
-    }
-
-    private void logout() {
-
-        String url = JABLOTRON_URL + "logout";
-        try {
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.GET)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL)
-                    .agent(AGENT)
-                    .timeout(5, TimeUnit.SECONDS)
-                    .send();
-
-            String line = resp.getContentAsString();
-
-            logger.debug("logout... {}", line);
-            httpClient.stop();
-            httpClient.destroy();
-        } catch (Exception e) {
-            //Silence
         }
     }
 }

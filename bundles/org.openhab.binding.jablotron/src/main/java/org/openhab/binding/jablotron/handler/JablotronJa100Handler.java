@@ -13,9 +13,9 @@
 package org.openhab.binding.jablotron.handler;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpHeader;
@@ -28,18 +28,14 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
 import org.eclipse.smarthome.core.types.Command;
-import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 import org.openhab.binding.jablotron.internal.model.ja100.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -55,8 +51,8 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronJa100Handler.class);
 
-    public JablotronJa100Handler(Thing thing) {
-        super(thing);
+    public JablotronJa100Handler(Thing thing, HttpClient httpClient) {
+        super(thing, httpClient);
     }
 
     @Override
