@@ -27,7 +27,6 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.config.DeviceConfig;
-import org.openhab.binding.jablotron.config.JablotronConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
 import org.openhab.binding.jablotron.internal.model.JablotronTrouble;

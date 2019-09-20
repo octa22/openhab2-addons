@@ -22,7 +22,6 @@ import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
-import org.eclipse.smarthome.core.library.types.OpenClosedType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
@@ -314,39 +313,10 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
     }
 
     public synchronized void sendCommand(String code) {
-        int status;
-        Integer result;
         try {
             if (!isReady()) {
                 return;
             }
-
-            /*
-            OasisControlResponse response = sendUserCode("", serviceUrl);
-            if (response == null) {
-                logger.warn("null response received");
-                return;
-            }
-
-            status = response.getStatus();
-            result = response.getVysledek();
-            if (result != null) {
-                if (status == 200 && result == 4) {
-                    logger.debug("Sending user code: {}", code);
-                    response = sendUserCode(code, serviceUrl);
-                } else {
-                    logger.warn("Received unknown status: {}", status);
-                }
-                if (response != null && response.getVysledek() != null) {
-                    handleHttpRequestStatus(response.getStatus());
-                } else {
-                    logger.warn("null response/status received");
-                    logout();
-                }
-            } else {
-                logger.warn("null status received");
-                logout();
-            }*/
             OasisControlResponse response = sendUserCode(code);
             if (response != null && response.getVysledek() != null) {
                 handleHttpRequestStatus(response.getStatus());

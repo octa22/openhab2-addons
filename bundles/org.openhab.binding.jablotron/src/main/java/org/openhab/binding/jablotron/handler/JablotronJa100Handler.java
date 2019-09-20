@@ -157,22 +157,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 }
                 updateLastTrouble(troubles.get(0));
             }
-            /*
-            if (response.hasEvents()) {
-                ArrayList<OasisEvent> events = response.getEvents();
-                for (OasisEvent event : events) {
-                    logger.debug("Found event: {} {} {}", event.getDatum(), event.getCode(), event.getEvent());
-                    //updateLastEvent(event);
-                }
-            } else {
-                ArrayList<Ja100Event> history = getServiceHistory();
-                logger.debug("History log contains {} events", history.size());
-                if (history.size() > 0) {
-                    Ja100Event event = history.get(0);
-                    updateLastEvent(event);
-                    logger.debug("Last event: {} is of class: {} has section: {}", event.getEvent(), event.getEventClass(), event.getSection());
-                }
-            }*/
 
             inService = response.inService();
 
