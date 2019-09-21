@@ -23,6 +23,7 @@ import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingStatusDetail;
+import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.config.DeviceConfig;
@@ -70,12 +71,25 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     final HttpClient httpClient;
 
     @Override
-    public void dispose() {
-        super.dispose();
+    public void bridgeStatusChanged(ThingStatusInfo bridgeStatusInfo) {
+        super.bridgeStatusChanged(bridgeStatusInfo);
+        if (ThingStatus.UNINITIALIZED == bridgeStatusInfo.getStatus()) {
+            cleanup();
+        }
+    }
+
+    private void cleanup() {
+        logger.debug("doing cleanup...");
         logout();
         if (future != null) {
             future.cancel(true);
         }
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        cleanup();
     }
 
     @Override
