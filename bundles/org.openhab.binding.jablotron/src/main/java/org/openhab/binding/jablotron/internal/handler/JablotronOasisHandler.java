@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.handler;
+package org.openhab.binding.jablotron.internal.handler;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

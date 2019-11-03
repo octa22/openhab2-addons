@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.handler;
+package org.openhab.binding.jablotron.internal.handler;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.client.HttpClient;
@@ -18,7 +18,6 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
@@ -27,14 +26,16 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
-import org.openhab.binding.jablotron.config.JablotronConfig;
+import org.openhab.binding.jablotron.internal.config.JablotronConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
 import org.openhab.binding.jablotron.internal.model.JablotronWidgetsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -122,8 +123,8 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
         } catch (TimeoutException ex) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Timeout during login to Jablonet cloud");
             scheduler.schedule(this::login, 30, TimeUnit.SECONDS);
-        } catch (Exception ex) {
-            logger.error("Exception during login to Jablotron cloud: {}", ex.toString());
+        } catch (UnsupportedEncodingException | ExecutionException | InterruptedException ex) {
+            logger.error("Exception during login to Jablotron cloud: {}", ex);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
         }
     }
@@ -144,7 +145,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             String line = resp.getContentAsString();
 
             logger.debug("logout... {}", line);
-        } catch (Exception e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             //Silence
             //logger.error(e.toString());
         }
@@ -171,9 +172,9 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
             return response;
         } catch (TimeoutException ex) {
-            logger.debug("Timeout during discovering services", ex);
-        } catch (Exception ex) {
-            logger.error("Cannot discover Jablotron services!", ex);
+            logger.error("Timeout during discovering services", ex);
+        } catch (ExecutionException | InterruptedException ex) {
+            logger.error("Interruption during discovering services", ex);
         }
         return null;
     }

@@ -14,7 +14,7 @@ package org.openhab.binding.jablotron.internal.model.ja100;
 
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
-import org.openhab.binding.jablotron.handler.JablotronBridgeHandler;
+import org.openhab.binding.jablotron.internal.handler.JablotronBridgeHandler;
 import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisEvent;
 import org.slf4j.Logger;

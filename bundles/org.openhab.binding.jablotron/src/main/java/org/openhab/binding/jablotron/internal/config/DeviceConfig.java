@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.config;
+package org.openhab.binding.jablotron.internal.config;
 
 /**
  * The {@link DeviceConfig} class defines the thing configuration

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.handler;
+package org.openhab.binding.jablotron.internal.handler;
 
 import com.google.gson.Gson;
 import org.eclipse.jetty.client.HttpClient;
@@ -26,13 +26,14 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.State;
-import org.openhab.binding.jablotron.config.DeviceConfig;
+import org.openhab.binding.jablotron.internal.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
 import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
 import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -120,7 +121,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
             String line = resp.getContentAsString();
 
             logger.debug("logout... {}", line);
-        } catch (Exception e) {
+        } catch (ExecutionException | TimeoutException | InterruptedException e) {
             //Silence
         } finally {
             //controlDisabled = true;
@@ -222,7 +223,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         } catch (TimeoutException e) {
             logger.debug("Timeout during getting login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
-        } catch (Exception e) {
+        } catch (UnsupportedEncodingException | ExecutionException | InterruptedException e) {
             logger.error("Cannot get Jablotron login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
         }
@@ -270,7 +271,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         } catch (TimeoutException e) {
             logger.debug("Timeout during initializing Jablotron service: {}", serviceId, e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot initialize " + thing.getThingTypeUID().getId() + " service");
-        } catch (Exception ex) {
+        } catch (ExecutionException | InterruptedException ex) {
             logger.error("Cannot initialize Jablotron service: {}", serviceId, ex);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, "Cannot initialize " + thing.getThingTypeUID().getId() + " service");
         }

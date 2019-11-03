@@ -12,7 +12,6 @@
  */
 package org.openhab.binding.jablotron.internal;
 
-import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
@@ -21,9 +20,9 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.io.net.http.HttpClientFactory;
-import org.openhab.binding.jablotron.handler.JablotronBridgeHandler;
-import org.openhab.binding.jablotron.handler.JablotronJa100Handler;
-import org.openhab.binding.jablotron.handler.JablotronOasisHandler;
+import org.openhab.binding.jablotron.internal.handler.JablotronBridgeHandler;
+import org.openhab.binding.jablotron.internal.handler.JablotronJa100Handler;
+import org.openhab.binding.jablotron.internal.handler.JablotronOasisHandler;
 import org.openhab.binding.jablotron.internal.discovery.JablotronDiscoveryService;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;

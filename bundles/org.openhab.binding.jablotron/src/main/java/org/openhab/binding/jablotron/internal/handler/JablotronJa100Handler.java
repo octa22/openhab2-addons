@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.handler;
+package org.openhab.binding.jablotron.internal.handler;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -95,9 +96,9 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             logger.info("getStatus response: {}", line);
             return gson.fromJson(line, Ja100StatusResponse.class);
         } catch (TimeoutException ste) {
-            logger.debug("Timeout during getting alarm status!");
+            logger.error("Timeout during getting alarm status!");
             return null;
-        } catch (Exception e) {
+        } catch (ExecutionException | InterruptedException e) {
             logger.error("sendGetStatusRequest exception", e);
             return null;
         }
@@ -344,8 +345,8 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
             logger.debug("sendUserCode result: {}", response.getResult());
             return response;
         } catch (TimeoutException ex) {
-            logger.debug("sendUserCode timeout exception", ex);
-        } catch (Exception ex) {
+            logger.error("sendUserCode timeout exception", ex);
+        } catch (ExecutionException | InterruptedException ex) {
             logger.error("sendUserCode exception", ex);
         }
         return null;
@@ -390,7 +391,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 }
             }
             return result;
-        } catch (Exception ex) {
+        } catch (ExecutionException | InterruptedException | TimeoutException ex) {
             logger.error("Cannot get Jablotron service history: {}", serviceId, ex);
         }
         return null;
