@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,8 @@
 package org.openhab.binding.jablotron.internal.model;
 
 import com.google.gson.annotations.SerializedName;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.ArrayList;
 
@@ -22,14 +24,15 @@ import java.util.ArrayList;
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class JablotronWidgetsResponse {
-    private int status;
+    private int status = -1;
 
     @SerializedName("cnt-widgets")
-    private int cntWidgets;
+    private int cntWidgets = -1;
 
     @SerializedName("widget")
-    private ArrayList<JablotronWidget> widgets;
+    private @Nullable ArrayList<JablotronWidget> widgets;
 
     public int getStatus() {
         return status;
@@ -39,7 +42,7 @@ public class JablotronWidgetsResponse {
         return cntWidgets;
     }
 
-    public ArrayList<JablotronWidget> getWidgets() {
+    public @Nullable ArrayList<JablotronWidget> getWidgets() {
         return widgets;
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,20 @@
  */
 package org.openhab.binding.jablotron.internal.model;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link JablotronWidget} class defines the widgets
  * object.
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class JablotronWidget {
-    private String name;
-    private int id;
-    private String url;
-    private String templateService;
+    private String name = "";
+    private int id = -1;
+    private String url = "";
+    private String templateService = "";
 
     public String getName() {
         return name;

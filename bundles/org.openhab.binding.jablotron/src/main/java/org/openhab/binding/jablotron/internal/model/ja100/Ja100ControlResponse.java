@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,18 +12,22 @@
  */
 package org.openhab.binding.jablotron.internal.model.ja100;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link Ja100ControlResponse} class defines the control command
  * response for ja100.
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class Ja100ControlResponse {
-    private Integer result;
-    private int responseCode;
-    private int authorization;
+    private int result;
+    private int responseCode = -1;
+    private int authorization = -1;
 
-    public Integer getResult() {
+    public int getResult() {
         return result;
     }
 

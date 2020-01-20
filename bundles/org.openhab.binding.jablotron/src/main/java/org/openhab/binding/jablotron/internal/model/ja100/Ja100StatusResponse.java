@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,8 @@ package org.openhab.binding.jablotron.internal.model.ja100;
 
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.jablotron.internal.handler.JablotronBridgeHandler;
 import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisEvent;
@@ -27,30 +29,38 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
+import javax.validation.constraints.Null;
+
 /**
  * The {@link Ja100StatusResponse} class defines the JA100 get status
  * response.
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class Ja100StatusResponse {
 
     private Gson gson = new Gson();
-    private JsonParser parser = new JsonParser();
 
-    private final Logger logger = LoggerFactory.getLogger(JablotronBridgeHandler.class);
+    int status = -1;
 
-    int status;
+    @Nullable
     JsonElement sekce;
+
+    @Nullable
     JsonElement pgm;
+
+    @Nullable
     Integer isAlarm;
 
+    @Nullable
     @SerializedName("trouble")
     ArrayList<JablotronTrouble> troubles;
 
     //JsonElement alarm;
     //boolean controlDisabled;
     //int service;
+    @Nullable
     JsonElement teplomery;
 
     public int getStatus() {
@@ -123,7 +133,7 @@ public class Ja100StatusResponse {
             return null;
     }*/
 
-    public ArrayList<JablotronTrouble> getTroubles() {
+    public @Nullable ArrayList<JablotronTrouble> getTroubles() {
         return troubles;
     }
 
@@ -133,7 +143,7 @@ public class Ja100StatusResponse {
         return Date.from(zdt.toInstant());
     }
 
-    public ArrayList<OasisEvent> getEvents() {
+    public @Nullable ArrayList<OasisEvent> getEvents() {
         if (!hasEvents()) {
             return null;
         }
@@ -143,7 +153,7 @@ public class Ja100StatusResponse {
         return result;
     }
 
-    public ArrayList<Ja100Temperature> getTemperatures() {
+    public @Nullable ArrayList<Ja100Temperature> getTemperatures() {
         if (!hasTemperature()) {
             return null;
         }
@@ -163,15 +173,15 @@ public class Ja100StatusResponse {
         return result;
     }
 
-    public ArrayList<Ja100Section> getPGMs() {
+    public @Nullable ArrayList<Ja100Section> getPGMs() {
         return getSectionsCommon(pgm);
     }
 
-    public ArrayList<Ja100Section> getSections() {
+    public @Nullable ArrayList<Ja100Section> getSections() {
         return getSectionsCommon(sekce);
     }
 
-    private ArrayList<Ja100Section> getSectionsCommon(JsonElement section) {
+    private @Nullable ArrayList<Ja100Section> getSectionsCommon(@Nullable JsonElement section) {
         if (section == null || section.equals(JsonNull.INSTANCE)) {
             return null;
         }

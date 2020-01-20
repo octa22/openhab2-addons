@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,8 @@ package org.openhab.binding.jablotron.internal.model.oasis;
 
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.jablotron.internal.model.JablotronSection;
 import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 
@@ -30,25 +32,35 @@ import java.util.Map;
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class OasisStatusResponse {
 
     private Gson gson = new Gson();
-    private JsonParser parser = new JsonParser();
 
+    @Nullable
     @SerializedName("last_entry")
     OasisLastEntry lastEntry;
-    int status;
+
+    int status = -1;
+
+    @Nullable
     ArrayList<JablotronSection> sekce;
+
+    @Nullable
     ArrayList<JablotronSection> pgm;
-    boolean controlDisabled;
-    int service;
-    int isAlarm;
+
+    boolean controlDisabled = false;
+    int service = -1;
+    int isAlarm = -1;
+
+    @Nullable
     JsonElement vypis;
 
+    @Nullable
     @SerializedName("trouble")
     ArrayList<JablotronTrouble> troubles;
 
-    public OasisLastEntry getLast_entry() {
+    public @Nullable OasisLastEntry getLast_entry() {
         return lastEntry;
     }
 
@@ -56,11 +68,11 @@ public class OasisStatusResponse {
         return status;
     }
 
-    public ArrayList<JablotronSection> getSekce() {
+    public @Nullable ArrayList<JablotronSection> getSekce() {
         return sekce;
     }
 
-    public ArrayList<JablotronSection> getPgm() {
+    public @Nullable ArrayList<JablotronSection> getPgm() {
         return pgm;
     }
 
@@ -68,7 +80,7 @@ public class OasisStatusResponse {
         return controlDisabled;
     }
 
-    public JsonElement getVypis() {
+    public @Nullable JsonElement getVypis() {
         return vypis;
     }
 
@@ -105,14 +117,14 @@ public class OasisStatusResponse {
     }
 
     public boolean hasTroubles() {
-        return troubles != null && !troubles.equals(JsonNull.INSTANCE);
+        return troubles != null;
     }
 
     public boolean hasSectionStatus() {
         return sekce != null && sekce.size() == 3 && pgm != null && pgm.size() == 2;
     }
 
-    public Date getLastEventTime() {
+    public @Nullable Date getLastEventTime() {
         if (lastEntry != null) {
             return getZonedDateTime(lastEntry.cid.time);
         } else
@@ -125,7 +137,7 @@ public class OasisStatusResponse {
         return Date.from(zdt.toInstant());
     }
 
-    public ArrayList<OasisEvent> getEvents() {
+    public @Nullable ArrayList<OasisEvent> getEvents() {
         if (!hasEvents()) {
             return null;
         }
@@ -151,7 +163,7 @@ public class OasisStatusResponse {
         return result;
     }
 
-    public ArrayList<JablotronTrouble> getTroubles() {
+    public @Nullable ArrayList<JablotronTrouble> getTroubles() {
         return troubles;
     }
 }

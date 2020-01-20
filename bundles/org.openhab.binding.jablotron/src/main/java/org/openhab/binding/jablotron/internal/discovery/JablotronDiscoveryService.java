@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -117,28 +117,24 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
     }
 
     public void oasisDiscovered(String label, String serviceId) {
-        Map<String, Object> properties = new HashMap<>(1);
-
         ThingUID thingUID = new ThingUID(THING_TYPE_OASIS, bridge.getThing().getUID(), serviceId);
 
         if (discoveryServiceCallback.getExistingThing(thingUID) == null) {
             logger.info("Detected an OASIS alarm with service id: {}", serviceId);
             thingDiscovered(
-                    DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_OASIS).withProperties(properties)
+                    DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_OASIS)
                             .withLabel(label)
                             .withBridge(bridge.getThing().getUID()).build());
         }
     }
 
     public void ja100Discovered(String label, String serviceId) {
-        Map<String, Object> properties = new HashMap<>(1);
-
         ThingUID thingUID = new ThingUID(THING_TYPE_JA100, bridge.getThing().getUID(), serviceId);
 
         if (discoveryServiceCallback.getExistingThing(thingUID) == null) {
             logger.info("Detected a JA100 alarm with service id: {}", serviceId);
             thingDiscovered(
-                    DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_JA100).withProperties(properties)
+                    DiscoveryResultBuilder.create(thingUID).withThingType(THING_TYPE_JA100)
                             .withLabel(label)
                             .withBridge(bridge.getThing().getUID()).build());
         }
@@ -166,7 +162,7 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
                 String device = response.getWidgets().get(i).getTemplateService();
                 if (device.equals(THING_TYPE_OASIS.getId())) {
                     oasisDiscovered("Jablotron OASIS Alarm", serviceId);
-                } else if (device.equals(THING_TYPE_JA100.getId())) {
+                } else if (device.startsWith(THING_TYPE_JA100.getId())) {
                     ja100Discovered("Jablotron JA100 Alarm", serviceId);
                 } else {
                     logger.error("Unsupported device type discovered: {} with serviceId: {} and url: {}", response.getWidgets().get(i).getTemplateService(), serviceId, url);

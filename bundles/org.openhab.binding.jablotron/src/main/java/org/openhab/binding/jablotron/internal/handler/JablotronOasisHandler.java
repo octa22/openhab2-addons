@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.util.StringContentProvider;
@@ -46,12 +49,15 @@ import java.util.concurrent.TimeoutException;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
+import javax.validation.constraints.Null;
+
 /**
  * The {@link JablotronOasisHandler} is responsible for handling commands, which are
  * sent to one of the channels.
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class JablotronOasisHandler extends JablotronAlarmHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronOasisHandler.class);
@@ -150,7 +156,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    private synchronized OasisStatusResponse sendGetStatusRequest() {
+    private synchronized @Nullable OasisStatusResponse sendGetStatusRequest() {
 
         String url = JABLOTRON_URL + "app/oasis/ajax/stav.php?" + Utils.getBrowserTimestamp();
         try {
@@ -276,7 +282,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             logger.debug("Controlling section: {} with status: {}", section, status);
             OasisControlResponse response = sendUserCode(section, status, "");
 
-            if (response != null && response.getVysledek() != null) {
+            if (response != null) {
                 handleHttpRequestStatus(response.getStatus());
             } else {
                 logger.warn("null response/status received");
@@ -319,7 +325,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 return;
             }
             OasisControlResponse response = sendUserCode(code);
-            if (response != null && response.getVysledek() != null) {
+            if (response != null) {
                 handleHttpRequestStatus(response.getStatus());
             } else {
                 logger.warn("null response/status received");
@@ -330,7 +336,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    protected synchronized OasisControlResponse sendUserCode(String section, String status, String code) {
+    protected synchronized @Nullable OasisControlResponse sendUserCode(String section, String status, String code) {
         String url;
 
         try {
@@ -365,11 +371,11 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         return null;
     }
 
-    private synchronized OasisControlResponse sendUserCode(String code) {
+    private synchronized @Nullable OasisControlResponse sendUserCode(String code) {
         return sendUserCode("STATE", code.isEmpty() ? "1" : "", code);
     }
 
-    private ArrayList<OasisEvent> getServiceHistory() {
+    private @Nullable ArrayList<OasisEvent> getServiceHistory() {
         String serviceId = thing.getUID().getId();
         try {
             String url = "https://www.jablonet.net/app/oasis/ajax/historie.php";

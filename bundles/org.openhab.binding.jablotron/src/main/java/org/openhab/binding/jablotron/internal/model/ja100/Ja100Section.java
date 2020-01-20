@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,18 +12,21 @@
  */
 package org.openhab.binding.jablotron.internal.model.ja100;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link Ja100StatusResponse} class defines the JA100 section status
  * object.
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class Ja100Section {
-    private int stav;
-    private String stateName;
-    private String nazev;
-    private String time;
-    private long active;
+    private int stav = -1;
+    private String stateName = "";
+    private String nazev = "";
+    private String time = "";
+    private long active = -1;
 
     public long getStav() {
         return stav;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,14 +12,17 @@
  */
 package org.openhab.binding.jablotron.internal.model.oasis;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link OasisLastEntryCID} class defines the OASIS last entry
  * CID object.
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class OasisLastEntryCID {
-    long time;
+    long time = -1;
 
     public long getTime() {
         return time;

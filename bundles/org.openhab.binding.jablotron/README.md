@@ -27,6 +27,7 @@ The bridge thing requires this configuration:
 * password (password to your jablonet account)
 
 optionally you can set
+
 * lang (language of the alarm texts)
 
 The both alarm things have this configuration:
@@ -58,6 +59,7 @@ The oasis thing exposes these channels:
 * alarm (the alarm status OFF/ON)
 
 The JA100 thing has these channels:
+
 * lastEvent (the text description of the last event)
 * lastEventSection (the section of the last event)
 * lastEventClass (the class of the last event - arm, disarm, service)

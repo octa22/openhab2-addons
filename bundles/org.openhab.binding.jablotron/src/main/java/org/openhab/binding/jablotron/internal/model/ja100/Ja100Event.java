@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,8 @@
 package org.openhab.binding.jablotron.internal.model.ja100;
 
 import com.google.gson.annotations.SerializedName;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,17 +25,18 @@ import java.time.format.DateTimeFormatter;
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class Ja100Event {
-    private String date;
+    private String date = "";
 
     @SerializedName("section-name")
-    private String section;
+    private String section = "";
 
     @SerializedName("event-text")
-    private String event;
+    private String event = "";
 
     @SerializedName("icon-type")
-    private String eventClass;
+    private String eventClass = "";
 
     public String getDate() {
         return date;

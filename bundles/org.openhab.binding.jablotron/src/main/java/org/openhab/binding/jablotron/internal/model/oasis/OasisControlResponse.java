@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,21 @@
  */
 package org.openhab.binding.jablotron.internal.model.oasis;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * The {@link OasisControlResponse} class defines the control command
  * response for OASIS.
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class OasisControlResponse {
-    private Integer vysledek;
-    private int status;
+    private int vysledek = -1;
+    private int status = -1;
 
-    public Integer getVysledek() {
+    public int getVysledek() {
         return vysledek;
     }
 

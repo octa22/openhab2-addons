@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,16 +12,19 @@
  */
 package org.openhab.binding.jablotron.internal.model.ja100;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link Ja100StatusResponse} class defines the JA100 temperature sensor
  * object.
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class Ja100Temperature {
-    private String stateName;
-    private String value;
-    private long ts;
+    private String stateName = "";
+    private String value = "";
+    private long ts = -1;
 
     public String getStateName() {
         return stateName;

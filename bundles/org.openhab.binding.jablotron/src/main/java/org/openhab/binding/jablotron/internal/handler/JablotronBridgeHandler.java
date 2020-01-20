@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,8 @@
 package org.openhab.binding.jablotron.internal.handler;
 
 import com.google.gson.Gson;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.util.StringContentProvider;
@@ -47,6 +49,7 @@ import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronBridgeHandler.class);
@@ -58,7 +61,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
     /**
      * Our configuration
      */
-    public JablotronConfig bridgeConfig;
+    public @Nullable JablotronConfig bridgeConfig;
 
     public JablotronBridgeHandler(Thing thing, HttpClient httpClient) {
         super(thing);
@@ -90,7 +93,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
         logout();
     }
 
-    public JablotronConfig getBridgeConfig() {
+    public @Nullable JablotronConfig getBridgeConfig() {
         return bridgeConfig;
     }
 
@@ -151,7 +154,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
         }
     }
 
-    public synchronized JablotronWidgetsResponse discoverServices() {
+    public synchronized @Nullable JablotronWidgetsResponse discoverServices() {
         try {
             String url = JABLOTRON_URL + "ajax/widget-new.php?" + Utils.getBrowserTimestamp();
 

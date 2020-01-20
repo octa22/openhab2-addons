@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.binding.jablotron.internal.model;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisLastEntryCID;
 
 /**
@@ -20,11 +21,12 @@ import org.openhab.binding.jablotron.internal.model.oasis.OasisLastEntryCID;
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class JablotronTrouble {
-    private String zekdy;
-    private String cas;
-    private String message;
-    private String name;
+    private String zekdy = "";
+    private String cas = "";
+    private String message = "";
+    private String name = "";
 
     public String getZekdy() {
         return zekdy;

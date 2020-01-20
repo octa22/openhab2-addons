@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,8 @@ package org.openhab.binding.jablotron.internal.handler;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.util.StringContentProvider;
@@ -48,6 +50,7 @@ import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class JablotronJa100Handler extends JablotronAlarmHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronJa100Handler.class);
@@ -77,7 +80,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         return channel.contains("STATE");
     }
 
-    private synchronized Ja100StatusResponse sendGetStatusRequest() {
+    private synchronized @Nullable Ja100StatusResponse sendGetStatusRequest() {
 
         String url = JABLOTRON_URL + "app/ja100/ajax/stav.php?" + Utils.getBrowserTimestamp();
         try {
@@ -317,7 +320,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         return true;
     }
 
-    protected synchronized Ja100ControlResponse sendUserCode(String section, String status) {
+    protected synchronized @Nullable Ja100ControlResponse sendUserCode(String section, String status) {
         String url;
 
         try {
@@ -352,7 +355,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         return null;
     }
 
-    private ArrayList<Ja100Event> getServiceHistory() {
+    private @Nullable ArrayList<Ja100Event> getServiceHistory() {
         String serviceId = thing.getUID().getId();
         try {
             String url = "https://www.jablonet.net/app/ja100/ajax/historie.php";

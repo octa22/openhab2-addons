@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,15 +12,18 @@
  */
 package org.openhab.binding.jablotron.internal.config;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link DeviceConfig} class defines the thing configuration
  * object.
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class DeviceConfig {
-    private int refresh;
-    private String code;
+    private int refresh = 180;
+    private String code = "";
 
     public int getRefresh() {
         return refresh;

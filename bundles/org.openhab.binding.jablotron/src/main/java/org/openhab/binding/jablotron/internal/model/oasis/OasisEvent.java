@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2019 Contributors to the openHAB project
+ * Copyright (c) 2010-2020 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.binding.jablotron.internal.model.oasis;
 
 import com.google.gson.annotations.SerializedName;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The {@link OasisLastEntryCID} class defines the OASIS last event
@@ -20,14 +21,15 @@ import com.google.gson.annotations.SerializedName;
  *
  * @author Ondrej Pecta - Initial contribution
  */
+@NonNullByDefault
 public class OasisEvent {
-    private String datum;
-    private long time;
-    private String code;
-    private String event;
+    private String datum = "";
+    private long time = -1;
+    private String code = "";
+    private String event = "";
 
     @SerializedName("ev_class")
-    private String eventClass;
+    private String eventClass = "";
 
     public String getDatum() {
         return datum;
