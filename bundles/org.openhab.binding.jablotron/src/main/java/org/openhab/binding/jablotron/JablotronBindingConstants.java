@@ -54,8 +54,11 @@ public class JablotronBindingConstants {
 
     // Constants
     public static final String JABLOTRON_URL = "https://www.jablonet.net/";
+    public static final String JABLOTRON_API_URL = "https://api.jablonet.net/api/1.4/";
     public static final String OASIS_SERVICE_URL = "app/oasis?service=";
     public static final String JA100_SERVICE_URL = "app/ja100?service=";
     public static final String AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.59 Safari/537.36";
     public static final int TIMEOUT = 10;
+    public static final int LONG_TIMEOUT = 20;
+    public static final String CLIENT = "openHAB";
 }

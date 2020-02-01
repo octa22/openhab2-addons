@@ -10,23 +10,32 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.internal.model.oasis;
+package org.openhab.binding.jablotron.internal.model;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link OasisControlResponse} class defines the control command
- * response for OASIS.
+ * The {@link JablotronGetServiceResponse} class defines the response for the
+ * getServiceList operation
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class OasisControlResponse {
-    private boolean status = false;
+public class JablotronGetServiceResponse {
+    boolean status = false;
 
     @SerializedName("error_message")
     String errorMessage = "";
+
+    List<JablotronDiscoveredService> services = new ArrayList<>();
+
+    public List<JablotronDiscoveredService> getServices() {
+        return services;
+    }
 
     public boolean isStatus() {
         return status;

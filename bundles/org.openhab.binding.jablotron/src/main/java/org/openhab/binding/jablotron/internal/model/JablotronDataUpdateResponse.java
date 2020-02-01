@@ -12,41 +12,35 @@
  */
 package org.openhab.binding.jablotron.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-
-import java.util.ArrayList;
 
 /**
- * The {@link JablotronWidgetsResponse} class defines the get widgets
+ * The {@link JablotronDataUpdateResponse} class defines the data update call
  * response.
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronWidgetsResponse {
-    private int status = -1;
+public class JablotronDataUpdateResponse {
+    boolean status = false;
+    JablotronData data = new JablotronData();
 
-    @SerializedName("cnt-widgets")
-    private int cntWidgets = -1;
+    @SerializedName("error_message")
+    String errorMessage = "";
 
-    @SerializedName("widget")
-    private @Nullable ArrayList<JablotronWidget> widgets;
-
-    public int getStatus() {
+    public boolean isStatus() {
         return status;
     }
 
-    public int getCntWidgets() {
-        return cntWidgets;
+    public JablotronData getData() {
+        return data;
     }
 
-    public @Nullable ArrayList<JablotronWidget> getWidgets() {
-        return widgets;
-    }
-
-    public boolean isOKStatus() {
-        return status == 200;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }

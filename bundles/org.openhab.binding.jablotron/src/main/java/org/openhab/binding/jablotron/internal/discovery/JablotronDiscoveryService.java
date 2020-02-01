@@ -22,7 +22,7 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
 import org.openhab.binding.jablotron.internal.handler.JablotronBridgeHandler;
-import org.openhab.binding.jablotron.internal.model.JablotronWidgetsResponse;
+import org.openhab.binding.jablotron.internal.model.JablotronDiscoveredService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
@@ -72,7 +72,7 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
 
     @Override
     protected void startBackgroundDiscovery() {
-        logger.debug("Starting SomfyTahoma background discovery");
+        logger.debug("Starting Jablotron background discovery");
 
         if (discoveryJob == null || discoveryJob.isCancelled()) {
             discoveryJob = scheduler.scheduleWithFixedDelay(this::startDiscovery, 10, 3600,
@@ -112,7 +112,6 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
     @Override
     protected void startScan() {
         logger.debug("Starting scanning for items...");
-        //bridge.setDiscoveryService(this);
         startDiscovery();
     }
 
@@ -142,30 +141,23 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
 
     private synchronized void discoverServices() {
         try {
-            JablotronWidgetsResponse response = bridge.discoverServices();
+            List<JablotronDiscoveredService> services = bridge.discoverServices();
 
-            if (response == null || !response.isOKStatus()) {
-                logger.error("Invalid widgets response");
-                return;
-            }
-
-            if (response.getCntWidgets() == 0) {
+            if (services == null || services.size() == 0) {
                 logger.error("Cannot found any Jablotron device");
                 return;
             }
 
-            for (int i = 0; i < response.getCntWidgets(); i++) {
-                String serviceId = String.valueOf(response.getWidgets().get(i).getId());
-                String url = response.getWidgets().get(i).getUrl();
-                logger.debug("Found Jablotron service: {} id: {}", response.getWidgets().get(i).getName(), serviceId);
+            for (JablotronDiscoveredService service : services) {
+                String serviceId = String.valueOf(service.getId());
+                logger.debug("Found Jablotron service: {} id: {}", service.getName(), serviceId);
 
-                String device = response.getWidgets().get(i).getTemplateService();
-                if (device.equals(THING_TYPE_OASIS.getId())) {
+                if (service.getServiceType().toLowerCase().equals(THING_TYPE_OASIS.getId())) {
                     oasisDiscovered("Jablotron OASIS Alarm", serviceId);
-                } else if (device.startsWith(THING_TYPE_JA100.getId())) {
+                } else if (service.getServiceType().toLowerCase().startsWith(THING_TYPE_JA100.getId())) {
                     ja100Discovered("Jablotron JA100 Alarm", serviceId);
                 } else {
-                    logger.error("Unsupported device type discovered: {} with serviceId: {} and url: {}", response.getWidgets().get(i).getTemplateService(), serviceId, url);
+                    logger.error("Unsupported device type discovered: {} with serviceId: {}", service.getName(), serviceId);
                 }
             }
         } catch (Exception ex) {

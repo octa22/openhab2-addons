@@ -10,36 +10,32 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.internal.config;
+package org.openhab.binding.jablotron.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link JablotronConfig} class defines the bridge configuration
- * object.
+ * The {@link JablotronServiceData} class defines the service data object
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronConfig {
-    private String login = "";
-    private String password = "";
-    private String lang = "";
-    private int refresh = 180;
+public class JablotronServiceData {
 
-    public String getLogin() {
-        return login;
+    @SerializedName("service_id")
+    String serviceId = "";
+
+    List<JablotronService> data = new ArrayList<>();
+
+    public String getServiceId() {
+        return serviceId;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public int getRefresh() {
-        return refresh;
-    }
-
-    public String getLang() {
-        return lang;
+    public List<JablotronService> getData() {
+        return data;
     }
 }

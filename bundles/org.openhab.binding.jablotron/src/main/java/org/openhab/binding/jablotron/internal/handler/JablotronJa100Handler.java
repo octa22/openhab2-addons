@@ -81,7 +81,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     }
 
     private synchronized @Nullable Ja100StatusResponse sendGetStatusRequest() {
-
         String url = JABLOTRON_URL + "app/ja100/ajax/stav.php?" + Utils.getBrowserTimestamp();
         try {
             ContentResponse resp = httpClient.newRequest(url)
@@ -96,7 +95,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
             String line = resp.getContentAsString();
 
-            logger.info("getStatus response: {}", line);
+            logger.trace("getStatus response: {}", line);
             return gson.fromJson(line, Ja100StatusResponse.class);
         } catch (TimeoutException ste) {
             logger.error("Timeout during getting alarm status!");

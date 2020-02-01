@@ -12,24 +12,30 @@
  */
 package org.openhab.binding.jablotron.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link JablotronWidgetSekce} class defines the sekce part of the widgets
- * object.
+ * The {@link JablotronService} class defines the service object
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronWidgetSekce {
-    private int status = -1;
-    private String nazev = "";
+public class JablotronService {
 
-    public int getStatus() {
-        return status;
+    @SerializedName("data_type")
+    String dataType = "";
+
+    JablotronServiceDetail data = new JablotronServiceDetail();
+
+    public String getDataType() {
+        return dataType;
     }
 
-    public String getNazev() {
-        return nazev;
+    public JablotronServiceDetail getData() {
+        return data;
     }
 }

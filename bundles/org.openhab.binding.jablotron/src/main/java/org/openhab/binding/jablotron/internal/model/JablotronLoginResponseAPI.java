@@ -10,36 +10,29 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.internal.config;
+package org.openhab.binding.jablotron.internal.model;
 
+import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link JablotronConfig} class defines the bridge configuration
- * object.
+ * The {@link JablotronLoginResponseAPI} class defines the login call
+ * response.
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronConfig {
-    private String login = "";
-    private String password = "";
-    private String lang = "";
-    private int refresh = 180;
+public class JablotronLoginResponseAPI {
+    private boolean status = false;
 
-    public String getLogin() {
-        return login;
+    @SerializedName("error_message")
+    String errorMessage = "";
+
+    public boolean isStatus() {
+        return status;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public int getRefresh() {
-        return refresh;
-    }
-
-    public String getLang() {
-        return lang;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }

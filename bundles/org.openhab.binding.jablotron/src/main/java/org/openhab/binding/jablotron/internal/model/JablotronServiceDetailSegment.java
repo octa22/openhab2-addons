@@ -12,24 +12,28 @@
  */
 package org.openhab.binding.jablotron.internal.model;
 
+import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link JablotronWidget} class defines the section
- * object.
+ * The {@link JablotronServiceDetailSegment} class defines the service segment detail object
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronSection {
-    int stav = -1;
-    String nazev = "";
+public class JablotronServiceDetailSegment {
 
-    public int getStav() {
-        return stav;
+    @SerializedName("segment_id")
+    String segmentId = "";
+
+    @SerializedName("segment_state")
+    String segmentState = "";
+
+    public String getSegmentId() {
+        return segmentId;
     }
 
-    public String getNazev() {
-        return nazev;
+    public String getSegmentState() {
+        return segmentState;
     }
 }

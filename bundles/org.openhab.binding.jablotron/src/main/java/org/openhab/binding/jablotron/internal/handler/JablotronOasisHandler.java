@@ -12,11 +12,19 @@
  */
 package org.openhab.binding.jablotron.internal.handler;
 
+import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
@@ -24,34 +32,18 @@ import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
-import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
-import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.internal.model.JablotronWidget;
-import org.openhab.binding.jablotron.internal.model.JablotronWidgetsResponse;
+import org.openhab.binding.jablotron.internal.model.*;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisControlResponse;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisEvent;
-import org.openhab.binding.jablotron.internal.model.oasis.OasisStatusResponse;
-import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
-
-import javax.validation.constraints.Null;
 
 /**
  * The {@link JablotronOasisHandler} is responsible for handling commands, which are
@@ -63,13 +55,6 @@ import javax.validation.constraints.Null;
 public class JablotronOasisHandler extends JablotronAlarmHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronOasisHandler.class);
-
-    private int stavA = 0;
-    private int stavB = 0;
-    private int stavABC = 0;
-    private int stavPGX = 0;
-    private int stavPGY = 0;
-    private boolean controlDisabled = true;
 
     public JablotronOasisHandler(Thing thing, HttpClient httpClient) {
         super(thing, httpClient);
@@ -85,97 +70,37 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
         if (channelUID.getId().equals(CHANNEL_STATUS_PGX) && command instanceof OnOffType) {
             scheduler.execute(() -> {
-                controlSection("PGX", command.equals(OnOffType.ON) ? "1" : "0");
+                controlSection("PGM_1", command.equals(OnOffType.ON) ? "set" : "unset");
             });
         }
 
         if (channelUID.getId().equals(CHANNEL_STATUS_PGY) && command instanceof OnOffType) {
             scheduler.execute(() -> {
-                controlSection("PGY", command.equals(OnOffType.ON) ? "1" : "0");
+                controlSection("PGM_2", command.equals(OnOffType.ON) ? "set" : "unset");
             });
         }
     }
 
-    private void readAlarmStatus(OasisStatusResponse response) {
-        logger.debug("Reading alarm status...");
-        controlDisabled = response.isControlDisabled();
+    private synchronized @Nullable JablotronDataUpdateResponse sendGetStatusRequest() {
 
-        stavA = response.getSekce().get(0).getStav();
-        stavB = response.getSekce().get(1).getStav();
-        stavABC = response.getSekce().get(2).getStav();
+        String url = JABLOTRON_API_URL + "dataUpdate.json";
+        String urlParameters = "data=[{ \"filter_data\":[{\"data_type\":\"section\"},{\"data_type\":\"pgm\"}],\"service_type\":\"" + thing.getThingTypeUID().getId() + "\",\"service_id\":" + thing.getUID().getId() + ",\"data_group\":\"serviceData\"}]&client_id=" + CLIENT;
 
-        stavPGX = response.getPgm().get(0).getStav();
-        stavPGY = response.getPgm().get(1).getStav();
-
-        logger.debug("Stav A: {}", stavA);
-        logger.debug("Stav B: {}", stavB);
-        logger.debug("Stav ABC: {}", stavABC);
-        logger.debug("Stav PGX: {}", stavPGX);
-        logger.debug("Stav PGY: {}", stavPGY);
-
-        for (Channel channel : getThing().getChannels()) {
-            State newState = null;
-            String type = channel.getUID().getId();
-
-            switch (type) {
-                case CHANNEL_STATUS_A:
-                    newState = (stavA == 1) ? OnOffType.ON : OnOffType.OFF;
-                    break;
-                case CHANNEL_STATUS_B:
-                    newState = (stavB == 1) ? OnOffType.ON : OnOffType.OFF;
-                    break;
-                case CHANNEL_STATUS_ABC:
-                    newState = (stavABC == 1) ? OnOffType.ON : OnOffType.OFF;
-                    break;
-                case CHANNEL_STATUS_PGX:
-                    newState = (stavPGX == 1) ? OnOffType.ON : OnOffType.OFF;
-                    break;
-                case CHANNEL_STATUS_PGY:
-                    newState = (stavPGY == 1) ? OnOffType.ON : OnOffType.OFF;
-                    break;
-                case CHANNEL_ALARM:
-                    if(response.isAlarm()) {
-                        triggerChannel(CHANNEL_ALARM);
-                    }
-                    break;
-                case CHANNEL_LAST_EVENT_TIME:
-                    Date lastEvent = response.getLastEventTime();
-                    if (lastEvent != null) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(lastEvent);
-                        ZonedDateTime zdt = ZonedDateTime.ofInstant(cal.toInstant(), ZoneId.systemDefault());
-                        newState = new DateTimeType(zdt);
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            if (newState != null) {
-                //eventPublisher.postUpdate(itemName, newState);
-                updateState(channel.getUID(), newState);
-            }
-        }
-    }
-
-    private synchronized @Nullable OasisStatusResponse sendGetStatusRequest() {
-
-        String url = JABLOTRON_URL + "app/oasis/ajax/stav.php?" + Utils.getBrowserTimestamp();
         try {
             ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.GET)
+                    .method(HttpMethod.POST)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, JABLOTRON_URL + OASIS_SERVICE_URL + thing.getUID().getId())
-                    .header("X-Requested-With", "XMLHttpRequest")
+                    //.header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(LONG_TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
             logger.trace("get status: {}", line);
 
-            return gson.fromJson(line, OasisStatusResponse.class);
+            return gson.fromJson(line, JablotronDataUpdateResponse.class);
         } catch (TimeoutException ste) {
             logger.debug("Timeout during getting alarm status!");
             return null;
@@ -186,6 +111,29 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
     }
 
     protected synchronized boolean updateAlarmStatus() {
+        JablotronDataUpdateResponse dataUpdate = sendGetStatusRequest();
+        if (dataUpdate == null) {
+            return false;
+        }
+
+        if (dataUpdate.isStatus()) {
+            updateState(CHANNEL_LAST_CHECK_TIME, getCheckTime());
+            List<JablotronServiceData> serviceData = dataUpdate.getData().getServiceData();
+            for (JablotronServiceData data : serviceData) {
+                List<JablotronService> services = data.getData();
+                for (JablotronService service : services) {
+                    JablotronServiceDetail detail = service.getData();
+                    for (JablotronServiceDetailSegment segment : detail.getSegments()) {
+                        updateSegmentStatus(segment);
+                    }
+                }
+
+            }
+        } else {
+            logger.debug("Error during alarm status update: {}", dataUpdate.getErrorMessage());
+        }
+
+        /*
         logger.debug("updating alarm status...");
 
         try {
@@ -292,6 +240,31 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         } catch (Exception ex) {
             logger.error("Error during alarm status update", ex);
             return false;
+        }*/
+        return true;
+    }
+
+    private void updateSegmentStatus(JablotronServiceDetailSegment segment) {
+        logger.debug("Segment id: {} and status: {}", segment.getSegmentId(), segment.getSegmentState());
+        State newState = "unset".equals(segment.getSegmentState()) ? OnOffType.OFF : OnOffType.ON;
+        switch (segment.getSegmentId()) {
+            case "STATE_1":
+                updateState(CHANNEL_STATUS_A, newState);
+                break;
+            case "STATE_2":
+                updateState(CHANNEL_STATUS_B, newState);
+                break;
+            case "STATE_3":
+                updateState(CHANNEL_STATUS_ABC, newState);
+                break;
+            case "PGM_1":
+                updateState(CHANNEL_STATUS_PGX, newState);
+                break;
+            case "PGM_2":
+                updateState(CHANNEL_STATUS_PGY, newState);
+                break;
+            default:
+                logger.info("Unknown segment status received: {}", segment.getSegmentId());
         }
     }
 
@@ -307,60 +280,27 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
     }
 
     public synchronized void controlSection(String section, String status) {
-        try {
-            if (!isReady()) {
-                return;
-            }
+        logger.debug("Controlling section: {} with status: {}", section, status);
+        OasisControlResponse response = sendUserCode(section, section.toLowerCase(), status, "");
 
-            logger.debug("Controlling section: {} with status: {}", section, status);
-            OasisControlResponse response = sendUserCode(section, status, "");
-
-            if (response != null) {
-                handleHttpRequestStatus(response.getStatus());
-            } else {
-                logger.warn("null response/status received");
-                logout();
-            }
-
-        } catch (Exception e) {
-            logger.error("internalReceiveCommand exception", e);
+        updateAlarmStatus();
+        if (response == null) {
+            logger.warn("null response/status received");
+            logout();
         }
+
     }
 
-    private synchronized boolean isReady() throws InterruptedException {
-        if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
-            login();
-            initializeService();
-        }
-        if (!getThing().getStatus().equals(ThingStatus.ONLINE)) {
-            logger.error("Cannot send user code - alarm is not online!");
-            return false;
-        }
-        int timeout = 30;
-        while (controlDisabled && --timeout >= 0) {
-            logger.info("Waiting for control enabling...");
-            Thread.sleep(1000);
-            boolean ok = updateAlarmStatus();
-            if (!ok) {
-                return false;
-            }
-        }
-        if (timeout < 0) {
-            logger.warn("Timeout during waiting for control enabling");
-            return false;
-        }
-        return true;
+    @Override
+    protected synchronized void logout(boolean setOffline) {
     }
 
     public synchronized void sendCommand(String code) {
         try {
-            if (!isReady()) {
-                return;
-            }
             OasisControlResponse response = sendUserCode(code);
-            if (response != null) {
-                handleHttpRequestStatus(response.getStatus());
-            } else {
+            scheduler.schedule(this::updateAlarmStatus, 1, TimeUnit.SECONDS);
+
+            if (response == null) {
                 logger.warn("null response/status received");
                 logout();
             }
@@ -369,20 +309,32 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         }
     }
 
-    protected synchronized @Nullable OasisControlResponse sendUserCode(String section, String status, String code) {
+    private String getControlTime() {
+        return String.valueOf(System.currentTimeMillis() / 1000);
+    }
+
+    @Override
+    protected synchronized void initializeService() {
+        updateStatus(ThingStatus.ONLINE);
+    }
+
+    @Override
+    protected synchronized void login() {
+        updateStatus(ThingStatus.ONLINE);
+    }
+
+    protected synchronized @Nullable OasisControlResponse sendUserCode(String section, String key, String status, String code) {
         String url;
 
         try {
-            url = JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "/ajax/ovladani.php";
-            String urlParameters = "section=" + section + "&status=" + status + "&code=" + code;
-
+            url = JABLOTRON_API_URL + "controlSegment.json";
+            String urlParameters = "service=oasis&serviceId=" + thing.getUID().getId() + "&segmentId=" + section + "&segmentKey=" + key + "&expected_status=" + status + "&control_time=0&control_code=" + code + "&client_id=" + CLIENT;
             logger.debug("Sending POST to url address: {} to control section: {}", url, section);
 
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
                     .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
                     .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header(HttpHeader.REFERER, getServiceUrl())
                     .header("X-Requested-With", "XMLHttpRequest")
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
@@ -391,21 +343,22 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
             String line = resp.getContentAsString();
 
-
-            logger.debug("Control response: {}", line);
+            logger.trace("Control response: {}", line);
             OasisControlResponse response = gson.fromJson(line, OasisControlResponse.class);
-            logger.debug("sendUserCode result: {}", response.getVysledek());
+            if (!response.isStatus()) {
+                logger.debug("Error during sending user code: {}", response.getErrorMessage());
+            }
             return response;
         } catch (TimeoutException ex) {
             logger.debug("sendUserCode timeout exception", ex);
         } catch (Exception ex) {
-            logger.error("sendUserCode exception", ex);
+            logger.debug("sendUserCode exception", ex);
         }
         return null;
     }
 
     private synchronized @Nullable OasisControlResponse sendUserCode(String code) {
-        return sendUserCode("STATE", code.isEmpty() ? "1" : "", code);
+        return sendUserCode("sections", "button_1", "partialSet", code);
     }
 
     private @Nullable ArrayList<OasisEvent> getServiceHistory() {
