@@ -34,6 +34,8 @@ import org.eclipse.smarthome.core.thing.ThingStatus;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.Utils;
+import org.openhab.binding.jablotron.internal.model.JablotronWidget;
+import org.openhab.binding.jablotron.internal.model.JablotronWidgetsResponse;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisControlResponse;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisEvent;
 import org.openhab.binding.jablotron.internal.model.oasis.OasisStatusResponse;
@@ -193,6 +195,37 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 relogin();
             }
             lastHours = hours;
+
+            JablotronBridgeHandler handler = (JablotronBridgeHandler) getBridge().getHandler();
+            JablotronWidgetsResponse widgets = handler.discoverServices();
+            for (JablotronWidget widget : widgets.getWidgets()) {
+                if (thing.getUID().getId().equals(String.valueOf(widget.getId()))) {
+                    if (widget.getNoticeCount() > 0) {
+                        break;
+                    }
+
+                    if (widget.getSekce().size() > 0) {
+                        updateState(CHANNEL_LAST_CHECK_TIME, getCheckTime());
+                        controlDisabled = false;
+                        int status = widget.getSekce().get(0).getStatus();
+                        if (status == 0) {
+                            logger.info("updating alarm status to disarmed");
+                            updateState(CHANNEL_STATUS_A, OnOffType.OFF);
+                            updateState(CHANNEL_STATUS_B, OnOffType.OFF);
+                            updateState(CHANNEL_STATUS_ABC, OnOffType.OFF);
+                            initializeService();
+                            return true;
+                        } else if (status == 5) {
+                            logger.info("updating alarm status to A armed");
+                            updateState(CHANNEL_STATUS_A, OnOffType.ON);
+                            updateState(CHANNEL_STATUS_B, OnOffType.OFF);
+                            updateState(CHANNEL_STATUS_ABC, OnOffType.OFF);
+                            initializeService();
+                            return true;
+                        }
+                    }
+                }
+            }
 
             OasisStatusResponse response = sendGetStatusRequest();
 

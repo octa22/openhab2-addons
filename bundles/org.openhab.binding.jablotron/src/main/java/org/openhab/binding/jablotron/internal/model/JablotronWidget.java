@@ -12,6 +12,9 @@
  */
 package org.openhab.binding.jablotron.internal.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -26,6 +29,8 @@ public class JablotronWidget {
     private int id = -1;
     private String url = "";
     private String templateService = "";
+    private List<JablotronWidgetSekce> sekce = new ArrayList<>();
+    private int noticeCount = -1;
 
     public String getName() {
         return name;
@@ -41,5 +46,13 @@ public class JablotronWidget {
 
     public String getTemplateService() {
         return templateService;
+    }
+
+    public List<JablotronWidgetSekce> getSekce() {
+        return sekce;
+    }
+
+    public int getNoticeCount() {
+        return noticeCount;
     }
 }
