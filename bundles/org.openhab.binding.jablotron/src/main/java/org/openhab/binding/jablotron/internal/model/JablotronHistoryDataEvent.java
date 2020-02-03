@@ -12,31 +12,41 @@
  */
 package org.openhab.binding.jablotron.internal.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link JablotronGetServiceResponse} class defines the response for the
- * getServiceList operation
+ * The {@link JablotronHistoryDataEvent} class defines the event object for the
+ * getEventHistory response
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronGetServiceResponse {
+public class JablotronHistoryDataEvent {
+    @SerializedName("icon-type")
+    String iconType = "";
 
-    @SerializedName("http-code")
-    int httpCode = -1;
+    @SerializedName("event-text")
+    String eventText = "";
 
-    JablotronGetServiceData data = new JablotronGetServiceData();
+    @SerializedName("invoker-name")
+    String invokerName = "";
 
-    public int getHttpCode() {
-        return httpCode;
+    String date = "";
+
+    public String getIconType() {
+        return iconType;
     }
 
-    public JablotronGetServiceData getData() {
-        return data;
+    public String getEventText() {
+        return eventText;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getInvokerName() {
+        return invokerName;
     }
 }

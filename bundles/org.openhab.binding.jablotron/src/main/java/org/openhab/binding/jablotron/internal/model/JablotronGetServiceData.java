@@ -19,24 +19,17 @@ import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link JablotronGetServiceResponse} class defines the response for the
- * getServiceList operation
+ * The {@link JablotronGetServiceData} class defines the data object for the
+ * getServiceList response
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronGetServiceResponse {
+public class JablotronGetServiceData {
 
-    @SerializedName("http-code")
-    int httpCode = -1;
+    List<JablotronDiscoveredService> services = new ArrayList<>();
 
-    JablotronGetServiceData data = new JablotronGetServiceData();
-
-    public int getHttpCode() {
-        return httpCode;
-    }
-
-    public JablotronGetServiceData getData() {
-        return data;
+    public List<JablotronDiscoveredService> getServices() {
+        return services;
     }
 }

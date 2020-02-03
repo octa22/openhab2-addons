@@ -23,16 +23,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class JablotronLoginResponseAPI {
-    private boolean status = false;
+    @SerializedName("http-code")
+    int httpCode = -1;
 
-    @SerializedName("error_message")
-    String errorMessage = "";
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
+    public int getHttpCode() {
+        return httpCode;
     }
 }

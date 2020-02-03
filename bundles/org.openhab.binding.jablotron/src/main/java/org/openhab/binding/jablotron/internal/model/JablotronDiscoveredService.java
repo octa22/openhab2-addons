@@ -24,10 +24,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class JablotronDiscoveredService {
 
+    @SerializedName("service-id")
     int id = 0;
     String name = "";
 
-    @SerializedName("service_type")
+    @SerializedName("service-type")
     String serviceType = "";
 
     public int getId() {

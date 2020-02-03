@@ -144,7 +144,7 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
             List<JablotronDiscoveredService> services = bridge.discoverServices();
 
             if (services == null || services.size() == 0) {
-                logger.error("Cannot found any Jablotron device");
+                logger.error("Cannot find any Jablotron device");
                 return;
             }
 

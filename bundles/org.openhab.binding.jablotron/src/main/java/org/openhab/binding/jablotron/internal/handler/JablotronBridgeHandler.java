@@ -100,25 +100,26 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
     protected synchronized void login() {
         try {
-            String url = JABLOTRON_API_URL + "login.json";
-            String urlParameters = "login=" + URLEncoder.encode(bridgeConfig.getLogin(), "UTF-8") + "&password=" + URLEncoder.encode(bridgeConfig.getPassword(), "UTF-8") + "&version=3.2.3&selected_lang=cs&selected_country=cz&client_id=" + CLIENT;
+            String url = JABLOTRON_API_URL + "userAuthorize.json";
+            String urlParameters = "{\"login\":\"" + bridgeConfig.getLogin() + "\", \"password\":\"" + bridgeConfig.getPassword() + "\"}";
 
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header("X-Requested-With", "XMLHttpRequest")
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                    .header(HttpHeader.ACCEPT_ENCODING, "*")
+                    .header(HttpHeader.ACCEPT, "application/json")
+                    .header("x-vendor-id", VENDOR)
                     .agent(AGENT)
-                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .content(new StringContentProvider(urlParameters), "application/json")
                     .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
             logger.trace("login response: {}", line);
             JablotronLoginResponseAPI response = gson.fromJson(line, JablotronLoginResponseAPI.class);
-            if (!response.isStatus()) {
-                logger.debug("Error during login: {}", response.getErrorMessage());
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, response.getErrorMessage());
+            if (response.getHttpCode() != 200) {
+                logger.debug("Error during login, got http error: {}", response.getHttpCode());
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Http error: " + String.valueOf(response.getHttpCode()));
             } else {
                 logger.debug("Successfully logged in");
                 updateStatus(ThingStatus.ONLINE);
@@ -126,7 +127,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
         } catch (TimeoutException e) {
             logger.debug("Timeout during getting login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
-        } catch (UnsupportedEncodingException | ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             logger.error("Cannot get Jablotron login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
         }
@@ -134,13 +135,14 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
     protected synchronized void logout() {
         String url = JABLOTRON_API_URL + "logout.json";
-        String urlParameters = "client_id=" + CLIENT;
+        String urlParameters = "system=" + SYSTEM;
 
         try {
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                    .header(HttpHeader.ACCEPT_ENCODING, "*")
+                    .header("x-vendor-id", VENDOR)
                     .agent(AGENT)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
                     .timeout(5, TimeUnit.SECONDS)
@@ -157,16 +159,17 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
     public synchronized @Nullable List<JablotronDiscoveredService> discoverServices() {
         try {
-            String url = JABLOTRON_API_URL + "getServiceList.json";
-            String urlParameters = "visibility=default&list_type=extended&client_id=" + CLIENT;
+            String url = JABLOTRON_API_URL + "serviceListGet.json";
+            String urlParameters = "{\"list-type\": \"EXTENDED\",\"visibility\": \"VISIBLE\"}";
 
             ContentResponse resp = httpClient.newRequest(url)
                     .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs-CZ")
-                    .header(HttpHeader.ACCEPT_ENCODING, "gzip, deflate")
-                    .header("X-Requested-With", "XMLHttpRequest")
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                    .header(HttpHeader.ACCEPT_ENCODING, "*")
+                    .header(HttpHeader.ACCEPT, "application/json")
+                    .header("x-vendor-id", VENDOR)
                     .agent(AGENT)
-                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .content(new StringContentProvider(urlParameters), "application/json")
                     .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
@@ -175,11 +178,11 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             logger.trace("Response: {}", line);
             JablotronGetServiceResponse response = gson.fromJson(line, JablotronGetServiceResponse.class);
 
-            if (!response.isStatus()) {
-                logger.debug("Error during service discovery: {}", response.getErrorMessage());
+            if (response.getHttpCode() != 200) {
+                logger.debug("Error during service discovery, got http code: {}", response.getHttpCode());
             }
 
-            return response.getServices();
+            return response.getData().getServices();
         } catch (TimeoutException ex) {
             logger.error("Timeout during discovering services", ex);
         } catch (ExecutionException | InterruptedException ex) {
