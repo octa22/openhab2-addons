@@ -11,13 +11,11 @@
 		<description>A Jablotron JA100 alarm device.</description>
 
 		<channels>
-			<channel id="lastCheckTime" typeId="lastCheckTime"/>
 			<channel id="lastEvent" typeId="lastEvent"/>
-			<channel id="lastEventSection" typeId="lastEventSection"/>
 			<channel id="lastEventClass" typeId="lastEventClass"/>
 			<channel id="lastEventTime" typeId="lastEventTime"/>
-			<channel id="lastTrouble" typeId="lastTrouble"/>
-			<channel id="lastTroubleDetail" typeId="lastTroubleDetail"/>
+			<channel id="lastCheckTime" typeId="lastCheckTime"/>
+			<channel id="alarm" typeId="alarm"/>
 		</channels>
 		<config-description-ref uri="thing-type:jablotron:ja100device"/>
 	</thing-type>

@@ -12,35 +12,27 @@
  */
 package org.openhab.binding.jablotron.internal.model;
 
+import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.binding.jablotron.internal.model.oasis.OasisLastEntryCID;
 
 /**
- * The {@link OasisLastEntryCID} class defines the OASIS last trouble
- * object.
+ * The {@link JablotronControlResponse} class defines the control command
+ * response for Jablotron alarm.
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronTrouble {
-    private String zekdy = "";
-    private String cas = "";
-    private String message = "";
-    private String name = "";
+public class JablotronControlResponse {
+    private boolean status = false;
 
-    public String getZekdy() {
-        return zekdy;
+    @SerializedName("error_message")
+    String errorMessage = "";
+
+    public boolean isStatus() {
+        return status;
     }
 
-    public String getCas() {
-        return cas;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getName() {
-        return name;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 }

@@ -29,11 +29,18 @@ public class JablotronServiceDetailSegment {
     @SerializedName("segment_state")
     String segmentState = "";
 
+    @SerializedName("segment_name")
+    String segmentName = "";
+
     public String getSegmentId() {
         return segmentId;
     }
 
     public String getSegmentState() {
         return segmentState;
+    }
+
+    public String getSegmentName() {
+        return segmentName;
     }
 }

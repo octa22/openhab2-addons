@@ -30,8 +30,7 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.Utils;
-import org.openhab.binding.jablotron.internal.model.JablotronLoginResponse;
-import org.openhab.binding.jablotron.internal.model.JablotronTrouble;
+import org.openhab.binding.jablotron.internal.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -85,7 +86,6 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
     private void cleanup() {
         logger.debug("doing cleanup...");
-        logout();
         if (future != null) {
             future.cancel(true);
         }
@@ -103,10 +103,10 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         scheduler.execute(() -> {
             doInit();
         });
+        updateStatus(ThingStatus.ONLINE);
     }
 
-    protected abstract boolean updateAlarmStatus();
-
+    /*
     protected void logout() {
         logout(true);
     }
@@ -141,37 +141,14 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         logout(false);
         login();
         initializeService();
-    }
+    }*/
 
     protected State getCheckTime() {
         ZonedDateTime zdt = ZonedDateTime.ofInstant(Calendar.getInstance().toInstant(), ZoneId.systemDefault());
         return new DateTimeType(zdt);
     }
 
-    protected void handleHttpRequestStatus(int status) {
-        switch (status) {
-            case 0:
-                logout();
-                break;
-            case 201:
-                logout();
-                break;
-            case 300:
-                logger.error("Redirect not supported");
-                break;
-            case 800:
-                login();
-                initializeService();
-                break;
-            case 200:
-                scheduler.schedule((Runnable) this::updateAlarmStatus, 1, TimeUnit.SECONDS);
-                //scheduler.schedule((Runnable) this::updateAlarmStatus, 15, TimeUnit.SECONDS);
-                break;
-            default:
-                logger.error("Unknown status code received: {}", status);
-        }
-    }
-
+    /*
     protected synchronized void setLanguage(String lang) throws InterruptedException, ExecutionException, TimeoutException {
         String url = JABLOTRON_URL + "lang/" + lang;
 
@@ -240,17 +217,15 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
     protected String getServiceUrl() {
         return JABLOTRON_URL + "app/" + thing.getThingTypeUID().getId() + "?service=" + thing.getUID().getId();
-    }
+    }*/
 
     protected void doInit() {
-        login();
-        initializeService();
-
         future = scheduler.scheduleWithFixedDelay(() -> {
             updateAlarmStatus();
         }, 1, thingConfig.getRefresh(), TimeUnit.SECONDS);
     }
 
+    /*
     protected synchronized void initializeService() {
         String url = getServiceUrl();
         String serviceId = thing.getUID().getId();
@@ -284,5 +259,113 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     protected void updateLastTrouble(JablotronTrouble trouble) {
         updateState(CHANNEL_LAST_TROUBLE, new StringType(trouble.getMessage()));
         updateState(CHANNEL_LAST_TROUBLE_DETAIL, new StringType(trouble.getName()));
+    }*/
+
+    protected synchronized @Nullable JablotronDataUpdateResponse sendGetStatusRequest() {
+
+        String url = JABLOTRON_API_URL + "dataUpdate.json";
+        String urlParameters = "data=[{ \"filter_data\":[{\"data_type\":\"section\"},{\"data_type\":\"pgm\"}],\"service_type\":\"" + thing.getThingTypeUID().getId() + "\",\"service_id\":" + thing.getUID().getId() + ",\"data_group\":\"serviceData\"}]&system=" + SYSTEM;
+
+        try {
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                    .header(HttpHeader.ACCEPT_ENCODING, "*")
+                    .header("x-vendor-id", VENDOR)
+                    .agent(AGENT)
+                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(LONG_TIMEOUT, TimeUnit.SECONDS)
+                    .send();
+
+            String line = resp.getContentAsString();
+            logger.debug("get status: {}", line);
+
+            return gson.fromJson(line, JablotronDataUpdateResponse.class);
+        } catch (TimeoutException ste) {
+            logger.debug("Timeout during getting alarm status!");
+            return null;
+        } catch (Exception e) {
+            logger.debug("sendGetStatusRequest exception", e);
+            return null;
+        }
     }
+
+    protected synchronized boolean updateAlarmStatus() {
+        JablotronDataUpdateResponse dataUpdate = sendGetStatusRequest();
+        if (dataUpdate == null) {
+            return false;
+        }
+
+        if (dataUpdate.isStatus()) {
+            updateState(CHANNEL_LAST_CHECK_TIME, getCheckTime());
+            List<JablotronServiceData> serviceData = dataUpdate.getData().getServiceData();
+            for (JablotronServiceData data : serviceData) {
+                List<JablotronService> services = data.getData();
+                for (JablotronService service : services) {
+                    JablotronServiceDetail detail = service.getData();
+                    for (JablotronServiceDetailSegment segment : detail.getSegments()) {
+                        updateSegmentStatus(segment);
+                    }
+                }
+
+            }
+        } else {
+            logger.debug("Error during alarm status update: {}", dataUpdate.getErrorMessage());
+        }
+
+        List<JablotronHistoryDataEvent> events = sendGetEventHistory();
+        if (events != null && events.size() > 0) {
+            JablotronHistoryDataEvent event = events.get(0);
+            updateLastEvent(event);
+        }
+
+        return true;
+    }
+
+    protected abstract @Nullable List<JablotronHistoryDataEvent> sendGetEventHistory();
+
+    protected synchronized @Nullable List<JablotronHistoryDataEvent> sendGetEventHistory(String alarm) {
+
+        String url = JABLOTRON_API_URL + alarm +"/eventHistoryGet.json";
+        String urlParameters = "{\"limit\":1, \"service-id\":" + thing.getUID().getId() + "}";
+
+        try {
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                    .header(HttpHeader.ACCEPT_ENCODING, "*")
+                    .header(HttpHeader.ACCEPT, "application/json")
+                    .header("x-vendor-id", VENDOR)
+                    .agent(AGENT)
+                    .content(new StringContentProvider(urlParameters), "application/json")
+                    .timeout(LONG_TIMEOUT, TimeUnit.SECONDS)
+                    .send();
+
+            String line = resp.getContentAsString();
+            logger.debug("get event history: {}", line);
+            JablotronGetEventHistoryResponse response = gson.fromJson(line, JablotronGetEventHistoryResponse.class);
+            if (200 != response.getHttpCode()) {
+                logger.debug("Got error while getting history with http code: {}", response.getHttpCode());
+            }
+            return response.getData().getEvents();
+        } catch (TimeoutException ste) {
+            logger.debug("Timeout during getting alarm history!");
+            return null;
+        } catch (Exception e) {
+            logger.debug("sendGetEventHistory exception", e);
+            return null;
+        }
+    }
+
+    private void updateLastEvent(JablotronHistoryDataEvent event) {
+        updateState(CHANNEL_LAST_EVENT_TIME, new DateTimeType(getZonedDateTime(event.getDate())));
+        updateState(CHANNEL_LAST_EVENT, new StringType(event.getEventText() + " " + event.getInvokerName()));
+        updateState(CHANNEL_LAST_EVENT_CLASS, new StringType(event.getIconType()));
+    }
+
+    public ZonedDateTime getZonedDateTime(String date) {
+        return ZonedDateTime.parse(date.substring(0,22) + ":" + date.substring(22,24), DateTimeFormatter.ISO_DATE_TIME);
+    }
+
+    protected abstract void updateSegmentStatus(JablotronServiceDetailSegment segment);
 }
