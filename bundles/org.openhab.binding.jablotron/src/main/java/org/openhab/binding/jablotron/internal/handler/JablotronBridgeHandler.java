@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
@@ -95,15 +96,9 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             String url = JABLOTRON_API_URL + "userAuthorize.json";
             String urlParameters = "{\"login\":\"" + bridgeConfig.getLogin() + "\", \"password\":\"" + bridgeConfig.getPassword() + "\"}";
 
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
-                    .header(HttpHeader.ACCEPT_ENCODING, "*")
-                    .header(HttpHeader.ACCEPT, "application/json")
-                    .header("x-vendor-id", VENDOR)
-                    .agent(AGENT)
-                    .content(new StringContentProvider(urlParameters), "application/json")
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+            ContentResponse resp = createRequest(url)
+                    .header(HttpHeader.ACCEPT, APPLICATION_JSON)
+                    .content(new StringContentProvider(urlParameters), APPLICATION_JSON)
                     .send();
 
             String line = resp.getContentAsString();
@@ -130,14 +125,8 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
         String urlParameters = "system=" + SYSTEM;
 
         try {
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
-                    .header(HttpHeader.ACCEPT_ENCODING, "*")
-                    .header("x-vendor-id", VENDOR)
-                    .agent(AGENT)
+            ContentResponse resp = createRequest(url)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(5, TimeUnit.SECONDS)
                     .send();
             String line = resp.getContentAsString();
 
@@ -154,15 +143,9 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             String url = JABLOTRON_API_URL + "serviceListGet.json";
             String urlParameters = "{\"list-type\": \"EXTENDED\",\"visibility\": \"VISIBLE\"}";
 
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
-                    .header(HttpHeader.ACCEPT_ENCODING, "*")
-                    .header(HttpHeader.ACCEPT, "application/json")
-                    .header("x-vendor-id", VENDOR)
-                    .agent(AGENT)
-                    .content(new StringContentProvider(urlParameters), "application/json")
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+            ContentResponse resp = createRequest(url)
+                    .header(HttpHeader.ACCEPT, APPLICATION_JSON)
+                    .content(new StringContentProvider(urlParameters), APPLICATION_JSON)
                     .send();
 
             String line = resp.getContentAsString();
@@ -192,14 +175,8 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             logger.debug("Sending POST to url address: {} to control section: {}", url, section);
             logger.trace("Url parameters: {}", urlParameters);
 
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
-                    .header(HttpHeader.ACCEPT_ENCODING, "*")
-                    .header("x-vendor-id", VENDOR)
-                    .agent(AGENT)
+            ContentResponse resp = createRequest(url)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -223,15 +200,9 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
         String urlParameters = "{\"limit\":1, \"service-id\":" + th.getUID().getId() + "}";
 
         try {
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
-                    .header(HttpHeader.ACCEPT_ENCODING, "*")
-                    .header(HttpHeader.ACCEPT, "application/json")
-                    .header("x-vendor-id", VENDOR)
-                    .agent(AGENT)
-                    .content(new StringContentProvider(urlParameters), "application/json")
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+            ContentResponse resp = createRequest(url)
+                    .header(HttpHeader.ACCEPT, APPLICATION_JSON)
+                    .content(new StringContentProvider(urlParameters), APPLICATION_JSON)
                     .send();
 
             String line = resp.getContentAsString();
@@ -255,14 +226,8 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
         String urlParameters = "data=[{ \"filter_data\":[{\"data_type\":\"section\"},{\"data_type\":\"pgm\"},{\"data_type\":\"teplomery\"},{\"data_type\":\"elektromery\"}],\"service_type\":\"" + th.getThingTypeUID().getId() + "\",\"service_id\":" + th.getUID().getId() + ",\"data_group\":\"serviceData\"}]&system=" + SYSTEM;
 
         try {
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
-                    .header(HttpHeader.ACCEPT_ENCODING, "*")
-                    .header("x-vendor-id", VENDOR)
-                    .agent(AGENT)
+            ContentResponse resp = createRequest(url)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
                     .send();
 
             String line = resp.getContentAsString();
@@ -276,5 +241,15 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             logger.debug("sendGetStatusRequest exception", e);
             return null;
         }
+    }
+
+    private Request createRequest(String url) {
+        return httpClient.newRequest(url)
+                .method(HttpMethod.POST)
+                .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                .header(HttpHeader.ACCEPT_ENCODING, "*")
+                .header("x-vendor-id", VENDOR)
+                .agent(AGENT)
+                .timeout(TIMEOUT, TimeUnit.SECONDS);
     }
 }

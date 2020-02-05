@@ -17,11 +17,13 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Channel;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.binding.builder.ChannelBuilder;
 import org.eclipse.smarthome.core.thing.binding.builder.ThingBuilder;
+import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
@@ -48,9 +50,9 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
 
-        if (channelUID.getId().startsWith("STATE_") && command instanceof OnOffType) {
+        if (channelUID.getId().startsWith("STATE_") && command instanceof StringType) {
             scheduler.execute(() -> {
-                controlSTATESection(channelUID.getId(), command.equals(OnOffType.ON) ? "set" : "unset");
+                controlSTATESection(channelUID.getId(), command.toString());
             });
         }
 
@@ -62,12 +64,24 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
     }
 
     private void createChannel(JablotronServiceDetailSegment section) {
-        createChannel(section.getSegmentId(), "Switch", section.getSegmentName());
+        if (section.getSegmentId().startsWith("PGM_")) {
+            createPGMChannel(section.getSegmentId(), section.getSegmentName());
+        } else {
+            createStateChannel(section.getSegmentId(), section.getSegmentName());
+        }
     }
 
-    private void createChannel(String name, String type, String label) {
+    private void createPGMChannel(String name, String label) {
         ThingBuilder thingBuilder = editThing();
-        Channel channel = ChannelBuilder.create(new ChannelUID(thing.getUID(), name), type).withLabel(label).build();
+        Channel channel = ChannelBuilder.create(new ChannelUID(thing.getUID(), name), "Switch").withLabel(label).build();
+        thingBuilder.withChannel(channel);
+        updateThing(thingBuilder.build());
+    }
+
+    private void createStateChannel(String name, String label) {
+        ChannelTypeUID alarmStatus = new ChannelTypeUID("jablotron", "alarm_state");
+        ThingBuilder thingBuilder = editThing();
+        Channel channel = ChannelBuilder.create(new ChannelUID(thing.getUID(), name), "String").withLabel(label).withType(alarmStatus).build();
         thingBuilder.withChannel(channel);
         updateThing(thingBuilder.build());
     }
@@ -78,18 +92,23 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
     protected void updateSegmentStatus(JablotronServiceDetailSegment segment) {
         logger.debug("Segment id: {} and status: {}", segment.getSegmentId(), segment.getSegmentState());
-        State newState = "unset".equals(segment.getSegmentState()) ? OnOffType.OFF : OnOffType.ON;
 
         if (segment.getSegmentId().startsWith("STATE_") || segment.getSegmentId().startsWith("PGM_")) {
             String name = segment.getSegmentId();
             Channel channel = getThing().getChannel(name);
             if (channel == null) {
-                logger.info("Creating a new channel: {}", name);
+                logger.debug("Creating a new channel: {}", name);
                 createChannel(segment);
             }
             channel = getThing().getChannel(name);
             if (channel != null) {
-                logger.info("Updating channel: {} to value: {}", channel.getUID(), segment.getSegmentState());
+                logger.debug("Updating channel: {} to value: {}", channel.getUID(), segment.getSegmentState());
+                State newState;
+                if (name.startsWith("PGM_")) {
+                    newState = "unset".equals(segment.getSegmentState()) ? OnOffType.OFF : OnOffType.ON;
+                } else {
+                    newState = new StringType(segment.getSegmentState());
+                }
                 updateState(channel.getUID(), newState);
             } else {
                 logger.warn("The channel: {} still doesn't exist!", segment.getSegmentId());

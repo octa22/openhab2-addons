@@ -58,4 +58,5 @@ public class JablotronBindingConstants {
     public static final int TIMEOUT = 10;
     public static final String SYSTEM = "openHAB";
     public static final String VENDOR = "JABLOTRON:Jablotron";
+    public static final String APPLICATION_JSON = "application/json";
 }
