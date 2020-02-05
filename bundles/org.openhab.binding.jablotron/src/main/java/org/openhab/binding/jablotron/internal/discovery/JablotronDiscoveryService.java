@@ -12,6 +12,13 @@
  */
 package org.openhab.binding.jablotron.internal.discovery;
 
+import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_JA100;
+import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_OASIS;
+
+import java.util.*;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.AbstractDiscoveryService;
@@ -27,12 +34,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
 /**
  * The {@link JablotronDiscoveryService} is responsible for the thing discovery
@@ -58,7 +59,7 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
 
     private void startDiscovery() {
         if (this.bridge.getThing().getStatus() == ThingStatus.ONLINE) {
-                discoverServices();
+            discoverServices();
         }
     }
 

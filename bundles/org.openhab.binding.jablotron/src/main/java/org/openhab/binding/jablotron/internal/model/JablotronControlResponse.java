@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class JablotronControlResponse {
     private boolean status = false;
 
-    @SerializedName("error_message")
+    @SerializedName(value = "error_message", alternate = "error_status")
     String errorMessage = "";
 
     public boolean isStatus() {

@@ -12,6 +12,10 @@
  */
 package org.openhab.binding.jablotron.internal;
 
+import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
+
+import java.util.*;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
@@ -22,20 +26,14 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.io.net.http.HttpClientFactory;
+import org.openhab.binding.jablotron.internal.discovery.JablotronDiscoveryService;
 import org.openhab.binding.jablotron.internal.handler.JablotronBridgeHandler;
 import org.openhab.binding.jablotron.internal.handler.JablotronJa100Handler;
 import org.openhab.binding.jablotron.internal.handler.JablotronOasisHandler;
-import org.openhab.binding.jablotron.internal.discovery.JablotronDiscoveryService;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.util.*;
-
-import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_BRIDGE;
-import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_JA100;
-import static org.openhab.binding.jablotron.JablotronBindingConstants.THING_TYPE_OASIS;
 
 /**
  * The {@link JablotronHandlerFactory} is responsible for creating things and thing
@@ -71,10 +69,10 @@ public class JablotronHandlerFactory extends BaseThingHandlerFactory {
             return handler;
         }
         if (thingTypeUID.equals(THING_TYPE_OASIS)) {
-            return new JablotronOasisHandler(thing, httpClientFactory.getCommonHttpClient());
+            return new JablotronOasisHandler(thing);
         }
         if (thingTypeUID.equals(THING_TYPE_JA100)) {
-            return new JablotronJa100Handler(thing, httpClientFactory.getCommonHttpClient());
+            return new JablotronJa100Handler(thing);
         }
 
         return null;

@@ -12,6 +12,13 @@
  */
 package org.openhab.binding.jablotron.internal.handler;
 
+import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import com.google.gson.Gson;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -29,20 +36,9 @@ import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.jablotron.internal.config.JablotronConfig;
-import org.openhab.binding.jablotron.internal.model.JablotronDiscoveredService;
-import org.openhab.binding.jablotron.internal.model.JablotronGetServiceResponse;
-import org.openhab.binding.jablotron.internal.model.JablotronLoginResponseAPI;
+import org.openhab.binding.jablotron.internal.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
 /**
  * The {@link JablotronBridgeHandler} is responsible for handling commands, which are
@@ -92,10 +88,6 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
     public void dispose() {
         super.dispose();
         logout();
-    }
-
-    public @Nullable JablotronConfig getBridgeConfig() {
-        return bridgeConfig;
     }
 
     protected synchronized void login() {
@@ -189,5 +181,100 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             logger.error("Interruption during discovering services", ex);
         }
         return null;
+    }
+
+    protected synchronized @Nullable JablotronControlResponse sendUserCode(Thing th, String section, String key, String status, String code) {
+        String url;
+
+        try {
+            url = JABLOTRON_API_URL + "controlSegment.json";
+            String urlParameters = "service=" + th.getThingTypeUID().getId() + "&serviceId=" + th.getUID().getId() + "&segmentId=" + section + "&segmentKey=" + key + "&expected_status=" + status + "&control_time=0&control_code=" + code + "&system=" + SYSTEM;
+            logger.debug("Sending POST to url address: {} to control section: {}", url, section);
+            logger.trace("Url parameters: {}", urlParameters);
+
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                    .header(HttpHeader.ACCEPT_ENCODING, "*")
+                    .header("x-vendor-id", VENDOR)
+                    .agent(AGENT)
+                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+                    .send();
+
+            String line = resp.getContentAsString();
+
+            logger.trace("Control response: {}", line);
+            JablotronControlResponse response = gson.fromJson(line, JablotronControlResponse.class);
+            if (!response.isStatus()) {
+                logger.debug("Error during sending user code: {}", response.getErrorMessage());
+            }
+            return response;
+        } catch (TimeoutException ex) {
+            logger.debug("sendUserCode timeout exception", ex);
+        } catch (Exception ex) {
+            logger.debug("sendUserCode exception", ex);
+        }
+        return null;
+    }
+
+    protected synchronized @Nullable List<JablotronHistoryDataEvent> sendGetEventHistory(Thing th, String alarm) {
+        String url = JABLOTRON_API_URL + alarm + "/eventHistoryGet.json";
+        String urlParameters = "{\"limit\":1, \"service-id\":" + th.getUID().getId() + "}";
+
+        try {
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                    .header(HttpHeader.ACCEPT_ENCODING, "*")
+                    .header(HttpHeader.ACCEPT, "application/json")
+                    .header("x-vendor-id", VENDOR)
+                    .agent(AGENT)
+                    .content(new StringContentProvider(urlParameters), "application/json")
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+                    .send();
+
+            String line = resp.getContentAsString();
+            logger.trace("get event history: {}", line);
+            JablotronGetEventHistoryResponse response = gson.fromJson(line, JablotronGetEventHistoryResponse.class);
+            if (200 != response.getHttpCode()) {
+                logger.debug("Got error while getting history with http code: {}", response.getHttpCode());
+            }
+            return response.getData().getEvents();
+        } catch (TimeoutException ste) {
+            logger.debug("Timeout during getting alarm history!");
+            return null;
+        } catch (Exception e) {
+            logger.debug("sendGetEventHistory exception", e);
+            return null;
+        }
+    }
+
+    protected synchronized @Nullable JablotronDataUpdateResponse sendGetStatusRequest(Thing th) {
+        String url = JABLOTRON_API_URL + "dataUpdate.json";
+        String urlParameters = "data=[{ \"filter_data\":[{\"data_type\":\"section\"},{\"data_type\":\"pgm\"},{\"data_type\":\"teplomery\"},{\"data_type\":\"elektromery\"}],\"service_type\":\"" + th.getThingTypeUID().getId() + "\",\"service_id\":" + th.getUID().getId() + ",\"data_group\":\"serviceData\"}]&system=" + SYSTEM;
+
+        try {
+            ContentResponse resp = httpClient.newRequest(url)
+                    .method(HttpMethod.POST)
+                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                    .header(HttpHeader.ACCEPT_ENCODING, "*")
+                    .header("x-vendor-id", VENDOR)
+                    .agent(AGENT)
+                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
+                    .timeout(TIMEOUT, TimeUnit.SECONDS)
+                    .send();
+
+            String line = resp.getContentAsString();
+            logger.trace("get status: {}", line);
+
+            return gson.fromJson(line, JablotronDataUpdateResponse.class);
+        } catch (TimeoutException ste) {
+            logger.debug("Timeout during getting alarm status!");
+            return null;
+        } catch (Exception e) {
+            logger.debug("sendGetStatusRequest exception", e);
+            return null;
+        }
     }
 }

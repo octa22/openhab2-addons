@@ -53,13 +53,9 @@ public class JablotronBindingConstants {
     public static final String CHANNEL_LAST_EVENT_SECTION = "lastEventSection";
 
     // Constants
-    public static final String JABLOTRON_URL = "https://www.jablonet.net/";
     public static final String JABLOTRON_API_URL = "https://api.jablonet.net/api/1.6/";
-    public static final String OASIS_SERVICE_URL = "app/oasis?service=";
-    public static final String JA100_SERVICE_URL = "app/ja100?service=";
     public static final String AGENT = "Swagger-Codegen/1.0.0/android";
     public static final int TIMEOUT = 10;
-    public static final int LONG_TIMEOUT = 20;
     public static final String SYSTEM = "openHAB";
     public static final String VENDOR = "JABLOTRON:Jablotron";
 }

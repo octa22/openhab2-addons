@@ -16,23 +16,18 @@ import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.util.StringContentProvider;
-import org.eclipse.jetty.http.HttpHeader;
-import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.ChannelUID;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
-import org.openhab.binding.jablotron.internal.model.*;
 import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
+import org.openhab.binding.jablotron.internal.model.JablotronHistoryDataEvent;
+import org.openhab.binding.jablotron.internal.model.JablotronServiceDetailSegment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +42,8 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronOasisHandler.class);
 
-    public JablotronOasisHandler(Thing thing, HttpClient httpClient) {
-        super(thing, httpClient);
+    public JablotronOasisHandler(Thing thing) {
+        super(thing);
     }
 
     @Override
@@ -96,7 +91,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 updateState(CHANNEL_STATUS_PGY, newState);
                 break;
             default:
-                logger.info("Unknown segment status received: {}", segment.getSegmentId());
+                logger.info("Unknown segment received: {} with state: {}", segment.getSegmentId(), segment.getSegmentState());
         }
     }
 
@@ -123,40 +118,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         } catch (Exception e) {
             logger.error("internalReceiveCommand exception", e);
         }
-    }
-
-    protected synchronized @Nullable JablotronControlResponse sendUserCode(String section, String key, String status, String code) {
-        String url;
-
-        try {
-            url = JABLOTRON_API_URL + "controlSegment.json";
-            String urlParameters = "service=oasis&serviceId=" + thing.getUID().getId() + "&segmentId=" + section + "&segmentKey=" + key + "&expected_status=" + status + "&control_time=0&control_code=" + code + "&system=" + SYSTEM;
-            logger.debug("Sending POST to url address: {} to control section: {}", url, section);
-
-            ContentResponse resp = httpClient.newRequest(url)
-                    .method(HttpMethod.POST)
-                    .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
-                    .header(HttpHeader.ACCEPT_ENCODING, "*")
-                    .header("x-vendor-id", VENDOR)
-                    .agent(AGENT)
-                    .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
-                    .timeout(TIMEOUT, TimeUnit.SECONDS)
-                    .send();
-
-            String line = resp.getContentAsString();
-
-            logger.trace("Control response: {}", line);
-            JablotronControlResponse response = gson.fromJson(line, JablotronControlResponse.class);
-            if (!response.isStatus()) {
-                logger.debug("Error during sending user code: {}", response.getErrorMessage());
-            }
-            return response;
-        } catch (TimeoutException ex) {
-            logger.debug("sendUserCode timeout exception", ex);
-        } catch (Exception ex) {
-            logger.debug("sendUserCode exception", ex);
-        }
-        return null;
     }
 
     private synchronized @Nullable JablotronControlResponse sendUserCode(String code) {
