@@ -19,6 +19,7 @@ import java.util.*;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.config.discovery.DiscoveryService;
+import org.eclipse.smarthome.core.thing.Bridge;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.ThingUID;
@@ -28,6 +29,7 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandlerFactory;
 import org.eclipse.smarthome.io.net.http.HttpClientFactory;
 import org.openhab.binding.jablotron.internal.discovery.JablotronDiscoveryService;
 import org.openhab.binding.jablotron.internal.handler.JablotronBridgeHandler;
+import org.openhab.binding.jablotron.internal.handler.JablotronJa100FHandler;
 import org.openhab.binding.jablotron.internal.handler.JablotronJa100Handler;
 import org.openhab.binding.jablotron.internal.handler.JablotronOasisHandler;
 import org.osgi.framework.ServiceRegistration;
@@ -45,7 +47,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = ThingHandlerFactory.class, immediate = true)
 public class JablotronHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(Arrays.asList(THING_TYPE_OASIS, THING_TYPE_JA100, THING_TYPE_BRIDGE));
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(Arrays.asList(THING_TYPE_OASIS, THING_TYPE_JA100, THING_TYPE_JA100F, THING_TYPE_BRIDGE));
     private Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
     private final HttpClientFactory httpClientFactory;
 
@@ -64,15 +66,16 @@ public class JablotronHandlerFactory extends BaseThingHandlerFactory {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
         if (thingTypeUID.equals(THING_TYPE_BRIDGE)) {
-            JablotronBridgeHandler handler = new JablotronBridgeHandler(thing, httpClientFactory.getCommonHttpClient());
+            JablotronBridgeHandler handler = new JablotronBridgeHandler((Bridge) thing, httpClientFactory.getCommonHttpClient());
             registerItemDiscoveryService(handler);
             return handler;
         }
         if (thingTypeUID.equals(THING_TYPE_OASIS)) {
             return new JablotronOasisHandler(thing);
-        }
-        if (thingTypeUID.equals(THING_TYPE_JA100)) {
+        } else if (thingTypeUID.equals(THING_TYPE_JA100)) {
             return new JablotronJa100Handler(thing);
+        } else if (thingTypeUID.equals(THING_TYPE_JA100F)) {
+            return new JablotronJa100FHandler(thing);
         }
 
         return null;

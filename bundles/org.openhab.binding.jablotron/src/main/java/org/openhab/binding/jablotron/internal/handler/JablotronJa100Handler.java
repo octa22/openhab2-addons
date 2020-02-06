@@ -49,7 +49,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-
         if (channelUID.getId().startsWith("STATE_") && command instanceof StringType) {
             scheduler.execute(() -> {
                 controlSTATESection(channelUID.getId(), command.toString());
@@ -90,6 +89,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         return sendGetEventHistory("JA100");
     }
 
+    @Override
     protected void updateSegmentStatus(JablotronServiceDetailSegment segment) {
         logger.debug("Segment id: {} and status: {}", segment.getSegmentId(), segment.getSegmentState());
 
@@ -111,10 +111,10 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
                 }
                 updateState(channel.getUID(), newState);
             } else {
-                logger.warn("The channel: {} still doesn't exist!", segment.getSegmentId());
+                logger.debug("The channel: {} still doesn't exist!", segment.getSegmentId());
             }
         } else {
-            logger.info("Unknown segment received: {} with state: {}", segment.getSegmentId(), segment.getSegmentState());
+            logger.debug("Unknown segment received: {} with state: {}", segment.getSegmentId(), segment.getSegmentState());
         }
     }
 
@@ -124,8 +124,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
         updateAlarmStatus();
         if (response == null) {
-            logger.warn("null response/status received");
-            //logout();
+            logger.debug("null response/status received");
         }
     }
 
@@ -135,8 +134,7 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
         updateAlarmStatus();
         if (response == null) {
-            logger.warn("null response/status received");
-            //logout();
+            logger.debug("null response/status received");
         }
     }
 }

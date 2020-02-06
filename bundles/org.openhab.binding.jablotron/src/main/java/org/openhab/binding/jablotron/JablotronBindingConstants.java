@@ -30,27 +30,26 @@ public class JablotronBindingConstants {
     public static final ThingTypeUID THING_TYPE_BRIDGE = new ThingTypeUID(BINDING_ID, "bridge");
     public static final ThingTypeUID THING_TYPE_OASIS = new ThingTypeUID(BINDING_ID, "oasis");
     public static final ThingTypeUID THING_TYPE_JA100 = new ThingTypeUID(BINDING_ID, "ja100");
+    public static final ThingTypeUID THING_TYPE_JA100F = new ThingTypeUID(BINDING_ID, "ja100f");
 
-    // Common channels
-    public static final String CHANNEL_COMMAND = "command";
+    // Common alarm channels
     public static final String CHANNEL_ALARM = "alarm";
-    public static final String CHANNEL_LAST_TROUBLE = "lastTrouble";
-    public static final String CHANNEL_LAST_TROUBLE_DETAIL = "lastTroubleDetail";
+    //public static final String CHANNEL_LAST_TROUBLE = "lastTrouble";
+    //public static final String CHANNEL_LAST_TROUBLE_DETAIL = "lastTroubleDetail";
+    public static final String CHANNEL_LAST_CHECK_TIME = "lastCheckTime";
     public static final String CHANNEL_LAST_EVENT = "lastEvent";
     public static final String CHANNEL_LAST_EVENT_CLASS = "lastEventClass";
     public static final String CHANNEL_LAST_EVENT_TIME = "lastEventTime";
-    public static final String CHANNEL_LAST_CHECK_TIME = "lastCheckTime";
+    public static final String CHANNEL_LAST_EVENT_INVOKER = "lastEventInvoker";
+    public static final String CHANNEL_LAST_EVENT_SECTION = "lastEventSection";
 
     // List of all OASIS Channel ids
-    public static final String CHANNEL_LAST_EVENT_CODE = "lastEventCode";
+    public static final String CHANNEL_COMMAND = "command";
     public static final String CHANNEL_STATUS_A = "statusA";
     public static final String CHANNEL_STATUS_B = "statusB";
     public static final String CHANNEL_STATUS_ABC = "statusABC";
     public static final String CHANNEL_STATUS_PGX = "statusPGX";
     public static final String CHANNEL_STATUS_PGY = "statusPGY";
-
-    // JA-100 channels
-    public static final String CHANNEL_LAST_EVENT_SECTION = "lastEventSection";
 
     // Constants
     public static final String JABLOTRON_API_URL = "https://api.jablonet.net/api/1.6/";

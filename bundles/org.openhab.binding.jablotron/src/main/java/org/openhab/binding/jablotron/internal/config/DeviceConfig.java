@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class DeviceConfig {
-    private int refresh = 180;
+    private int refresh = 60;
     private String code = "";
 
     public int getRefresh() {

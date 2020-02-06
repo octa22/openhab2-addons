@@ -25,7 +25,6 @@ public class JablotronConfig {
     private String login = "";
     private String password = "";
     private String lang = "";
-    private int refresh = 180;
 
     public String getLogin() {
         return login;
@@ -33,10 +32,6 @@ public class JablotronConfig {
 
     public String getPassword() {
         return password;
-    }
-
-    public int getRefresh() {
-        return refresh;
     }
 
     public String getLang() {

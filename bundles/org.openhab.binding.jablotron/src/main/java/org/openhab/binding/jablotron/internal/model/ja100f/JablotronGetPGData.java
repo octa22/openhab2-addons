@@ -10,30 +10,31 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.internal.model;
+package org.openhab.binding.jablotron.internal.model.ja100f;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link JablotronGetServiceResponse} class defines the response for the
- * getServiceList operation
+ * The {@link JablotronGetPGData} class defines the data object for the
+ * getProgrammableGates response
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronGetServiceResponse {
+public class JablotronGetPGData {
 
-    @SerializedName("http-code")
-    int httpCode = -1;
+    List<JablotronState> states = new ArrayList<>();
+    List<JablotronSection> programmableGates = new ArrayList<>();
 
-    JablotronGetServiceData data = new JablotronGetServiceData();
-
-    public int getHttpCode() {
-        return httpCode;
+    public List<JablotronState> getStates() {
+        return states;
     }
 
-    public JablotronGetServiceData getData() {
-        return data;
+    public List<JablotronSection> getProgrammableGates() {
+        return programmableGates;
     }
 }

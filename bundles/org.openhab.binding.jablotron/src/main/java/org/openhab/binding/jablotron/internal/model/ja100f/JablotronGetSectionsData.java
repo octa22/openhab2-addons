@@ -10,30 +10,30 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.jablotron.internal.model;
+package org.openhab.binding.jablotron.internal.model.ja100f;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link JablotronGetServiceResponse} class defines the response for the
- * getServiceList operation
+ * The {@link JablotronGetSectionsData} class defines the data object for the
+ * getSections response
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronGetServiceResponse {
+public class JablotronGetSectionsData {
 
-    @SerializedName("http-code")
-    int httpCode = -1;
+    List<JablotronState> states = new ArrayList<>();
+    List<JablotronSection> sections = new ArrayList<>();
 
-    JablotronGetServiceData data = new JablotronGetServiceData();
-
-    public int getHttpCode() {
-        return httpCode;
+    public List<JablotronState> getStates() {
+        return states;
     }
 
-    public JablotronGetServiceData getData() {
-        return data;
+    public List<JablotronSection> getSections() {
+        return sections;
     }
 }

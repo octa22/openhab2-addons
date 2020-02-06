@@ -29,6 +29,7 @@ import org.eclipse.smarthome.core.library.types.DateTimeType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.thing.ThingStatus;
+import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.State;
@@ -51,6 +52,8 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     protected Gson gson = new Gson();
 
     protected @Nullable DeviceConfig thingConfig;
+
+    private String lastWarningTime = "";
 
     @Nullable
     ScheduledFuture<?> future = null;
@@ -84,7 +87,8 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
     protected abstract @Nullable List<JablotronHistoryDataEvent> sendGetEventHistory();
 
-    protected abstract void updateSegmentStatus(JablotronServiceDetailSegment segment);
+    protected void updateSegmentStatus(JablotronServiceDetailSegment segment) {
+    }
 
     private void cleanup() {
         logger.debug("doing cleanup...");
@@ -105,11 +109,11 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     }
 
     protected synchronized @Nullable JablotronDataUpdateResponse sendGetStatusRequest() {
-        if (getBridge() == null || getBridge().getHandler() == null) {
-            return null;
+        JablotronBridgeHandler handler = getBridgeHandler();
+        if (handler != null) {
+            return handler.sendGetStatusRequest(getThing());
         }
-        JablotronBridgeHandler handler = (JablotronBridgeHandler) getBridge().getHandler();
-        return handler.sendGetStatusRequest(getThing());
+        return null;
     }
 
     protected synchronized boolean updateAlarmStatus() {
@@ -145,17 +149,23 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     }
 
     protected @Nullable List<JablotronHistoryDataEvent> sendGetEventHistory(String alarm) {
-        if (getBridge() == null || getBridge().getHandler() == null) {
-            return null;
+        JablotronBridgeHandler handler = getBridgeHandler();
+        if (handler != null) {
+            return handler.sendGetEventHistory(getThing(), alarm);
         }
-        JablotronBridgeHandler handler = (JablotronBridgeHandler) getBridge().getHandler();
-        return handler.sendGetEventHistory(getThing(), alarm);
+        return null;
     }
 
-    private void updateLastEvent(JablotronHistoryDataEvent event) {
+    protected void updateLastEvent(JablotronHistoryDataEvent event) {
         updateState(CHANNEL_LAST_EVENT_TIME, new DateTimeType(getZonedDateTime(event.getDate())));
-        updateState(CHANNEL_LAST_EVENT, new StringType(event.getEventText() + " " + event.getInvokerName()));
+        updateState(CHANNEL_LAST_EVENT, new StringType(event.getEventText()));
         updateState(CHANNEL_LAST_EVENT_CLASS, new StringType(event.getIconType()));
+        updateState(CHANNEL_LAST_EVENT_INVOKER, new StringType(event.getInvokerName()));
+
+        //oasis does not have sections
+        if (getThing().getChannel(CHANNEL_LAST_EVENT_SECTION) != null) {
+            updateState(CHANNEL_LAST_EVENT_SECTION, new StringType(event.getSectionName()));
+        }
     }
 
     public ZonedDateTime getZonedDateTime(String date) {
@@ -163,10 +173,28 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
     }
 
     protected @Nullable JablotronControlResponse sendUserCode(String section, String key, String status, String code) {
-        if (getBridge() == null || getBridge().getHandler() == null) {
-            return null;
+        JablotronBridgeHandler handler = getBridgeHandler();
+        if (handler != null) {
+            return handler.sendUserCode(getThing(), section, key, status, code);
         }
-        JablotronBridgeHandler handler = (JablotronBridgeHandler) getBridge().getHandler();
-        return handler.sendUserCode(getThing(), section, key, status, code);
+        return null;
+    }
+
+    protected @Nullable JablotronBridgeHandler getBridgeHandler() {
+        if (getBridge() != null && getBridge().getHandler() != null) {
+            return (JablotronBridgeHandler) getBridge().getHandler();
+        }
+        return null;
+    }
+
+    public void setStatus(ThingStatus status, ThingStatusDetail detail, String message) {
+        updateStatus(status, detail, message);
+    }
+
+    public void triggerAlarm(String warningTime) {
+        if (!warningTime.equals(lastWarningTime)) {
+            lastWarningTime = warningTime;
+            triggerChannel(CHANNEL_ALARM);
+        }
     }
 }

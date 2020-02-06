@@ -14,8 +14,11 @@ package org.openhab.binding.jablotron.internal.handler;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -28,16 +31,15 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.smarthome.core.thing.ChannelUID;
-import org.eclipse.smarthome.core.thing.Thing;
-import org.eclipse.smarthome.core.thing.ThingStatus;
-import org.eclipse.smarthome.core.thing.ThingStatusDetail;
-import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
-import org.eclipse.smarthome.core.thing.binding.BridgeHandler;
+import org.eclipse.smarthome.config.core.status.ConfigStatusMessage;
+import org.eclipse.smarthome.core.thing.*;
+import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.jablotron.internal.config.JablotronConfig;
 import org.openhab.binding.jablotron.internal.model.*;
+import org.openhab.binding.jablotron.internal.model.ja100f.JablotronGetPGResponse;
+import org.openhab.binding.jablotron.internal.model.ja100f.JablotronGetSectionsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHandler {
+public class JablotronBridgeHandler extends ConfigStatusBridgeHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronBridgeHandler.class);
 
@@ -56,14 +58,22 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
     final HttpClient httpClient;
 
+    @Nullable
+    ScheduledFuture<?> future = null;
+
     /**
      * Our configuration
      */
     public @Nullable JablotronConfig bridgeConfig;
 
-    public JablotronBridgeHandler(Thing thing, HttpClient httpClient) {
+    public JablotronBridgeHandler(Bridge thing, HttpClient httpClient) {
         super(thing);
         this.httpClient = httpClient;
+    }
+
+    @Override
+    public Collection<ConfigStatusMessage> getConfigStatus() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -83,11 +93,43 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
     public void initialize() {
         bridgeConfig = getConfigAs(JablotronConfig.class);
         scheduler.execute(this::login);
+        future = scheduler.scheduleWithFixedDelay(() -> updateAlarmThings(), 30, 30, TimeUnit.SECONDS);
+    }
+
+    private void updateAlarmThings() {
+        //discover services
+        List<JablotronDiscoveredService> services = discoverServices();
+        for (JablotronDiscoveredService service : services) {
+            updateAlarmThing(service);
+        }
+    }
+
+    private void updateAlarmThing(JablotronDiscoveredService service) {
+        for (Thing th : getThing().getThings()) {
+            if (String.valueOf(service.getId()).equals(th.getUID().getId())) {
+                JablotronAlarmHandler handler = (JablotronAlarmHandler) th.getHandler();
+                if ("ENABLED".equals(service.getStatus())) {
+                    if (!"".equals(service.getWarning())) {
+                        logger.debug("Alarm with service id: {} warning: {}", service.getId(), service.getWarning());
+                    }
+                    handler.setStatus(ThingStatus.ONLINE, ThingStatusDetail.NONE, service.getWarning());
+                    if ("ALARM".equals(service.getWarning())) {
+                        handler.triggerAlarm(service.getWarningTime());
+                    }
+                } else {
+                    logger.debug("Alarm with service id: {} is offline", service.getId());
+                    handler.setStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, service.getStatus());
+                }
+            }
+        }
     }
 
     @Override
     public void dispose() {
         super.dispose();
+        if (future != null) {
+            future.cancel(true);
+        }
         logout();
     }
 
@@ -115,7 +157,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             logger.debug("Timeout during getting login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
         } catch (ExecutionException | InterruptedException e) {
-            logger.error("Cannot get Jablotron login cookie", e);
+            logger.debug("Cannot get Jablotron login cookie", e);
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Cannot login to Jablonet cloud");
         }
     }
@@ -133,8 +175,6 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             logger.trace("logout response: {}", line);
         } catch (ExecutionException | TimeoutException | InterruptedException e) {
             //Silence
-        } finally {
-            //controlDisabled = true;
         }
     }
 
@@ -159,9 +199,9 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
 
             return response.getData().getServices();
         } catch (TimeoutException ex) {
-            logger.error("Timeout during discovering services", ex);
+            logger.debug("Timeout during discovering services", ex);
         } catch (ExecutionException | InterruptedException ex) {
-            logger.error("Interruption during discovering services", ex);
+            logger.debug("Interruption during discovering services", ex);
         }
         return null;
     }
@@ -225,6 +265,7 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
         String url = JABLOTRON_API_URL + "dataUpdate.json";
         String urlParameters = "data=[{ \"filter_data\":[{\"data_type\":\"section\"},{\"data_type\":\"pgm\"},{\"data_type\":\"teplomery\"},{\"data_type\":\"elektromery\"}],\"service_type\":\"" + th.getThingTypeUID().getId() + "\",\"service_id\":" + th.getUID().getId() + ",\"data_group\":\"serviceData\"}]&system=" + SYSTEM;
 
+        logger.trace("Url parameters: {}", urlParameters);
         try {
             ContentResponse resp = createRequest(url)
                     .content(new StringContentProvider(urlParameters), "application/x-www-form-urlencoded; charset=UTF-8")
@@ -239,6 +280,75 @@ public class JablotronBridgeHandler extends BaseThingHandler implements BridgeHa
             return null;
         } catch (Exception e) {
             logger.debug("sendGetStatusRequest exception", e);
+            return null;
+        }
+    }
+
+    protected synchronized @Nullable JablotronGetPGResponse sendGetProgrammableGates(Thing th, String alarm) {
+        String url = JABLOTRON_API_URL + alarm + "/programmableGatesGet.json";
+        String urlParameters = "{\"connect-device\":false,\"list-type\":\"FULL\",\"service-id\":" + th.getUID().getId() + ",\"service-states\":true}";
+
+        try {
+            ContentResponse resp = createRequest(url)
+                    .header(HttpHeader.ACCEPT, APPLICATION_JSON)
+                    .content(new StringContentProvider(urlParameters), APPLICATION_JSON)
+                    .send();
+
+            String line = resp.getContentAsString();
+            logger.trace("get programmable gates: {}", line);
+
+            return gson.fromJson(line, JablotronGetPGResponse.class);
+        } catch (TimeoutException ste) {
+            logger.debug("Timeout during getting programmable gates!");
+            return null;
+        } catch (Exception e) {
+            logger.debug("sendGetSections exception", e);
+            return null;
+        }
+    }
+
+    protected synchronized @Nullable JablotronGetSectionsResponse sendGetSections(Thing th, String alarm) {
+        String url = JABLOTRON_API_URL + alarm + "/sectionsGet.json";
+        String urlParameters = "{\"connect-device\":false,\"list-type\":\"FULL\",\"service-id\":" + th.getUID().getId() + ",\"service-states\":true}";
+
+        try {
+            ContentResponse resp = createRequest(url)
+                    .header(HttpHeader.ACCEPT, APPLICATION_JSON)
+                    .content(new StringContentProvider(urlParameters), APPLICATION_JSON)
+                    .send();
+
+            String line = resp.getContentAsString();
+            logger.trace("get sections: {}", line);
+
+            return gson.fromJson(line, JablotronGetSectionsResponse.class);
+        } catch (TimeoutException ste) {
+            logger.debug("Timeout during getting alarm sections!");
+            return null;
+        } catch (Exception e) {
+            logger.debug("sendGetSections exception", e);
+            return null;
+        }
+    }
+
+    protected synchronized @Nullable JablotronGetSectionsResponse controlComponent(String serviceId, String alarm, String code, String action, String value, String componentId) {
+        String url = JABLOTRON_API_URL + alarm + "/controlComponent.json";
+        String urlParameters = "{\"authorization\":{\"authorization-code\":\"" + code + "\"},\"control-components\":[{\"actions\":{\"action\":\"" + action + "\",\"value\":\"" + value + "\"},\"component-id\":\"" + componentId + "\"}],\"service-id\":" + serviceId + "}";
+
+        try {
+            ContentResponse resp = createRequest(url)
+                    .header(HttpHeader.ACCEPT, APPLICATION_JSON)
+                    .content(new StringContentProvider(urlParameters), APPLICATION_JSON)
+                    .send();
+
+            String line = resp.getContentAsString();
+            logger.trace("control component: {}", line);
+
+            return gson.fromJson(line, JablotronGetSectionsResponse.class);
+        } catch (TimeoutException ste) {
+            logger.debug("Timeout during getting alarm sections!");
+            return null;
+        } catch (Exception e) {
+            logger.debug("controlComponent exception", e);
             return null;
         }
     }

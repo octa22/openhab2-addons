@@ -32,6 +32,9 @@ public class JablotronHistoryDataEvent {
     @SerializedName("invoker-name")
     String invokerName = "";
 
+    @SerializedName("section-name")
+    String sectionName = "";
+
     String date = "";
 
     public String getIconType() {
@@ -48,5 +51,9 @@ public class JablotronHistoryDataEvent {
 
     public String getInvokerName() {
         return invokerName;
+    }
+
+    public String getSectionName() {
+        return sectionName;
     }
 }

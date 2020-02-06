@@ -27,6 +27,11 @@ public class JablotronDiscoveredService {
     @SerializedName("service-id")
     int id = 0;
     String name = "";
+    String status = "";
+    String warning = "";
+
+    @SerializedName("warning-time")
+    String warningTime = "";
 
     @SerializedName("service-type")
     String serviceType = "";
@@ -41,5 +46,17 @@ public class JablotronDiscoveredService {
 
     public String getServiceType() {
         return serviceType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getWarning() {
+        return warning;
+    }
+
+    public String getWarningTime() {
+        return warningTime;
     }
 }

@@ -71,6 +71,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
         return sendGetEventHistory("OASIS");
     }
 
+    @Override
     protected void updateSegmentStatus(JablotronServiceDetailSegment segment) {
         logger.debug("Segment id: {} and status: {}", segment.getSegmentId(), segment.getSegmentState());
         State newState = "unset".equals(segment.getSegmentState()) ? OnOffType.OFF : OnOffType.ON;
@@ -91,7 +92,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 updateState(CHANNEL_STATUS_PGY, newState);
                 break;
             default:
-                logger.info("Unknown segment received: {} with state: {}", segment.getSegmentId(), segment.getSegmentState());
+                logger.debug("Unknown segment received: {} with state: {}", segment.getSegmentId(), segment.getSegmentState());
         }
     }
 
@@ -101,8 +102,7 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
         updateAlarmStatus();
         if (response == null) {
-            logger.warn("null response/status received");
-            //logout();
+            logger.debug("null response/status received");
         }
     }
 
@@ -112,11 +112,10 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
             scheduler.schedule(this::updateAlarmStatus, 1, TimeUnit.SECONDS);
 
             if (response == null) {
-                logger.warn("null response/status received");
-                //logout();
+                logger.debug("null response/status received");
             }
         } catch (Exception e) {
-            logger.error("internalReceiveCommand exception", e);
+            logger.debug("internalReceiveCommand exception", e);
         }
     }
 
