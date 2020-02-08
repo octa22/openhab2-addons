@@ -12,6 +12,7 @@
  */
 package org.openhab.binding.jablotron.internal.model;
 
+import com.google.gson.annotations.SerializedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -22,13 +23,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class JablotronLoginResponse {
-    private int status = -1;
+    @SerializedName("http-code")
+    int httpCode = -1;
 
-    public int getStatus() {
-        return status;
-    }
-
-    public boolean isOKStatus() {
-        return status == 200;
+    public int getHttpCode() {
+        return httpCode;
     }
 }

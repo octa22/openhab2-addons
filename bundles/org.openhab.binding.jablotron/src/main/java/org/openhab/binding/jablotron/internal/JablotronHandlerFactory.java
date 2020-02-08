@@ -47,7 +47,6 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = ThingHandlerFactory.class, immediate = true)
 public class JablotronHandlerFactory extends BaseThingHandlerFactory {
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(Arrays.asList(THING_TYPE_OASIS, THING_TYPE_JA100, THING_TYPE_JA100F, THING_TYPE_BRIDGE));
     private Map<ThingUID, ServiceRegistration<?>> discoveryServiceRegs = new HashMap<>();
     private final HttpClientFactory httpClientFactory;
 
@@ -58,7 +57,7 @@ public class JablotronHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
-        return SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID);
+        return THING_TYPE_BRIDGE.equals(thingTypeUID) || SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID);
     }
 
     @Override
@@ -71,11 +70,11 @@ public class JablotronHandlerFactory extends BaseThingHandlerFactory {
             return handler;
         }
         if (thingTypeUID.equals(THING_TYPE_OASIS)) {
-            return new JablotronOasisHandler(thing);
+            return new JablotronOasisHandler(thing, "OASIS");
         } else if (thingTypeUID.equals(THING_TYPE_JA100)) {
-            return new JablotronJa100Handler(thing);
+            return new JablotronJa100Handler(thing, "JA100");
         } else if (thingTypeUID.equals(THING_TYPE_JA100F)) {
-            return new JablotronJa100FHandler(thing);
+            return new JablotronJa100FHandler(thing, "JA100F");
         }
 
         return null;
@@ -89,6 +88,9 @@ public class JablotronHandlerFactory extends BaseThingHandlerFactory {
                 // remove discovery service, if bridge handler is removed
                 JablotronDiscoveryService service = (JablotronDiscoveryService) bundleContext
                         .getService(serviceReg.getReference());
+                if (service != null) {
+                    service.deactivate();
+                }
                 serviceReg.unregister();
                 discoveryServiceRegs.remove(thingHandler.getThing().getUID());
             }

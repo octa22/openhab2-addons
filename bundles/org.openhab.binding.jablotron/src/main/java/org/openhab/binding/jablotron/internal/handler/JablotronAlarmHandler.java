@@ -35,6 +35,8 @@ import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.config.DeviceConfig;
 import org.openhab.binding.jablotron.internal.model.*;
+import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
+import org.openhab.binding.jablotron.internal.model.JablotronDataUpdateResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,11 +57,14 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
     private String lastWarningTime = "";
 
+    protected String alarmName = "";
+
     @Nullable
     ScheduledFuture<?> future = null;
 
-    public JablotronAlarmHandler(Thing thing) {
+    public JablotronAlarmHandler(Thing thing, String alarmName) {
         super(thing);
+        this.alarmName = alarmName;
     }
 
     @Override
@@ -84,8 +89,6 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         });
         updateStatus(ThingStatus.ONLINE);
     }
-
-    protected abstract @Nullable List<JablotronHistoryDataEvent> sendGetEventHistory();
 
     protected void updateSegmentStatus(JablotronServiceDetailSegment segment) {
     }
@@ -139,7 +142,7 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
             logger.debug("Error during alarm status update: {}", dataUpdate.getErrorMessage());
         }
 
-        List<JablotronHistoryDataEvent> events = sendGetEventHistory();
+        List<JablotronHistoryDataEvent> events = sendGetEventHistory(alarmName);
         if (events != null && events.size() > 0) {
             JablotronHistoryDataEvent event = events.get(0);
             updateLastEvent(event);

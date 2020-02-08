@@ -92,7 +92,7 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
 
     @Deactivate
     @Override
-    protected void deactivate() {
+    public void deactivate() {
         super.deactivate();
         if (discoveryJob != null) {
             discoveryJob.cancel(true);
@@ -101,7 +101,7 @@ public class JablotronDiscoveryService extends AbstractDiscoveryService implemen
 
     @Override
     public Set<ThingTypeUID> getSupportedThingTypes() {
-        return new HashSet<>(Arrays.asList(THING_TYPE_OASIS, THING_TYPE_JA100, THING_TYPE_JA100F));
+        return SUPPORTED_THING_TYPES_UIDS;
     }
 
     @Override

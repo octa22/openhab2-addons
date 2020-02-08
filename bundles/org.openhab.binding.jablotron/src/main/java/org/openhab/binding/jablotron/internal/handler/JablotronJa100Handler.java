@@ -12,10 +12,7 @@
  */
 package org.openhab.binding.jablotron.internal.handler;
 
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.smarthome.core.library.types.OnOffType;
 import org.eclipse.smarthome.core.library.types.StringType;
 import org.eclipse.smarthome.core.thing.Channel;
@@ -27,7 +24,6 @@ import org.eclipse.smarthome.core.thing.type.ChannelTypeUID;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
-import org.openhab.binding.jablotron.internal.model.JablotronHistoryDataEvent;
 import org.openhab.binding.jablotron.internal.model.JablotronServiceDetailSegment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +39,8 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronJa100Handler.class);
 
-    public JablotronJa100Handler(Thing thing) {
-        super(thing);
+    public JablotronJa100Handler(Thing thing, String alarmName) {
+        super(thing, alarmName);
     }
 
     @Override
@@ -83,10 +79,6 @@ public class JablotronJa100Handler extends JablotronAlarmHandler {
         Channel channel = ChannelBuilder.create(new ChannelUID(thing.getUID(), name), "String").withLabel(label).withType(alarmStatus).build();
         thingBuilder.withChannel(channel);
         updateThing(thingBuilder.build());
-    }
-
-    protected synchronized @Nullable List<JablotronHistoryDataEvent> sendGetEventHistory() {
-        return sendGetEventHistory("JA100");
     }
 
     @Override

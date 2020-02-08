@@ -14,7 +14,6 @@ package org.openhab.binding.jablotron.internal.handler;
 
 import static org.openhab.binding.jablotron.JablotronBindingConstants.*;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -26,7 +25,6 @@ import org.eclipse.smarthome.core.thing.Thing;
 import org.eclipse.smarthome.core.types.Command;
 import org.eclipse.smarthome.core.types.State;
 import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
-import org.openhab.binding.jablotron.internal.model.JablotronHistoryDataEvent;
 import org.openhab.binding.jablotron.internal.model.JablotronServiceDetailSegment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +40,8 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronOasisHandler.class);
 
-    public JablotronOasisHandler(Thing thing) {
-        super(thing);
+    public JablotronOasisHandler(Thing thing, String alarmName) {
+        super(thing, alarmName);
     }
 
     @Override
@@ -65,10 +63,6 @@ public class JablotronOasisHandler extends JablotronAlarmHandler {
                 controlSection("PGM_2", command.equals(OnOffType.ON) ? "set" : "unset");
             });
         }
-    }
-
-    protected synchronized @Nullable List<JablotronHistoryDataEvent> sendGetEventHistory() {
-        return sendGetEventHistory("OASIS");
     }
 
     @Override

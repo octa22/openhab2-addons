@@ -145,7 +145,7 @@ public class JablotronBridgeHandler extends ConfigStatusBridgeHandler {
 
             String line = resp.getContentAsString();
             logger.trace("login response: {}", line);
-            JablotronLoginResponseAPI response = gson.fromJson(line, JablotronLoginResponseAPI.class);
+            JablotronLoginResponse response = gson.fromJson(line, JablotronLoginResponse.class);
             if (response.getHttpCode() != 200) {
                 logger.debug("Error during login, got http error: {}", response.getHttpCode());
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Http error: " + String.valueOf(response.getHttpCode()));

@@ -47,8 +47,8 @@ public class JablotronJa100FHandler extends JablotronAlarmHandler {
 
     private final Logger logger = LoggerFactory.getLogger(JablotronJa100FHandler.class);
 
-    public JablotronJa100FHandler(Thing thing) {
-        super(thing);
+    public JablotronJa100FHandler(Thing thing, String alarmName) {
+        super(thing, alarmName);
     }
 
     @Override
@@ -96,10 +96,6 @@ public class JablotronJa100FHandler extends JablotronAlarmHandler {
         updateThing(thingBuilder.build());
     }
 
-    protected synchronized @Nullable List<JablotronHistoryDataEvent> sendGetEventHistory() {
-        return sendGetEventHistory("JA100F");
-    }
-
     @Override
     protected synchronized boolean updateAlarmStatus() {
         JablotronBridgeHandler handler = getBridgeHandler();
@@ -107,17 +103,17 @@ public class JablotronJa100FHandler extends JablotronAlarmHandler {
             updateState(CHANNEL_LAST_CHECK_TIME, getCheckTime());
 
             // sections
-            JablotronGetSectionsResponse response = handler.sendGetSections(getThing(), "JA100F");
+            JablotronGetSectionsResponse response = handler.sendGetSections(getThing(), alarmName);
             createSectionChannels(response.getData().getSections());
             updateSectionState(response.getData().getStates());
 
             // PGs
-            JablotronGetPGResponse resp = handler.sendGetProgrammableGates(getThing(), "JA100F");
+            JablotronGetPGResponse resp = handler.sendGetProgrammableGates(getThing(), alarmName);
             createPGChannels(resp.getData().getProgrammableGates());
             updateSectionState(resp.getData().getStates());
 
             // update events
-            List<JablotronHistoryDataEvent> events = sendGetEventHistory();
+            List<JablotronHistoryDataEvent> events = sendGetEventHistory(alarmName);
             if (events != null && events.size() > 0) {
                 JablotronHistoryDataEvent event = events.get(0);
                 updateLastEvent(event);

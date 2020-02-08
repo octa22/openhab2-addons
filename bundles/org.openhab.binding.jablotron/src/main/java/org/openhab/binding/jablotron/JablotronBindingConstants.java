@@ -12,6 +12,10 @@
  */
 package org.openhab.binding.jablotron;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.smarthome.core.thing.ThingTypeUID;
 
@@ -58,4 +62,8 @@ public class JablotronBindingConstants {
     public static final String SYSTEM = "openHAB";
     public static final String VENDOR = "JABLOTRON:Jablotron";
     public static final String APPLICATION_JSON = "application/json";
+
+    // supported thing types for discovery
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = new HashSet<>(Arrays.asList(THING_TYPE_OASIS,
+            THING_TYPE_JA100, THING_TYPE_JA100F));
 }
