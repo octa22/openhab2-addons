@@ -5,23 +5,23 @@
 
 	<config-description uri="thing-type:jablotron:device">
 		<parameter name="refresh" type="integer" required="false">
-			<label>Refresh refresh</label>
-			<description>Specifies the refresh of thing states in seconds</description>
+			<label>Refresh</label>
+			<description>Specifies the refresh time of thing channels in seconds</description>
 			<default>60</default>
 		</parameter>
 	</config-description>
 
 	<config-description uri="thing-type:jablotron:ja100device">
 		<parameter name="refresh" type="integer" required="false">
-			<label>Refresh refresh</label>
-			<description>Specifies the refresh of thing states in seconds</description>
+			<label>Refresh</label>
+			<description>Specifies the refresh time of thing channels in seconds</description>
 			<default>180</default>
 		</parameter>
 
 		<parameter name="code" type="text">
 			<context>password</context>
 			<label>Code</label>
-			<description>Code for the JA100 alarm</description>
+			<description>Master code for the JA100 alarm</description>
 			<required>false</required>
 		</parameter>
 	</config-description>
@@ -41,11 +41,11 @@
 			</parameter>
 
 			<parameter name="lang" type="text">
-				<default>cz</default>
+				<default>en</default>
 				<label>Language</label>
 				<description>Language for Jablonet portal</description>
 				<options>
-					<option value="cz">Česky</option>
+					<option value="cs">Česky</option>
 					<option value="da">Dansk</option>
 					<option value="de">Deutsch</option>
 					<option value="en">English</option>
@@ -66,11 +66,13 @@
 					<option value="fi">Suomi</option>
 					<option value="sv">Svenska</option>
 					<option value="tr">Türkçe</option>
-					<option value="el">ελληνικά</option>
-					<option value="ru">Русский</option>
-					<option value="uk">Українська</option>
 				</options>
 				<required>true</required>
-			</parameter>
+			</parameter> -->
+		<parameter name="refresh" type="integer" required="false">
+			<label>Refresh refresh</label>
+			<description>Specifies the refresh time for all alarm warnings (alarm, service mode, ...)</description>
+			<default>30</default>
+		</parameter>
 	</config-description>
 </config-description:config-descriptions>

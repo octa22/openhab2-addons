@@ -15,16 +15,17 @@ package org.openhab.binding.jablotron.internal.config;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link JablotronConfig} class defines the bridge configuration
+ * The {@link JablotronBridgeConfig} class defines the bridge configuration
  * object.
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class JablotronConfig {
+public class JablotronBridgeConfig {
     private String login = "";
     private String password = "";
-    private String lang = "";
+    private int refresh = 30;
+    private String lang = "en";
 
     public String getLogin() {
         return login;
@@ -36,5 +37,9 @@ public class JablotronConfig {
 
     public String getLang() {
         return lang;
+    }
+
+    public int getRefresh() {
+        return refresh;
     }
 }

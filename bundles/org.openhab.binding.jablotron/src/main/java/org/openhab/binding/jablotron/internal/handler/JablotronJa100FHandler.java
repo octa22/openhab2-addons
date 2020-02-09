@@ -71,7 +71,7 @@ public class JablotronJa100FHandler extends JablotronAlarmHandler {
 
         JablotronBridgeHandler handler = getBridgeHandler();
         if (handler != null) {
-            JablotronGetSectionsResponse response = handler.controlComponent(getThing().getUID().getId(), "JA100F", thingConfig.getCode(), action, value, componentId);
+            JablotronGetSectionsResponse response = handler.controlComponent(getThing(), thingConfig.getCode(), action, value, componentId);
             if (response != null) {
                 updateSectionState(response.getData().getStates());
             } else {

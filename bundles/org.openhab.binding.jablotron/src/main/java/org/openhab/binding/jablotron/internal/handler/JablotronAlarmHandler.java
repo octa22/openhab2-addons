@@ -33,7 +33,7 @@ import org.eclipse.smarthome.core.thing.ThingStatusDetail;
 import org.eclipse.smarthome.core.thing.ThingStatusInfo;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandler;
 import org.eclipse.smarthome.core.types.State;
-import org.openhab.binding.jablotron.internal.config.DeviceConfig;
+import org.openhab.binding.jablotron.internal.config.JablotronDeviceConfig;
 import org.openhab.binding.jablotron.internal.model.*;
 import org.openhab.binding.jablotron.internal.model.JablotronControlResponse;
 import org.openhab.binding.jablotron.internal.model.JablotronDataUpdateResponse;
@@ -53,11 +53,13 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
     protected Gson gson = new Gson();
 
-    protected @Nullable DeviceConfig thingConfig;
+    protected @Nullable JablotronDeviceConfig thingConfig;
 
     private String lastWarningTime = "";
 
     protected String alarmName = "";
+
+    private boolean inService = false;
 
     @Nullable
     ScheduledFuture<?> future = null;
@@ -83,11 +85,19 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
 
     @Override
     public void initialize() {
-        thingConfig = getConfigAs(DeviceConfig.class);
+        thingConfig = getConfigAs(JablotronDeviceConfig.class);
         scheduler.execute(() -> {
             doInit();
         });
         updateStatus(ThingStatus.ONLINE);
+    }
+
+    public boolean isInService() {
+        return inService;
+    }
+
+    public String getAlarmName() {
+        return alarmName;
     }
 
     protected void updateSegmentStatus(JablotronServiceDetailSegment segment) {
@@ -194,10 +204,15 @@ public abstract class JablotronAlarmHandler extends BaseThingHandler {
         updateStatus(status, detail, message);
     }
 
-    public void triggerAlarm(String warningTime) {
-        if (!warningTime.equals(lastWarningTime)) {
-            lastWarningTime = warningTime;
-            triggerChannel(CHANNEL_ALARM);
+    public void triggerAlarm(JablotronDiscoveredService service) {
+        if (!service.getWarningTime().equals(lastWarningTime)) {
+            logger.debug("Service id: {} is triggering an alarm: {}", thing.getUID().getId(), service.getWarning());
+            lastWarningTime = service.getWarningTime();
+            triggerChannel(CHANNEL_ALARM, service.getWarning());
         }
+    }
+
+    public void setInService(boolean inService) {
+        this.inService = inService;
     }
 }

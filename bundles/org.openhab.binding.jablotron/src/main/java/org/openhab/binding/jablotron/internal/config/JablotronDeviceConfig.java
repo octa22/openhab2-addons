@@ -15,13 +15,13 @@ package org.openhab.binding.jablotron.internal.config;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link DeviceConfig} class defines the thing configuration
+ * The {@link JablotronDeviceConfig} class defines the thing configuration
  * object.
  *
  * @author Ondrej Pecta - Initial contribution
  */
 @NonNullByDefault
-public class DeviceConfig {
+public class JablotronDeviceConfig {
     private int refresh = 60;
     private String code = "";
 

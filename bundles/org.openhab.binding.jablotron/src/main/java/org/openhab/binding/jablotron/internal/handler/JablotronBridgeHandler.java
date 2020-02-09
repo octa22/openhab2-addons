@@ -36,7 +36,7 @@ import org.eclipse.smarthome.core.thing.*;
 import org.eclipse.smarthome.core.thing.binding.ConfigStatusBridgeHandler;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
-import org.openhab.binding.jablotron.internal.config.JablotronConfig;
+import org.openhab.binding.jablotron.internal.config.JablotronBridgeConfig;
 import org.openhab.binding.jablotron.internal.model.*;
 import org.openhab.binding.jablotron.internal.model.ja100f.JablotronGetPGResponse;
 import org.openhab.binding.jablotron.internal.model.ja100f.JablotronGetSectionsResponse;
@@ -64,7 +64,7 @@ public class JablotronBridgeHandler extends ConfigStatusBridgeHandler {
     /**
      * Our configuration
      */
-    public @Nullable JablotronConfig bridgeConfig;
+    public @Nullable JablotronBridgeConfig bridgeConfig;
 
     public JablotronBridgeHandler(Bridge thing, HttpClient httpClient) {
         super(thing);
@@ -91,13 +91,12 @@ public class JablotronBridgeHandler extends ConfigStatusBridgeHandler {
 
     @Override
     public void initialize() {
-        bridgeConfig = getConfigAs(JablotronConfig.class);
+        bridgeConfig = getConfigAs(JablotronBridgeConfig.class);
         scheduler.execute(this::login);
-        future = scheduler.scheduleWithFixedDelay(() -> updateAlarmThings(), 30, 30, TimeUnit.SECONDS);
+        future = scheduler.scheduleWithFixedDelay(() -> updateAlarmThings(), 30, bridgeConfig.getRefresh(), TimeUnit.SECONDS);
     }
 
     private void updateAlarmThings() {
-        //discover services
         List<JablotronDiscoveredService> services = discoverServices();
         for (JablotronDiscoveredService service : services) {
             updateAlarmThing(service);
@@ -113,9 +112,10 @@ public class JablotronBridgeHandler extends ConfigStatusBridgeHandler {
                         logger.debug("Alarm with service id: {} warning: {}", service.getId(), service.getWarning());
                     }
                     handler.setStatus(ThingStatus.ONLINE, ThingStatusDetail.NONE, service.getWarning());
-                    if ("ALARM".equals(service.getWarning())) {
-                        handler.triggerAlarm(service.getWarningTime());
+                    if ("ALARM".equals(service.getWarning()) || "TAMPER".equals(service.getWarning())) {
+                        handler.triggerAlarm(service);
                     }
+                    handler.setInService("SERVICE".equals(service.getWarning()));
                 } else {
                     logger.debug("Alarm with service id: {} is offline", service.getId());
                     handler.setStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, service.getStatus());
@@ -190,7 +190,7 @@ public class JablotronBridgeHandler extends ConfigStatusBridgeHandler {
 
             String line = resp.getContentAsString();
 
-            logger.trace("Response: {}", line);
+            logger.debug("Response: {}", line);
             JablotronGetServiceResponse response = gson.fromJson(line, JablotronGetServiceResponse.class);
 
             if (response.getHttpCode() != 200) {
@@ -208,6 +208,12 @@ public class JablotronBridgeHandler extends ConfigStatusBridgeHandler {
 
     protected synchronized @Nullable JablotronControlResponse sendUserCode(Thing th, String section, String key, String status, String code) {
         String url;
+        JablotronAlarmHandler handler = (JablotronAlarmHandler) th.getHandler();
+
+        if (handler.isInService()) {
+            logger.debug("Cannot send command because the alarm is in the service mode");
+            return null;
+        }
 
         try {
             url = JABLOTRON_API_URL + "controlSegment.json";
@@ -330,9 +336,16 @@ public class JablotronBridgeHandler extends ConfigStatusBridgeHandler {
         }
     }
 
-    protected synchronized @Nullable JablotronGetSectionsResponse controlComponent(String serviceId, String alarm, String code, String action, String value, String componentId) {
-        String url = JABLOTRON_API_URL + alarm + "/controlComponent.json";
-        String urlParameters = "{\"authorization\":{\"authorization-code\":\"" + code + "\"},\"control-components\":[{\"actions\":{\"action\":\"" + action + "\",\"value\":\"" + value + "\"},\"component-id\":\"" + componentId + "\"}],\"service-id\":" + serviceId + "}";
+    protected synchronized @Nullable JablotronGetSectionsResponse controlComponent(Thing th, String code, String action, String value, String componentId) {
+        JablotronAlarmHandler handler = (JablotronAlarmHandler) th.getHandler();
+
+        if (handler.isInService()) {
+            logger.debug("Cannot control component because the alarm is in the service mode");
+            return null;
+        }
+
+        String url = JABLOTRON_API_URL + handler.getAlarmName() + "/controlComponent.json";
+        String urlParameters = "{\"authorization\":{\"authorization-code\":\"" + code + "\"},\"control-components\":[{\"actions\":{\"action\":\"" + action + "\",\"value\":\"" + value + "\"},\"component-id\":\"" + componentId + "\"}],\"service-id\":" + th.getUID().getId() + "}";
 
         try {
             ContentResponse resp = createRequest(url)
@@ -356,7 +369,7 @@ public class JablotronBridgeHandler extends ConfigStatusBridgeHandler {
     private Request createRequest(String url) {
         return httpClient.newRequest(url)
                 .method(HttpMethod.POST)
-                .header(HttpHeader.ACCEPT_LANGUAGE, "cs")
+                .header(HttpHeader.ACCEPT_LANGUAGE, bridgeConfig.getLang())
                 .header(HttpHeader.ACCEPT_ENCODING, "*")
                 .header("x-vendor-id", VENDOR)
                 .agent(AGENT)
