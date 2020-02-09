@@ -5,15 +5,14 @@ https://www.jablotron.com/en/jablotron-products/alarms/
 
 ## Supported Things
 
-* bridge (the bridge to your jablonet cloud account)
-* JA-80 OASIS alarm
-* JA-100 alarm (partial support, still under development)
+* bridge (the bridge to your Jablonet cloud account)
+* JA-80/OASIS alarm
+* JA-100 alarm (no thermometer neither energy meter support)
+* JA-100+/JA-100F alarm (no thermometer neither energy meter support)
  
-Please contact me if you want to add other alarms (e.g. JA-100 etc)
-
 ## Discovery
 
-This binding supports auto discovery. Just manually add bridge thing and supply login & password to your Jablonet account.
+This binding supports auto discovery. Just manually add a bridge thing and supply login & password to your Jablonet account.
 
 ## Binding Configuration
 
@@ -23,50 +22,54 @@ Binding itself doesn't require specific configuration.
 
 The bridge thing requires this configuration:
 
-* login (login to your jablonet account)
-* password (password to your jablonet account)
+* login (the login to your Jablonet account)
+* password (the password to your Jablonet account)
+* refresh (the refresh time for all alarm warnings including ALARM, TAMPER triggers and SERVICE state flag)
 
 optionally you can set
 
 * lang (language of the alarm texts)
 
-The both alarm things have this configuration:
+All alarm things have this configuration:
 
-* refresh (thing status refresh period in seconds, default is 180s)
+* refresh (thing channel refresh period in seconds, default is 60s)
 
-The Ja100 alarm thing has one extra parameter
+The Ja100/JA100+ alarm thing has one extra parameter
 
- * code (alarm master code, used for controlling the sections & PGMs)
+ * code (alarm master code, used for controlling sections & PGMs)
 
 ## Channels
 
 The bridge thing does not have any channels.
-The oasis thing exposes these channels:
+The OASIS alarm thing exposes these channels:
 
 * statusA (the status of A section)
 * statusB (the status of AB/B section)
 * statusABC (the status of ABC section)
 * statusPGX (the status of PGX)
 * statusPGY (the status of PGY)
-* command (the channel for sending codes to alarm)
+* command (the channel for sending keyboard codes to the OASIS alarm)
 * lastEvent (the text description of the last event)
-* lastEventCode (the code of the last event)
-* lastEventClass (the class of the last event - arm, disarm, service)
+* lastEventClass (the class of the last event - e.g. arm, disarm, ...)
+* lastEventInvoker (the invoker of the last event)
 * lastEventTime (the time of the last event)
 * lastCheckTime (the time of the last checking)
-* lastTrouble (the last problem reported by alarm)
-* lastTroubleDetail (the detail info about the last problem)
-* alarm (the alarm status OFF/ON)
+* alarm (the alarm trigger, might fire ALARM or TAMPER events)
 
-The JA100 thing has these channels:
+The JA100/JA100+ things have these channels:
 
 * lastEvent (the text description of the last event)
+* lastEventClass (the class of the last event - arm, disarm, ...)
+* lastEventInvoker (the invoker of the last event)
 * lastEventSection (the section of the last event)
-* lastEventClass (the class of the last event - arm, disarm, service)
 * lastEventTime (the time of the last event)
 * lastCheckTime (the time of the last checking)
+* alarm (the alarm trigger, might fire ALARM or TAMPER events)
 
-all other channels (sections, PGMs, temperature sensors) are dynamicaly created according to your configuration 
+all other channels for the JA100/+ alarms (sections, PGs) are dynamically created according to your configuration
+* The sections are represented by String channels (with possible values "set", "unset", "partialSet" for JA100 and 
+possible values "ARM", "PARTIAL_ARM" and "DISARM" for JA100+)
+* The PGs (programmable gates) are represented by Switch channels 
 
 ## Full Example
 
@@ -79,6 +82,8 @@ Switch	ArmSectionA	"Garage arming"	<jablotron>	(Alarm)	{ channel="jablotron:oasi
 Switch	ArmSectionAB	"1st floor arming"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5ed:50139:statusB" }
 Switch	ArmSectionABC	"2nd floor arming"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5ed:50139:statusABC" }
 String LastEvent "Last event code [%s]" <jablotron> { channel="jablotron:oasis:8c93a5ed:50139:lastEvent" }
+String LastEventClass "Last event class [%s]" <jablotron> { channel="jablotron:oasis:8c93a5ed:50139:lastEventClass" }
+String LastEventInvoker "Last event class [%s]" <jablotron> { channel="jablotron:oasis:8c93a5ed:50139:lastEventInvoker" }
 DateTime LastEventTime "Last event [%1$td.%1$tm.%1$tY %1$tR]" <clock> { channel="jablotron:oasis:8c93a5ed:50139:lastEventTime" }
 DateTime LastCheckTime "Last check [%1$td.%1$tm.%1$tY %1$tR]" <clock> { channel="jablotron:oasis:8c93a5ed:50139:lastCheckTime" }
 Switch	ArmControlPGX	"PGX"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5ed:50139:statusPGX" }
@@ -89,18 +94,18 @@ Switch	ArmControlPGY	"PGY"	<jablotron>	(Alarm)	{ channel="jablotron:oasis:8c93a5
 
 ```
 Text item=HouseAlarm icon="alarm" {
-            Switch item=ArmSectionA
-            Switch item=ArmSectionAB
-            Switch item=ArmSectionABC
-            Text item=LastEvent
-            Text item=LastEventCode
-            Text item=LastEventClass
-            Text item=LastEventTime
-            Text item=LastCheckTime
-            Switch item=ArmControlPGX
-            Switch item=ArmControlPGY
-            Switch item=JablotronCode label="Arm" mappings=[1234=" A ",2345=" B ",3456="ABC"]
-            Switch item=JablotronCode label="Disarm" mappings=[9876="Disarm"]
+          Switch item=ArmSectionA
+          Switch item=ArmSectionAB
+          Switch item=ArmSectionABC
+          Text item=LastEvent
+          Text item=LastEventInvoker
+          Text item=LastEventClass
+          Text item=LastEventTime
+          Text item=LastCheckTime
+          Switch item=ArmControlPGX
+          Switch item=ArmControlPGY
+          Switch item=JablotronCode label="Arm" mappings=[1234=" A ", 2345=" B ", 3456="ABC"]
+          Switch item=JablotronCode label="Disarm" mappings=[9876="Disarm"]
       }
 ```
 
@@ -118,5 +123,12 @@ then
    {   postUpdate(HouseAlarm, "disarmed") }
    if( ArmSectionA.state == ON && ArmSectionAB.state == ON && ArmSectionABC.state == ON)
    {   postUpdate(HouseAlarm, "armed")    }
+end
+
+rule "Jablotron alarm trigger"
+when
+    Channel "jablotron:oasis:8c93a5ed:50939:alarm" triggered
+then
+    logInfo("default.rules", "Jablotron triggered " + receivedEvent.getEvent())
 end
 ```

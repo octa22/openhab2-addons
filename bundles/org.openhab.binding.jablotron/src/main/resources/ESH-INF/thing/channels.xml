@@ -70,35 +70,11 @@
 		<description>Channel for sending commands to your alarm</description>
 	</channel-type>
 
-	<!-- LastTrouble -->
-	<channel-type id="lastTrouble">
-		<item-type>String</item-type>
-		<label>Alarm Last Trouble Text Description Channel</label>
-		<description>Text description of the last trouble with your alarm</description>
-		<state readOnly="true"/>
-	</channel-type>
-
-	<!-- LastTroubleName -->
-	<channel-type id="lastTroubleDetail">
-		<item-type>String</item-type>
-		<label>Alarm Last Trouble Detail Channel</label>
-		<description>Detail of the last trouble with your alarm</description>
-		<state readOnly="true"/>
-	</channel-type>
-
 	<!-- LastEvent -->
 	<channel-type id="lastEvent">
 		<item-type>String</item-type>
 		<label>Alarm Last Event Text Description Channel</label>
 		<description>Text description of the last event of your alarm</description>
-		<state readOnly="true"/>
-	</channel-type>
-
-	<!-- LastEventCode -->
-	<channel-type id="lastEventCode">
-		<item-type>String</item-type>
-		<label>Alarm Last Event Code Channel</label>
-		<description>Code of the last event of your alarm</description>
 		<state readOnly="true"/>
 	</channel-type>
 
@@ -142,6 +118,7 @@
 		<state readOnly="true"/>
 	</channel-type>
 
+	<!-- alarm_state -->
 	<channel-type id="alarm_state">
 		<item-type>String</item-type>
 		<label>Alarm state</label>
@@ -155,6 +132,7 @@
 		</state>
 	</channel-type>
 
+	<!-- ja100f_alarm_state -->
 	<channel-type id="ja100f_alarm_state">
 		<item-type>String</item-type>
 		<label>Alarm state</label>
