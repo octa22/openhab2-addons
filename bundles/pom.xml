@@ -111,6 +111,7 @@
     <module>org.openhab.binding.gce</module>
     <module>org.openhab.binding.goecharger</module>
     <module>org.openhab.binding.globalcache</module>
+    <module>org.openhab.binding.goodwe</module>
     <module>org.openhab.binding.gpstracker</module>
     <module>org.openhab.binding.gree</module>
     <module>org.openhab.binding.groheondus</module>

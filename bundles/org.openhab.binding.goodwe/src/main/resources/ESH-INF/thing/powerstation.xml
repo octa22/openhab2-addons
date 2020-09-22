@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="goodwe"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Powerstation Thing -->
+	<thing-type id="powerstation">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Power Station</label>
+		<description>GoodWe power station Thing</description>
+
+
+		<channels>
+			<channel id="capacity" typeId="capacity"/>
+			<channel id="battery_capacity" typeId="battery_capacity"/>
+			<channel id="pac" typeId="pac"/>
+			<channel id="power" typeId="power"/>
+			<channel id="total_power" typeId="total_power"/>
+			<channel id="day_income" typeId="day_income"/>
+			<channel id="total_income" typeId="total_income"/>
+			<channel id="sum" typeId="sum"/>
+			<channel id="buy" typeId="buy"/>
+			<channel id="buy_percent" typeId="buy_percent"/>
+			<channel id="sell" typeId="sell"/>
+			<channel id="sell_percent" typeId="sell_percent"/>
+			<channel id="self_use_of_pv" typeId="self_use_of_pv"/>
+			<channel id="consumption_of_load" typeId="consumption_of_load"/>
+		</channels>
+
+
+		<config-description>
+			<parameter name="refresh" type="integer" required="false" min="10">
+				<label>Refresh</label>
+				<description>Specifies the refresh time in seconds for getting updates from SEMS Portal</description>
+				<default>60</default>
+			</parameter>
+			<parameter name="id" type="text" required="true">
+				<label>Station ID</label>
+				<description>Specifies the unique power station id</description>
+			</parameter>
+		</config-description>
+
+	</thing-type>
+
+	<!-- Capacity Channel Type -->
+	<channel-type id="capacity">
+		<item-type>Number</item-type>
+		<label>Powerstation Capacity</label>
+		<description>Channel for the powerstation capacity</description>
+		<state pattern="%.3f kWh" readOnly="true"/>
+	</channel-type>
+
+	<!-- Battery Capacity Channel Type -->
+	<channel-type id="battery_capacity">
+		<item-type>Number</item-type>
+		<label>Battery Capacity</label>
+		<description>Channel for the battery capacity</description>
+		<state pattern="%.3f kWh" readOnly="true"/>
+	</channel-type>
+
+	<!-- PAC KPI Channel Type -->
+	<channel-type id="pac">
+		<item-type>Number</item-type>
+		<label>PAC KPI</label>
+		<description>Channel for the PAC KPI</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Power KPI Channel Type -->
+	<channel-type id="power">
+		<item-type>Number</item-type>
+		<label>Power KPI</label>
+		<description>Channel for the power KPI</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Total Power KPI Channel Type -->
+	<channel-type id="total_power">
+		<item-type>Number</item-type>
+		<label>Total Power KPI</label>
+		<description>Channel for the total power KPI</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Day Income KPI Channel Type -->
+	<channel-type id="day_income">
+		<item-type>Number</item-type>
+		<label>Daily Income KPI</label>
+		<description>Channel for the daily income KPI</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Total Income KPI Channel Type -->
+	<channel-type id="total_income">
+		<item-type>Number</item-type>
+		<label>Total Income KPI</label>
+		<description>Channel for the total income KPI</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Sum Channel Type -->
+	<channel-type id="sum">
+		<item-type>Number</item-type>
+		<label>Sum</label>
+		<description>Sum channel (needs to be clarified)</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Buy Channel Type -->
+	<channel-type id="buy">
+		<item-type>Number</item-type>
+		<label>Buy</label>
+		<description>Buy channel (needs to be clarified)</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Buy Percent Channel Type -->
+	<channel-type id="buy_percent">
+		<item-type>Number</item-type>
+		<label>Buy Percent</label>
+		<description>Buy percent channel (needs to be clarified)</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Sell Channel Type -->
+	<channel-type id="sell">
+		<item-type>Number</item-type>
+		<label>Sell</label>
+		<description>Sell channel (needs to be clarified)</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Sell Percent Channel Type -->
+	<channel-type id="sell_percent">
+		<item-type>Number</item-type>
+		<label>Sell Percent</label>
+		<description>Sell percent channel (needs to be clarified)</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Self Use Of PV Channel Type -->
+	<channel-type id="self_use_of_pv">
+		<item-type>Number</item-type>
+		<label>Self Use Of PV</label>
+		<description>Self use of PV channel (needs to be clarified)</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+
+	<!-- Consumption Of Load Channel Type -->
+	<channel-type id="consumption_of_load">
+		<item-type>Number</item-type>
+		<label>Consumption Of Load</label>
+		<description>Consumption of load channel (needs to be clarified)</description>
+		<state pattern="%.3f" readOnly="true"/>
+	</channel-type>
+</thing:thing-descriptions>
