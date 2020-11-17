@@ -382,4 +382,48 @@
 		<description>Operating mode of the Somfy thermostatic valve</description>
 		<state readOnly="true"/>
 	</channel-type>
+
+	<channel-type id="boost">
+		<item-type>Switch</item-type>
+		<label>Boost</label>
+		<description>Boost mode</description>
+	</channel-type>
+
+	<channel-type id="water_heater_mode">
+		<item-type>String</item-type>
+		<label>Water Heater Mode</label>
+		<description>Operating mode of the water heater</description>
+		<command>
+			<options>
+				<option value="comfort">Comfort</option>
+				<option value="eco">Eco</option>
+				<option value="externalScheduling">External Scheduling</option>
+				<option value="internalScheduling">Internal Scheduling</option>
+				<option value="peakAndOffPeakScheduling">Peak &amp; Off Peak Scheduling</option>
+				<option value="peakAndOffPeakTimes">Peak &amp; Off Peak Times</option>
+				<option value="stop">Stop</option>
+			</options>
+		</command>
+	</channel-type>
+
+	<channel-type id="water_heater_profile">
+		<item-type>String</item-type>
+		<label>Water Heater Profile</label>
+		<description>The profile of the water heater</description>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="target_temp_eco">
+		<item-type>Number:Temperature</item-type>
+		<label>Target Eco Temperature</label>
+		<description>The target eco temperature of the heating system</description>
+		<state pattern="%.1f %unit%"/>
+	</channel-type>
+
+	<channel-type id="target_temp_comfort">
+		<item-type>Number:Temperature</item-type>
+		<label>Target Comfort Temperature</label>
+		<description>The target comfort temperature of the heating system</description>
+		<state pattern="%.1f %unit%"/>
+	</channel-type>
 </thing:thing-descriptions>

@@ -247,6 +247,13 @@ public class SomfyTahomaItemDiscoveryService extends AbstractDiscoveryService
                     logUnsupportedDevice(device);
                 }
                 break;
+            case CLASS_WATER_HEATING_SYSTEM:
+                if ("AtlanticPassAPCDHW".equals(device.getWidget())) {
+                    deviceDiscovered(device, THING_TYPE_WATER_HEATING_SYSTEM);
+                } else {
+                    logUnsupportedDevice(device);
+                }
+                break;
             case CLASS_EXTERIOR_HEATING_SYSTEM:
                 if ("DimmerExteriorHeating".equals(device.getWidget())) {
                     // widget: DimmerExteriorHeating

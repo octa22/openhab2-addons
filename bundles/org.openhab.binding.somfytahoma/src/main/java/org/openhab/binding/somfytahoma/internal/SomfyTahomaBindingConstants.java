@@ -151,6 +151,10 @@ public class SomfyTahomaBindingConstants {
     // Thermostat
     public static final ThingTypeUID THING_TYPE_THERMOSTAT = new ThingTypeUID(BINDING_ID, "thermostat");
 
+    // Water Heating System
+    public static final ThingTypeUID THING_TYPE_WATER_HEATING_SYSTEM = new ThingTypeUID(BINDING_ID,
+            "waterheatingsystem");
+
     // List of all Channel ids
     public static final String RSSI = "rssi";
 
@@ -263,6 +267,13 @@ public class SomfyTahomaBindingConstants {
     // Myfox Camera
     public static final String SHUTTER = "shutter";
 
+    // Water Heating System
+    public static final String BOOST = "boost";
+    public static final String WATER_HEATER_MODE = "water_heater_mode";
+    public static final String WATER_HEATER_PROFILE = "water_heater_profile";
+    public static final String TARGET_TEMP_ECO = "target_temp_eco";
+    public static final String TARGET_TEMP_COMFORT = "target_temp_comfort";
+
     // Constants
     public static final String TAHOMA_API_URL = "https://www.tahomalink.com/enduser-mobile-web/enduserAPI/";
     public static final String TAHOMA_EVENTS_URL = TAHOMA_API_URL + "events/";
@@ -346,6 +357,7 @@ public class SomfyTahomaBindingConstants {
     public static final String CLASS_ALARM = "Alarm";
     public static final String CLASS_POD = "Pod";
     public static final String CLASS_HEATING_SYSTEM = "HeatingSystem";
+    public static final String CLASS_WATER_HEATING_SYSTEM = "WaterHeatingSystem";
     public static final String CLASS_EXTERIOR_HEATING_SYSTEM = "ExteriorHeatingSystem";
     public static final String CLASS_DOOR_LOCK = "DoorLock";
     public static final String CLASS_PERGOLA = "Pergola";
@@ -379,7 +391,8 @@ public class SomfyTahomaBindingConstants {
             THING_TYPE_GATE, THING_TYPE_CURTAIN, THING_TYPE_ELECTRICITYSENSOR, THING_TYPE_DOCK, THING_TYPE_SIREN,
             THING_TYPE_ADJUSTABLE_SLATS_ROLLERSHUTTER, THING_TYPE_MYFOX_CAMERA, THING_TYPE_ROLLERSHUTTER_UNO,
             THING_TYPE_WATERSENSOR, THING_TYPE_HUMIDITYSENSOR, THING_TYPE_MYFOX_ALARM, THING_TYPE_THERMOSTAT,
-            THING_TYPE_DIMMER_LIGHT, THING_TYPE_EXTERIOR_HEATING_SYSTEM, THING_TYPE_VALVE_HEATING_SYSTEM));
+            THING_TYPE_DIMMER_LIGHT, THING_TYPE_EXTERIOR_HEATING_SYSTEM, THING_TYPE_VALVE_HEATING_SYSTEM,
+            THING_TYPE_WATER_HEATING_SYSTEM));
 
     // somfy gateways
     public static Map<Integer, String> gatewayTypes = new HashMap<Integer, String>() {
