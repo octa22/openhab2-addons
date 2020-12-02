@@ -23,6 +23,7 @@ home automation systems.
 - on/off switches (connected by RTS, IO protocol or supported by USB stick - z-wave, enocean, ..)
 - light switches (similar to on/off)
 - dimmer lights (light switches with intensity setting)
+- dynamic lights (light switches with on/off and intensity setting) 
 - light sensors (luminance value)
 - occupancy sensors (OPEN/CLOSE contact)
 - smoke sensors (OPEN/CLOSE contact, alarm check)
@@ -77,8 +78,8 @@ Please see the example below.
 | venetian blind, adjustable slats roller shutter                               | closure_orientation          | percentual closure and orientation of the blind's slats, it can have value 0-100. For IO Homecontrol devices only (non RTS) |
 | adjustable slats roller shutter                                               | rocker                       | used for setting the rocker position of the roller shutter, the only position allowing the slats control                    |
 | action group                                                                  | execute_action               | switch which reacts to ON command and triggers the predefined Tahoma action                                                 |
-| onoff, light                                                                  | switch                       | reacts to standard ON/OFF commands                                                                                          |
-| dimmer light                                                                  | light_intensity              | sets/gets intensity of the dimmer light or ON/OFF                                                                           |
+| onoff, light, dynamiclight                                                    | switch                       | reacts to standard ON/OFF commands                                                                                          |
+| dimmer light, dynamiclight                                                    | light_intensity              | sets/gets intensity of the dimmer light or ON/OFF                                                                           |
 | smoke sensor, occupancy sensor, contact sensor & water sensor                 | contact                      | normal value is CLOSE, changes to OPEN when detection triggered                                                             |
 | smoke sensor, occupancy sensor, contact sensor & water sensor                 | sensor_defect                | indicates the health of the sensor (dead, lowBatter, maintenanceRequired, noDefect)                                         |
 | smoke sensor                                                                  | radio_battery                | maintenance radio part battery state (low, normal)                                                                          |

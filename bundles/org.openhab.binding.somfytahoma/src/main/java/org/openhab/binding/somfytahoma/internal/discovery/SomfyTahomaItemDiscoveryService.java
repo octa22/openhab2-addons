@@ -173,6 +173,9 @@ public class SomfyTahomaItemDiscoveryService extends AbstractDiscoveryService
                 if ("DimmerLight".equals(device.getWidget())) {
                     // widget: DimmerLight
                     deviceDiscovered(device, THING_TYPE_DIMMER_LIGHT);
+                } else if ("DynamicLight".equals(device.getWidget())) {
+                    // widget: DynamicLight
+                    deviceDiscovered(device, THING_TYPE_DYNAMIC_LIGHT);
                 } else {
                     // widget: TimedOnOffLight
                     // widget: StatefulOnOffLight

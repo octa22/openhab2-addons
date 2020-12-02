@@ -76,6 +76,9 @@ public class SomfyTahomaBindingConstants {
     // DimmerLight
     public static final ThingTypeUID THING_TYPE_DIMMER_LIGHT = new ThingTypeUID(BINDING_ID, "dimmerlight");
 
+    // DynamicLight
+    public static final ThingTypeUID THING_TYPE_DYNAMIC_LIGHT = new ThingTypeUID(BINDING_ID, "dynamiclight");
+
     // Light sensor
     public static final ThingTypeUID THING_TYPE_LIGHTSENSOR = new ThingTypeUID(BINDING_ID, "lightsensor");
 
@@ -177,10 +180,13 @@ public class SomfyTahomaBindingConstants {
     // Action group
     public static final String EXECUTE_ACTION = "execute_action";
 
-    // OnOff, Light
+    // OnOff, Light, Dynamic Light
     public static final String SWITCH = "switch";
 
-    // Dimmer Light
+    // Dynamic Light
+    public static final String COLOR = "color";
+
+    // Dimmer Light, Dynamic Light
     public static final String LIGHT_INTENSITY = "light_intensity";
 
     // Door lock
@@ -393,7 +399,7 @@ public class SomfyTahomaBindingConstants {
             THING_TYPE_ADJUSTABLE_SLATS_ROLLERSHUTTER, THING_TYPE_MYFOX_CAMERA, THING_TYPE_ROLLERSHUTTER_UNO,
             THING_TYPE_WATERSENSOR, THING_TYPE_HUMIDITYSENSOR, THING_TYPE_MYFOX_ALARM, THING_TYPE_THERMOSTAT,
             THING_TYPE_DIMMER_LIGHT, THING_TYPE_EXTERIOR_HEATING_SYSTEM, THING_TYPE_VALVE_HEATING_SYSTEM,
-            THING_TYPE_WATER_HEATING_SYSTEM));
+            THING_TYPE_WATER_HEATING_SYSTEM, THING_TYPE_DYNAMIC_LIGHT));
 
     // somfy gateways
     public static Map<Integer, String> gatewayTypes = new HashMap<Integer, String>() {

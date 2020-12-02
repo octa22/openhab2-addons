@@ -88,6 +88,8 @@ public class SomfyTahomaHandlerFactory extends BaseThingHandlerFactory {
             return new SomfyTahomaOnOffHandler(thing);
         } else if (thingTypeUID.equals(THING_TYPE_DIMMER_LIGHT)) {
             return new SomfyTahomaDimmerLightHandler(thing);
+        } else if (thingTypeUID.equals(THING_TYPE_DYNAMIC_LIGHT)) {
+            return new SomfyTahomaDynamicLightHandler(thing);
         } else if (thingTypeUID.equals(THING_TYPE_LIGHTSENSOR)) {
             return new SomfyTahomaLightSensorHandler(thing);
         } else if (thingTypeUID.equals(THING_TYPE_SMOKESENSOR)) {

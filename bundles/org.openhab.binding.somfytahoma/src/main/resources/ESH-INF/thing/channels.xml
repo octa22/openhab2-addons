@@ -433,4 +433,10 @@
 		<description>The target comfort temperature of the heating system</description>
 		<state pattern="%.1f %unit%"/>
 	</channel-type>
+
+	<channel-type id="color">
+		<item-type>Color</item-type>
+		<label>Color</label>
+		<description>The color of a light</description>
+	</channel-type>
 </thing:thing-descriptions>
