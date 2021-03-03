@@ -12,6 +12,7 @@
  */
 package org.openhab.binding.somfytahoma.internal.handler;
 
+import static org.openhab.binding.somfytahoma.internal.SomfyTahomaBindingConstants.STATUS;
 import static org.openhab.core.thing.Thing.PROPERTY_FIRMWARE_VERSION;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -32,6 +33,12 @@ public class SomfyTahomaGatewayHandler extends SomfyTahomaBaseThingHandler {
 
     public SomfyTahomaGatewayHandler(Thing thing) {
         super(thing);
+    }
+
+    @Override
+    public void initialize() {
+        updateStatus(ThingStatus.ONLINE);
+        refresh(STATUS);
     }
 
     @Override
