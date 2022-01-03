@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="abbegon"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Device Thing Type -->
+	<thing-type id="abbdevice">
+		<label>ABB Ego-n</label>
+		<description>ABB Ego-n Device</description>
+
+		<config-description>
+			<parameter name="hostname" type="text" required="true">
+				<context>network-address</context>
+				<label>Hostname</label>
+				<description>Hostname or IP address of the ABB Ego-n device</description>
+			</parameter>
+			<parameter name="port" type="integer" required="true">
+				<label>Port</label>
+				<description>Port of the ABB Ego-n device</description>
+				<default>80</default>
+			</parameter>
+			<parameter name="user" type="text" required="true">
+				<label>Username</label>
+				<description>Username to access the ABB Ego-n device</description>
+			</parameter>
+			<parameter name="password" type="text" required="true">
+				<context>password</context>
+				<label>Password</label>
+				<description>Password to access the ABB Ego-n device</description>
+			</parameter>
+			<parameter name="refreshInterval" type="integer" unit="s" min="10">
+				<label>Refresh Interval</label>
+				<description>Interval the device is polled in sec.</description>
+				<default>15</default>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<channel-type id="switch">
+		<item-type>Switch</item-type>
+		<label>ABB Ego-n Switch</label>
+		<description>Channel representing a ABB Ego-n switch</description>
+	</channel-type>
+
+	<channel-type id="rollershutter">
+		<item-type>Rollershutter</item-type>
+		<label>ABB Ego-n Roller Shutter</label>
+		<description>Channel representing a ABB Ego-n roller shutter</description>
+	</channel-type>
+
+	<channel-type id="number">
+		<item-type>Number</item-type>
+		<label>ABB Ego-n Number</label>
+		<description>Channel representing a ABB Ego-n Number</description>
+		<state pattern="%.2f" readOnly="true"/>
+	</channel-type>
+
+</thing:thing-descriptions>

@@ -43,6 +43,7 @@
     <module>org.openhab.transform.xpath</module>
     <module>org.openhab.transform.xslt</module>
     <!-- bindings -->
+    <module>org.openhab.binding.abbegon</module>
     <module>org.openhab.binding.adorne</module>
     <module>org.openhab.binding.ahawastecollection</module>
     <module>org.openhab.binding.airq</module>
