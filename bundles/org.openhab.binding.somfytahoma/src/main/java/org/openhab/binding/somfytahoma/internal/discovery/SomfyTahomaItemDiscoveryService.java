@@ -211,6 +211,10 @@ public class SomfyTahomaItemDiscoveryService extends AbstractDiscoveryService
                     deviceDiscovered(device, THING_TYPE_ROLLERSHUTTER, place);
                 }
                 break;
+            case CLASS_SHUTTER:
+                // widget: DynamicShutter
+                deviceDiscovered(device, THING_TYPE_SHUTTER, place);
+                break;
             case CLASS_SCREEN:
                 // widget: PositionableTiltedScreen
                 deviceDiscovered(device, THING_TYPE_SCREEN, place);
