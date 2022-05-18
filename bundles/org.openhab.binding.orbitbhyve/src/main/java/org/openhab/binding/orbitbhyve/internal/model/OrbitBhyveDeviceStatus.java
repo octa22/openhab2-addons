@@ -13,6 +13,7 @@
 package org.openhab.binding.orbitbhyve.internal.model;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -36,6 +37,10 @@ public class OrbitBhyveDeviceStatus {
     @SerializedName("rain_delay_started_at")
     String rainDelayStartedAt = "";
 
+    @SerializedName("watering_status")
+    @Nullable
+    OrbitBhyveWateringStatus wateringStatus = new OrbitBhyveWateringStatus();
+
     public String getMode() {
         return mode;
     }
@@ -46,5 +51,13 @@ public class OrbitBhyveDeviceStatus {
 
     public int getDelay() {
         return delay;
+    }
+
+    public @Nullable OrbitBhyveWateringStatus getWateringStatus() {
+        return wateringStatus;
+    }
+
+    public void setWateringStatus(@Nullable OrbitBhyveWateringStatus wateringStatus) {
+        this.wateringStatus = wateringStatus;
     }
 }

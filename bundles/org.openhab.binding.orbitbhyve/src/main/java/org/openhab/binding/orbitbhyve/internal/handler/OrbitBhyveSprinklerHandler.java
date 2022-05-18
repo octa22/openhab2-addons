@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.orbitbhyve.internal.model.OrbitBhyveDevice;
 import org.openhab.binding.orbitbhyve.internal.model.OrbitBhyveDeviceStatus;
 import org.openhab.binding.orbitbhyve.internal.model.OrbitBhyveProgram;
+import org.openhab.binding.orbitbhyve.internal.model.OrbitBhyveWateringStatus;
 import org.openhab.binding.orbitbhyve.internal.model.OrbitBhyveZone;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
@@ -147,6 +148,7 @@ public class OrbitBhyveSprinklerHandler extends BaseThingHandler {
     }
 
     private synchronized void doInit() {
+        logger.debug("Doing sprinkler init...");
         OrbitBhyveBridgeHandler handler = getBridgeHandler();
         if (handler != null) {
             deviceId = getSprinklerId();
@@ -157,7 +159,7 @@ public class OrbitBhyveSprinklerHandler extends BaseThingHandler {
                 if (device != null) {
                     setDeviceOnline(device.isConnected());
                     createChannels(device.getZones());
-                    updateDeviceStatus(device.getStatus());
+                    updateDeviceStatus(device);
                 }
                 List<OrbitBhyveProgram> programs = handler.getPrograms();
                 for (OrbitBhyveProgram program : programs) {
@@ -187,7 +189,8 @@ public class OrbitBhyveSprinklerHandler extends BaseThingHandler {
         }
     }
 
-    public void updateDeviceStatus(OrbitBhyveDeviceStatus status) {
+    public void updateDeviceStatus(OrbitBhyveDevice device) {
+        OrbitBhyveDeviceStatus status = device.getStatus();
         if (!status.getMode().isEmpty()) {
             updateState(CHANNEL_MODE, new StringType(status.getMode()));
             updateState(CHANNEL_CONTROL, "off".equals(status.getMode()) ? OnOffType.OFF : OnOffType.ON);
@@ -195,9 +198,42 @@ public class OrbitBhyveSprinklerHandler extends BaseThingHandler {
         if (!status.getNextStartTime().isEmpty()) {
             DateTimeType dt = new DateTimeType(status.getNextStartTime());
             updateState(CHANNEL_NEXT_START, dt);
-            logger.debug("Next start time: {}", status.getNextStartTime());
+            logger.debug("Next watering start time: {}", status.getNextStartTime());
+        }
+
+        OrbitBhyveWateringStatus wateringStatus = status.getWateringStatus();
+        if (wateringStatus != null) {
+            if (wateringStatus.getProgram() != null) {
+                updateProgramWatering(wateringStatus.getProgram(), OnOffType.ON);
+            }
+            if (!wateringStatus.getCurrentStation().isEmpty()) {
+                updateZoneWatering(status.getWateringStatus().getCurrentStation(), OnOffType.ON);
+            }
+        } else {
+            for (int zone = 1; zone <= device.getZones().size(); zone++) {
+                updateZoneWatering(String.valueOf(zone), OnOffType.OFF);
+            }
+            for (String program : programs.keySet()) {
+                updateProgramWatering(program, OnOffType.OFF);
+            }
         }
         updateState(CHANNEL_RAIN_DELAY, new DecimalType(status.getDelay()));
+    }
+
+    private void updateProgramWatering(@Nullable String program, OnOffType state) {
+        if (program != null) {
+            Channel ch = thing.getChannel("program_" + program);
+            if (ch != null) {
+                updateState(ch.getUID(), state);
+            }
+        }
+    }
+
+    private void updateZoneWatering(String zone, OnOffType state) {
+        Channel ch = thing.getChannel("zone_" + zone);
+        if (ch != null) {
+            updateState(ch.getUID(), state);
+        }
     }
 
     private void createProgram(OrbitBhyveProgram program) {
@@ -247,11 +283,14 @@ public class OrbitBhyveSprinklerHandler extends BaseThingHandler {
     }
 
     public void setDeviceOnline(boolean connected) {
-        if (!connected) {
-            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
-                    "Not connected to Orbit BHyve Cloud");
-        } else {
-            updateStatus(ThingStatus.ONLINE);
+        Bridge bridge = getBridge();
+        if (bridge != null && ThingStatus.ONLINE == bridge.getStatus()) {
+            if (!connected) {
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                        "Not connected to Orbit BHyve Cloud");
+            } else {
+                updateStatus(ThingStatus.ONLINE);
+            }
         }
     }
 
@@ -265,5 +304,11 @@ public class OrbitBhyveSprinklerHandler extends BaseThingHandler {
 
     public void updateSmartWatering(String senseMode) {
         updateState(CHANNEL_SMART_WATERING, ("auto".equals(senseMode)) ? OnOffType.ON : OnOffType.OFF);
+    }
+
+    @Override
+    public void dispose() {
+        programs.clear();
+        super.dispose();
     }
 }
