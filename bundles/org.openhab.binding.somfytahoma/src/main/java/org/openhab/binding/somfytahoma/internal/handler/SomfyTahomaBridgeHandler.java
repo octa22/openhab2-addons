@@ -345,9 +345,15 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
             try {
                 if (thingConfig.getToken().isEmpty()) {
                     localToken = getNewLocalToken();
-                    logger.debug("Local token retrieved");
-                    activateLocalToken();
-                    updateConfiguration();
+                    if (!localToken.isEmpty()) {
+                        logger.debug("Local token retrieved");
+                        activateLocalToken();
+                        updateConfiguration();
+                    } else {
+                        logger.debug("Cannot get local token, falling back to cloud mode");
+                        cloudFallback = true;
+                        return;
+                    }
                 } else {
                     localToken = thingConfig.getToken();
                     activateLocalToken();
@@ -373,12 +379,18 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
                 CONFIG_URL + thingConfig.getPin() + LOCAL_TOKENS_URL + "devmode", "", HttpMethod.GET,
                 SomfyTahomaLocalToken[].class);
 
-        // Delete old OH tokens
-        for (SomfyTahomaLocalToken token : tokens) {
-            if (OPENHAB_TOKEN.equals(token.getLabel())) {
-                logger.debug("Deleting token: {}", token.getUuid());
-                sendDeleteToTahomaWithCookie(CONFIG_URL + thingConfig.getPin() + LOCAL_TOKENS_URL + token.getUuid());
+        if (tokens != null) {
+            // Delete old OH tokens
+            for (SomfyTahomaLocalToken token : tokens) {
+                if (OPENHAB_TOKEN.equals(token.getLabel())) {
+                    logger.debug("Deleting token: {}", token.getUuid());
+                    sendDeleteToTahomaWithCookie(
+                            CONFIG_URL + thingConfig.getPin() + LOCAL_TOKENS_URL + token.getUuid());
+                }
             }
+        } else {
+            // the local gateway is not responding
+            discoverGateway();
         }
 
         // Generate a new token
@@ -386,7 +398,7 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
                 CONFIG_URL + thingConfig.getPin() + LOCAL_TOKENS_URL + "generate", "", HttpMethod.GET,
                 SomfyTahomaTokenReponse.class);
 
-        return tokenResponse.getToken();
+        return tokenResponse != null ? tokenResponse.getToken() : "";
     }
 
     private void discoverGateway() {
@@ -1199,13 +1211,17 @@ public class SomfyTahomaBridgeHandler extends BaseBridgeHandler {
                             "Too many communication errors");
                 }
             } else {
-                logger.debug("Cannot call url: {} with params: {}!", getApiFullUrl(url), urlParameters, e);
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
+                errorsCounter++;
+                if (errorsCounter > MAX_ERRORS) {
+                    logger.debug("Cannot call url: {} with params: {}!", getApiFullUrl(url), urlParameters, e);
+                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                            "Too many communication errors");
+                }
             }
         } catch (TimeoutException e) {
             errorsCounter++;
-            logger.debug("Timeout when calling url: {} with params: {}!", getApiFullUrl(url), urlParameters, e);
             if (errorsCounter > MAX_ERRORS) {
+                logger.debug("Timeout when calling url: {} with params: {}!", getApiFullUrl(url), urlParameters, e);
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, "Too many timeouts");
             }
         } catch (InterruptedException e) {
