@@ -11,6 +11,23 @@
 		</parameter>
 	</config-description>
 
+	<config-description uri="thing-type:somfytahoma:shutter_device">
+		<parameter name="url" type="text" required="true">
+			<label>Somfy Tahoma Device URL</label>
+			<description>The identifier of this Somfy device</description>
+		</parameter>
+		<parameter name="my" type="text" required="true">
+			<label>Somfy Tahoma MY Command Override</label>
+			<description>The command sent when MY triggered</description>
+			<options>
+				<option value="my">MY</option>
+				<option value="stop">STOP</option>
+			</options>
+			<default>my</default>
+			<advanced>true</advanced>
+		</parameter>
+	</config-description>
+
 	<config-description uri="thing-type:somfytahoma:gateway">
 		<parameter name="id" type="text" required="true">
 			<label>Somfy Tahoma Gateway ID</label>

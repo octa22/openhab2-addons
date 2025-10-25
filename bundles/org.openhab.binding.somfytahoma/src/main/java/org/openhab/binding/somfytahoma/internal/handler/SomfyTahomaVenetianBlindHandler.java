@@ -84,7 +84,7 @@ public class SomfyTahomaVenetianBlindHandler extends SomfyTahomaBaseThingHandler
                 return COMMAND_OPEN;
             case "MOVE":
             case "MY":
-                return COMMAND_MY;
+                return getMyCommand();
             case "STOP":
                 return COMMAND_STOP;
             default:

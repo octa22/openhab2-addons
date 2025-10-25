@@ -15,7 +15,7 @@
 			<channel id="tilt" typeId="tilt"></channel>
 		</channels>
 		<representation-property>url</representation-property>
-		<config-description-ref uri="thing-type:somfytahoma:device"/>
+		<config-description-ref uri="thing-type:somfytahoma:shutter_device"/>
 	</thing-type>
 
 </thing:thing-descriptions>

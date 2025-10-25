@@ -501,4 +501,8 @@ public abstract class SomfyTahomaBaseThingHandler extends BaseThingHandler {
         }
         return null;
     }
+
+    public String getMyCommand() {
+        return getThing().getConfiguration().get(COMMAND_MY).toString();
+    }
 }

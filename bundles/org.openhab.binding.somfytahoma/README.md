@@ -91,9 +91,10 @@ The gateway support for the developer mode is limited as well, so far Connexoon 
 
 ### other devices
 
-| Parameter  | Parameter ID | Required/Optional | Description                  |
-|------------|--------------|-------------------|------------------------------|
-| Device URL | url          | Required          | The identifier of the device |
+| Parameter           | Parameter ID | Required/Optional | Description                                                                                  |
+|---------------------|--------------|-------------------|----------------------------------------------------------------------------------------------|
+| Device URL          | url          | Required          | The identifier of the device                                                                 |
+| MY command override | my           | Optional          | Applies for some devices only. The command sent when MY triggered (some devices ignore "my") |
 
 To retrieve the url parameter or gateway id, just add the automatically discovered device from your inbox and copy its values from thing edit page. (the url parameter is visible on edit page only)
 Please see the example below.

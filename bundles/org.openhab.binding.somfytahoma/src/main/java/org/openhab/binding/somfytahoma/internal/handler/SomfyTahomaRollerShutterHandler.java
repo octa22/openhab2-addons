@@ -76,7 +76,7 @@ public class SomfyTahomaRollerShutterHandler extends SomfyTahomaBaseThingHandler
                 return COMMAND_UP;
             case "MOVE":
             case "MY":
-                return COMMAND_MY;
+                return getMyCommand();
             case "STOP":
                 return COMMAND_STOP;
             default:
