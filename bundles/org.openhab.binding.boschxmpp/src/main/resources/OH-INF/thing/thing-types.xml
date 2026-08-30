@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="boschxmpp"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<bridge-type id="easycontrol">
+		<label>Bosch EasyControl</label>
+		<description>A Bosch EasyControl controller connected through the Bosch XMPP cloud service</description>
+		<channels>
+			<channel id="firmware-version" typeId="firmware-version"/>
+			<channel id="outdoor-temperature" typeId="outdoor-temperature"/>
+			<channel id="system-pressure" typeId="system-pressure"/>
+			<channel id="supply-temperature" typeId="supply-temperature"/>
+			<channel id="modulation" typeId="modulation"/>
+			<channel id="flame-indication" typeId="flame-indication"/>
+			<channel id="heating-pump" typeId="heating-pump"/>
+			<channel id="heating-pump-modulation" typeId="heating-pump-modulation"/>
+			<channel id="room-influence" typeId="room-influence"/>
+			<channel id="target-supply-temperature" typeId="target-supply-temperature"/>
+			<channel id="notification-light" typeId="notification-light"/>
+			<channel id="away-mode" typeId="away-mode"/>
+		</channels>
+		<config-description>
+			<parameter name="serialNumber" type="text" required="true">
+				<label>Serial Number</label>
+				<description>Serial number printed on the EasyControl controller</description>
+			</parameter>
+			<parameter name="accessKey" type="text" required="true">
+				<context>password</context>
+				<label>Access Key</label>
+				<description>Access key printed on the EasyControl controller</description>
+			</parameter>
+			<parameter name="devicePassword" type="text" required="true">
+				<context>password</context>
+				<label>Device Password</label>
+				<description>Device-specific password configured in the EasyControl app</description>
+			</parameter>
+			<parameter name="refreshInterval" type="integer" unit="s" min="10">
+				<label>Refresh Interval</label>
+				<description>Interval at which live controller values are polled</description>
+				<default>30</default>
+				<advanced>true</advanced>
+			</parameter>
+			<parameter name="requestTimeout" type="integer" unit="s" min="1" max="30">
+				<label>Request Timeout</label>
+				<description>Timeout for a request to the Bosch cloud service</description>
+				<default>5</default>
+				<advanced>true</advanced>
+			</parameter>
+			<parameter name="hostname" type="text" required="true">
+				<context>network-address</context>
+				<label>XMPP Hostname</label>
+				<description>Bosch EasyControl XMPP service hostname</description>
+				<default>xmpp.rrcng.ticx.boschtt.net</default>
+				<advanced>true</advanced>
+			</parameter>
+			<parameter name="port" type="integer" min="1" max="65535" required="true">
+				<label>XMPP Port</label>
+				<description>Bosch EasyControl XMPP service port</description>
+				<default>5222</default>
+				<advanced>true</advanced>
+			</parameter>
+		</config-description>
+	</bridge-type>
+
+	<thing-type id="zone">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="easycontrol"/>
+		</supported-bridge-type-refs>
+		<label>EasyControl Heating Zone</label>
+		<description>A heating zone managed by an EasyControl controller</description>
+		<channels>
+			<channel id="room-temperature" typeId="room-temperature"/>
+			<channel id="target-temperature" typeId="target-temperature"/>
+			<channel id="operation-mode" typeId="operation-mode"/>
+			<channel id="heating-status" typeId="heating-status"/>
+			<channel id="humidity" typeId="humidity"/>
+		</channels>
+		<representation-property>zoneId</representation-property>
+		<config-description>
+			<parameter name="zoneId" type="text" required="true" readOnly="true">
+				<label>Zone ID</label>
+				<description>Controller zone identifier, for example zn1</description>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<thing-type id="device">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="easycontrol"/>
+		</supported-bridge-type-refs>
+		<label>EasyControl Device</label>
+		<description>A thermostat or radiator valve paired with an EasyControl controller</description>
+		<channels>
+			<channel id="battery" typeId="battery"/>
+			<channel id="signal" typeId="signal"/>
+			<channel id="device-type" typeId="device-type"/>
+			<channel id="firmware-version" typeId="firmware-version"/>
+			<channel id="device-zone" typeId="device-zone"/>
+			<channel id="child-lock" typeId="child-lock"/>
+			<channel id="device-temperature" typeId="device-temperature"/>
+			<channel id="valve-position" typeId="valve-position"/>
+		</channels>
+		<representation-property>deviceId</representation-property>
+		<config-description>
+			<parameter name="deviceId" type="text" required="true" readOnly="true">
+				<label>Device ID</label>
+				<description>Controller device identifier, for example device1</description>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<thing-type id="dhw">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="easycontrol"/>
+		</supported-bridge-type-refs>
+		<label>EasyControl Hot Water Circuit</label>
+		<description>A domestic hot-water circuit managed by an EasyControl controller</description>
+		<channels>
+			<channel id="dhw-temperature" typeId="dhw-temperature"/>
+			<channel id="dhw-target-temperature" typeId="dhw-target-temperature"/>
+			<channel id="dhw-mode" typeId="dhw-mode"/>
+			<channel id="dhw-status" typeId="dhw-status"/>
+		</channels>
+		<representation-property>circuitId</representation-property>
+		<config-description>
+			<parameter name="circuitId" type="text" required="true" readOnly="true">
+				<label>Circuit ID</label>
+				<description>Hot-water circuit identifier, for example dhw1</description>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<channel-type id="firmware-version">
+		<item-type>String</item-type>
+		<label>Firmware Version</label>
+		<description>Firmware version reported by the controller or device</description>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="room-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Room Temperature</label>
+		<description>Current temperature in the heating zone</description>
+		<category>Temperature</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="target-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Target Temperature</label>
+		<description>Active target temperature for the heating zone</description>
+		<category>Temperature</category>
+		<state min="5" max="30" step="0.5" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="operation-mode">
+		<item-type>String</item-type>
+		<label>Operation Mode</label>
+		<description>Heating operation mode for the zone</description>
+		<state>
+			<options>
+				<option value="clock">Clock</option>
+				<option value="manual">Manual</option>
+			</options>
+		</state>
+	</channel-type>
+	<channel-type id="heating-status">
+		<item-type>String</item-type>
+		<label>Heating Status</label>
+		<description>Current heating status for the zone</description>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="humidity">
+		<item-type>Dimmer</item-type>
+		<label>Humidity</label>
+		<description>Relative humidity in the zone</description>
+		<state readOnly="true" min="0" max="100" pattern="%d %%"/>
+	</channel-type>
+	<channel-type id="outdoor-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Outdoor Temperature</label>
+		<description>Outdoor temperature reported by the EasyControl system</description>
+		<category>Temperature</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="system-pressure">
+		<item-type>Number:Pressure</item-type>
+		<label>System Pressure</label>
+		<description>Heating system water pressure</description>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="supply-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Supply Temperature</label>
+		<description>Current heat source supply temperature</description>
+		<category>Temperature</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="modulation">
+		<item-type>Dimmer</item-type>
+		<label>Modulation</label>
+		<description>Current heat source modulation</description>
+		<state readOnly="true" min="0" max="100" pattern="%d %%"/>
+	</channel-type>
+	<channel-type id="flame-indication">
+		<item-type>String</item-type>
+		<label>Flame Indication</label>
+		<description>Current heat source flame indication</description>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="heating-pump">
+		<item-type>String</item-type>
+		<label>Heating Pump</label>
+		<description>Current heating pump state</description>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="heating-pump-modulation">
+		<item-type>Dimmer</item-type>
+		<label>Heating Pump Modulation</label>
+		<description>Current heating pump modulation; string on/off is converted to 100/0 percent</description>
+		<state readOnly="true" min="0" max="100" pattern="%d %%"/>
+	</channel-type>
+	<channel-type id="room-influence">
+		<item-type>Number</item-type>
+		<label>Room Influence</label>
+		<description>Current room influence setting for heating circuit 1</description>
+		<state/>
+	</channel-type>
+	<channel-type id="notification-light">
+		<item-type>Switch</item-type>
+		<label>Notification Light</label>
+		<description>Activates the controller notification light for ten seconds</description>
+	</channel-type>
+	<channel-type id="target-supply-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Target Supply Temperature</label>
+		<description>Current heat source supply temperature setpoint</description>
+		<category>Temperature</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="away-mode">
+		<item-type>Switch</item-type>
+		<label>Away Mode</label>
+		<description>Enables or disables controller-wide away mode</description>
+	</channel-type>
+	<channel-type id="battery">
+		<item-type>String</item-type>
+		<label>Battery State</label>
+		<description>Battery state reported by the paired device</description>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="signal">
+		<item-type>Dimmer</item-type>
+		<label>Signal Strength</label>
+		<description>Radio signal strength reported by the paired device</description>
+		<state readOnly="true" min="0" max="100" pattern="%d %%"/>
+	</channel-type>
+	<channel-type id="device-type">
+		<item-type>String</item-type>
+		<label>Device Type</label>
+		<description>Type reported by the paired device</description>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="device-zone">
+		<item-type>Number</item-type>
+		<label>Assigned Zone</label>
+		<description>Number of the zone to which the device is assigned</description>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="child-lock">
+		<item-type>Switch</item-type>
+		<label>Child Lock</label>
+		<description>Enables or disables the device child lock</description>
+	</channel-type>
+	<channel-type id="device-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Device Temperature</label>
+		<description>Temperature measured by a paired radiator valve</description>
+		<category>Temperature</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="valve-position">
+		<item-type>Dimmer</item-type>
+		<label>Valve Position</label>
+		<description>Current radiator valve opening</description>
+		<state readOnly="true" min="0" max="100" pattern="%d %%"/>
+	</channel-type>
+	<channel-type id="dhw-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Hot Water Temperature</label>
+		<description>Current domestic hot-water temperature</description>
+		<category>Temperature</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="dhw-target-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Target Hot Water Temperature</label>
+		<description>Target domestic hot-water temperature for high mode</description>
+		<category>Temperature</category>
+		<state min="30" max="80" step="1" pattern="%.1f %unit%"/>
+	</channel-type>
+	<channel-type id="dhw-mode">
+		<item-type>String</item-type>
+		<label>Hot Water Mode</label>
+		<description>Domestic hot-water operation mode</description>
+		<state>
+			<options>
+				<option value="Off">Off</option>
+				<option value="high">High</option>
+				<option value="ownprogram">Own Program</option>
+				<option value="eco">Eco</option>
+			</options>
+		</state>
+	</channel-type>
+	<channel-type id="dhw-status">
+		<item-type>String</item-type>
+		<label>Hot Water Status</label>
+		<description>Current domestic hot-water state</description>
+		<state readOnly="true"/>
+	</channel-type>
+</thing:thing-descriptions>
