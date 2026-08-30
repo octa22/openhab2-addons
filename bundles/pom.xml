@@ -100,6 +100,7 @@
     <module>org.openhab.binding.bondhome</module>
     <module>org.openhab.binding.boschindego</module>
     <module>org.openhab.binding.boschshc</module>
+    <module>org.openhab.binding.boschxmpp</module>
     <module>org.openhab.binding.bosesoundtouch</module>
     <module>org.openhab.binding.broadlink</module>
     <module>org.openhab.binding.broadlinkthermostat</module>

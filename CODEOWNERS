@@ -62,6 +62,7 @@
 /bundles/org.openhab.binding.bondhome/ @ccutrer
 /bundles/org.openhab.binding.boschindego/ @jofleck @jlaur
 /bundles/org.openhab.binding.boschshc/ @david-pace @GerdZanker
+/bundles/org.openhab.binding.boschxmpp/ @opecta
 /bundles/org.openhab.binding.bosesoundtouch/ @marvkis @tratho
 /bundles/org.openhab.binding.broadlink/ @AntonJansen
 /bundles/org.openhab.binding.broadlinkthermostat/ @flo-02-mu

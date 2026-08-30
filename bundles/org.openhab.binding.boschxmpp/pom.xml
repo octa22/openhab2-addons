@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.openhab.addons.bundles</groupId>
+    <artifactId>org.openhab.addons.reactor.bundles</artifactId>
+    <version>5.3.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>org.openhab.binding.boschxmpp</artifactId>
+
+  <name>openHAB Add-ons :: Bundles :: Bosch XMPP Binding</name>
+
+  <properties>
+    <smack.version>4.5.0-rc1</smack.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jxmpp</groupId>
+        <artifactId>jxmpp-core</artifactId>
+        <version>1.1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jxmpp</groupId>
+        <artifactId>jxmpp-jid</artifactId>
+        <version>1.1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jxmpp</groupId>
+        <artifactId>jxmpp-util-cache</artifactId>
+        <version>1.1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.minidns</groupId>
+        <artifactId>minidns-core</artifactId>
+        <version>1.1.1</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.codelibs</groupId>
+      <artifactId>xpp3</artifactId>
+      <version>1.1.4c.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.igniterealtime.smack</groupId>
+      <artifactId>smack-java11</artifactId>
+      <version>${smack.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.igniterealtime.smack</groupId>
+          <artifactId>smack-xmlparser-stax</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- The following direct dependencies are embedded into this bundle. The
+         openHAB runtime does not provide Smack as a shared OSGi bundle. -->
+    <dependency>
+      <groupId>org.igniterealtime.smack</groupId>
+      <artifactId>smack-core</artifactId>
+      <version>${smack.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.igniterealtime.smack</groupId>
+      <artifactId>smack-resolver-javax</artifactId>
+      <version>${smack.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.igniterealtime.smack</groupId>
+      <artifactId>smack-sasl-javax</artifactId>
+      <version>${smack.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.igniterealtime.smack</groupId>
+      <artifactId>smack-xmlparser-xpp3</artifactId>
+      <version>${smack.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>xpp3</groupId>
+          <artifactId>xpp3_min</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.igniterealtime.smack</groupId>
+      <artifactId>smack-tcp</artifactId>
+      <version>${smack.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.igniterealtime.smack</groupId>
+      <artifactId>smack-streammanagement</artifactId>
+      <version>${smack.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.igniterealtime.smack</groupId>
+      <artifactId>smack-xmlparser</artifactId>
+      <version>${smack.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.minidns</groupId>
+      <artifactId>minidns-core</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jxmpp</groupId>
+      <artifactId>jxmpp-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jxmpp</groupId>
+      <artifactId>jxmpp-jid</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jxmpp</groupId>
+      <artifactId>jxmpp-util-cache</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <configuration>
+          <bnd><![CDATA[
+${oh.bndDefaults}
+Import-Package: !android,!sun.security.pkcs11,org.openhab.core.*;version="[5.2,6)",*
+]]></bnd>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
