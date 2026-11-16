@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="hisensetv"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<thing-type id="tv">
+		<label>Hisense TV</label>
+		<description>A Hisense television with a RemoteNOW MQTT service.</description>
+		<category>Television</category>
+		<channels>
+			<channel id="key" typeId="key"/>
+			<channel id="volume" typeId="volume"/>
+			<channel id="source" typeId="source"/>
+			<channel id="sources" typeId="sources"/>
+		</channels>
+
+		<config-description>
+			<parameter name="host" type="text" required="true">
+				<context>network-address</context>
+				<label>Host</label>
+				<description>The hostname or IP address of the TV.</description>
+			</parameter>
+			<parameter name="port" type="integer" min="1" max="65535">
+				<label>MQTT Port</label>
+				<description>The port of the MQTT broker on the TV.</description>
+				<default>36669</default>
+			</parameter>
+			<parameter name="tls" type="boolean">
+				<label>Use TLS</label>
+				<description>Use TLS to connect to the TV's MQTT broker.</description>
+				<default>true</default>
+			</parameter>
+			<parameter name="certificateFingerprint" type="text">
+				<label>Certificate Fingerprint</label>
+				<description>The SHA-256 fingerprint of the TV certificate, with optional colon separators. Set this for a
+					self-signed certificate.</description>
+			</parameter>
+			<parameter name="username" type="text">
+				<label>MQTT Username</label>
+				<description>Overrides the TV's standard MQTT username.</description>
+				<advanced>true</advanced>
+			</parameter>
+			<parameter name="password" type="text">
+				<context>password</context>
+				<label>MQTT Password</label>
+				<description>Overrides the TV's standard MQTT password.</description>
+				<advanced>true</advanced>
+			</parameter>
+			<parameter name="remoteId" type="text">
+				<label>Remote ID</label>
+				<description>Remote app identity used for pairing. The default matches newAM/hisensetv.</description>
+				<default>XX:XX:XX:XX:XX:XY</default>
+				<advanced>true</advanced>
+			</parameter>
+			<parameter name="refreshInterval" type="integer" min="1" unit="s">
+				<label>Refresh Interval</label>
+				<description>Interval for polling the volume in seconds.</description>
+				<default>30</default>
+				<advanced>true</advanced>
+			</parameter>
+		</config-description>
+	</thing-type>
+
+	<channel-type id="key">
+		<item-type>String</item-type>
+		<label>Remote Key</label>
+		<description>Sends a remote control key such as KEY_POWER, KEY_HOME or KEY_OK.</description>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="volume">
+		<item-type>Dimmer</item-type>
+		<label>Volume</label>
+		<description>The volume level of the TV.</description>
+		<category>SoundVolume</category>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="source">
+		<item-type>String</item-type>
+		<label>Select Input</label>
+		<description>Selects a TV input by its source ID.</description>
+		<autoUpdatePolicy>veto</autoUpdatePolicy>
+	</channel-type>
+
+	<channel-type id="sources">
+		<item-type>String</item-type>
+		<label>Available Inputs</label>
+		<description>The list of TV inputs as JSON.</description>
+		<state readOnly="true"/>
+	</channel-type>
+
+</thing:thing-descriptions>

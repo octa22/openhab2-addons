@@ -206,6 +206,7 @@
     <module>org.openhab.binding.heliosventilation</module>
     <module>org.openhab.binding.heos</module>
     <module>org.openhab.binding.herzborg</module>
+    <module>org.openhab.binding.hisensetv</module>
     <module>org.openhab.binding.homeassistant</module>
     <module>org.openhab.binding.homeconnect</module>
     <module>org.openhab.binding.homeconnectdirect</module>

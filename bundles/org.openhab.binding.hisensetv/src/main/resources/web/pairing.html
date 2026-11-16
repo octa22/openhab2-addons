@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pair a Hisense TV · openHAB</title>
+  <style>
+    :root { color-scheme: light dark; font: 100%/1.5 system-ui, sans-serif; }
+    body { margin: 0; background: Canvas; color: CanvasText; }
+    main { max-width: 30rem; margin: clamp(2rem, 12vh, 7rem) auto; padding: 0 1.25rem; }
+    h1 { font-size: 1.7rem; margin: 0 0 1.5rem; }
+    label { display: block; margin: 1rem 0 .35rem; font-weight: 600; }
+    button, input, select { font: inherit; padding: .55rem .75rem; border: 1px solid GrayText; border-radius: .35rem; }
+    button { cursor: pointer; margin-top: .75rem; }
+    button:disabled { cursor: default; }
+    select { width: 100%; }
+    input { width: 8ch; }
+    #status { min-height: 3em; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Pair a Hisense TV</h1>
+    <p>The TV list shows Hisense TV Things already configured in openHAB.
+      To add one, use <strong>Settings → Things</strong> or define a <code>hisensetv:tv</code> Thing in a <code>.things</code> file.</p>
+    <button id="login" type="button">Sign in to openHAB</button>
+    <section id="controls" hidden>
+      <label for="tv">TV</label>
+      <select id="tv"></select>
+      <button id="request" type="button">Request PIN</button>
+      <form id="pair" hidden>
+        <label for="pin">Four-digit PIN on the TV</label>
+        <input id="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required>
+        <button type="submit">Pair TV</button>
+      </form>
+    </section>
+    <p id="status" role="status">Sign in as an openHAB administrator to pair the TV.</p>
+  </main>
+  <script nonce="@NONCE@">
+    const login = document.getElementById('login');
+    const controls = document.getElementById('controls');
+    const tv = document.getElementById('tv');
+    const request = document.getElementById('request');
+    const form = document.getElementById('pair');
+    const pin = document.getElementById('pin');
+    const status = document.getElementById('status');
+    const redirect = location.origin + location.pathname;
+    const storedFlow = 'hisensetv-pairing-flow';
+    let accessToken;
+
+    login.addEventListener('click', () => {
+      const state = '@NONCE@';
+      sessionStorage.setItem(storedFlow, JSON.stringify({ state, verifier: '@VERIFIER@' }));
+      const params = new URLSearchParams({
+        client_id: redirect, redirect_uri: redirect, response_type: 'code', scope: 'admin',
+        code_challenge: '@CHALLENGE@', code_challenge_method: 'S256', state
+      });
+      location.assign('/auth/authorize?' + params);
+    });
+
+    async function send(path, body) {
+      const target = '/rest/hisensetv/pairing/' + encodeURIComponent(tv.value) + '/' + path;
+      const response = await fetch(target, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'text/plain' },
+        body
+      });
+      if (response.status === 401 || response.status === 403) {
+        login.hidden = false;
+        controls.hidden = true;
+        status.textContent = 'Sign in again as an openHAB administrator.';
+        return false;
+      }
+      if (!response.ok) {
+        const message = response.headers.get('Content-Type')?.startsWith('text/plain')
+          ? await response.text() : '';
+        status.textContent = message || 'Pairing request failed.';
+      }
+      return response.ok;
+    }
+
+    tv.addEventListener('change', () => {
+      form.hidden = true;
+      pin.value = '';
+      status.textContent = '';
+    });
+
+    request.addEventListener('click', async () => {
+      request.disabled = tv.disabled = true;
+      form.hidden = true;
+      pin.value = '';
+      status.textContent = 'Requesting the PIN…';
+      try {
+        if (await send('request')) {
+          status.textContent = 'If a PIN appears on the TV, enter it within two minutes.';
+          form.hidden = false;
+          pin.focus();
+        }
+      } catch {
+        status.textContent = 'Could not reach openHAB.';
+      } finally {
+        request.disabled = tv.disabled = false;
+      }
+    });
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      request.disabled = tv.disabled = true;
+      form.hidden = true;
+      const value = pin.value;
+      pin.value = '';
+      status.textContent = 'Waiting for the TV…';
+      try {
+        if (await send('pin', value)) {
+          status.textContent = 'The TV accepted the PIN. Pairing is complete.';
+        }
+      } catch {
+        status.textContent = 'Could not reach openHAB.';
+      } finally {
+        request.disabled = tv.disabled = false;
+      }
+    });
+
+    async function finishLogin() {
+      const query = new URLSearchParams(location.search);
+      const code = query.get('code');
+      if (!code && !query.has('error')) return;
+      history.replaceState(null, '', redirect);
+      const stored = sessionStorage.getItem(storedFlow);
+      sessionStorage.removeItem(storedFlow);
+      const flow = stored && JSON.parse(stored);
+      if (!code || !flow || flow.state !== query.get('state')) {
+        status.textContent = 'Sign-in could not be verified. Please try again.';
+        return;
+      }
+
+      const response = await fetch('/rest/auth/token', {
+        method: 'POST',
+        body: new URLSearchParams({
+          grant_type: 'authorization_code', code, redirect_uri: redirect, client_id: redirect,
+          code_verifier: flow.verifier
+        })
+      });
+      if (!response.ok) throw new Error();
+      ({ access_token: accessToken } = await response.json());
+      const things = await fetch('/rest/things', { headers: { Authorization: 'Bearer ' + accessToken } });
+      if (!things.ok) throw new Error();
+      for (const thing of await things.json()) {
+        if (thing.UID.startsWith('hisensetv:tv:')) {
+          tv.add(new Option(thing.label || thing.UID, thing.UID.slice('hisensetv:tv:'.length)));
+        }
+      }
+      login.hidden = true;
+      controls.hidden = tv.options.length === 0;
+      status.textContent = controls.hidden
+        ? 'No Hisense TV Things are configured. Add one using the instructions above, then reopen this page.'
+        : 'Turn on the TV and request a PIN.';
+    }
+
+    finishLogin().catch(() => {
+      status.textContent = 'Could not sign in as an openHAB administrator.';
+    });
+  </script>
+</body>
+</html>
